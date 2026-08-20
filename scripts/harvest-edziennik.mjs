@@ -23,12 +23,26 @@ const BAZA = process.env.EDZIENNIK ?? 'https://edziennik.mazowieckie.pl';
 const OUT = new URL('../data/raw/akty-edziennik.json', import.meta.url);
 const rozpoznanie = process.argv.includes('--rozpoznanie');
 
-// Organy, których akty nas interesują.
+/**
+ * Organy wydające, których akty nas interesują — spisane z listy wydawców
+ * serwisu (/publisher-group, grupa „W”).
+ *
+ * Ta sama instytucja występuje pod kilkoma nazwami, bo zapis zmieniał się
+ * przez lata. Branie tylko jednego wariantu po cichu gubi całe roczniki,
+ * więc odpytujemy wszystkie i sprowadzamy do wspólnego organu przy zapisie.
+ */
 const ORGANY = [
-  'Rada Miejska w Wyszkowie',
-  'Burmistrz Wyszkowa',
-  'Rada Powiatu w Wyszkowie',
-  'Zarząd Powiatu Wyszkowskiego',
+  { nazwa: 'Rada Miejska w Wyszkowie', organ: 'Rada Miejska w Wyszkowie' },
+  { nazwa: 'Burmistrz Wyszkowa', organ: 'Burmistrz Wyszkowa' },
+  { nazwa: 'Burmistrz Miasta i Gminy Wyszków', organ: 'Burmistrz Wyszkowa' },
+  { nazwa: 'Rada Powiatu w Wyszkowie', organ: 'Rada Powiatu Wyszkowskiego' },
+  { nazwa: 'Rada Powiatu Wyszkowskiego', organ: 'Rada Powiatu Wyszkowskiego' },
+  { nazwa: 'Zarząd Powiatu w Wyszkowie', organ: 'Zarząd Powiatu Wyszkowskiego' },
+  { nazwa: 'Zarząd Powiatu Wyszkowskiego', organ: 'Zarząd Powiatu Wyszkowskiego' },
+  { nazwa: 'Starosta Wyszkowski', organ: 'Starosta Wyszkowski' },
+  { nazwa: 'Starosta Powiatu Wyszkowskiego', organ: 'Starosta Wyszkowski' },
+  { nazwa: 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie',
+    organ: 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie' },
 ];
 
 const FRAZY = [
@@ -43,11 +57,12 @@ const FRAZY = [
 // je po kolei, bo różne województwa działają na różnych wersjach systemu.
 const KANDYDACI = [
   '/',
+  '/publisher-group',
   '/api/search',
   '/api/legalacts',
   '/api/acts',
+  '/api/publisher-group',
   '/actbytype',
-  '/WDU',
   '/robots.txt',
   '/sitemap.xml',
 ];
@@ -103,7 +118,7 @@ async function main() {
     'Parser właściwego pobierania nie jest jeszcze dopasowany do tego serwisu.\n' +
       'Uruchom najpierw: npm run data:edziennik -- --rozpoznanie\n' +
       'i przekaż wynik — dopiszę parsowanie wyników wyszukiwania.\n\n' +
-      `Organy do objęcia: ${ORGANY.join(', ')}\n` +
+      `Organy do objęcia: ${ORGANY.map((o) => o.nazwa).join(', ')}\n` +
       `Frazy: ${FRAZY.join('; ')}`
   );
 
