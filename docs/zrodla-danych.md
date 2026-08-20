@@ -121,6 +121,28 @@ Geometrię pojedynczej działki można pobrać z ULDK:
 https://uldk.gugik.gov.pl/?request=GetParcelByIdOrNr&id=143505_4.0001.123&result=geom_wkt
 ```
 
+## Dostępność źródeł z sieci
+
+Nie każde źródło da się odpytać z każdej sieci — część serwisów blokuje adresy
+centrów danych. Sprawdzić to można pod `/api/diagnostyka`; endpoint odpytuje
+stałą listę adresów i pokazuje, co odpowiadają.
+
+Stan sprawdzony z funkcji na Vercelu w regionie `lhr1`:
+
+| Źródło | Wynik |
+|---|---|
+| GUGiK: UUG, ULDK, WFS BDOT10k | 200, poniżej 300 ms |
+| BIP gminy i powiatu | 200 |
+| **edziennik.mazowieckie.pl** | **brak odpowiedzi, timeout po 20 s** |
+
+Z sieci Google Cloud ten sam serwis zwraca `403 Dostęp zablokowany` z numerem
+zgłoszenia. Import z e-dziennika trzeba więc uruchamiać z sieci, która nie jest
+blokowana — z komputera w urzędzie albo z hostingu o polskim adresie:
+
+```bash
+node scripts/harvest-edziennik.mjs --rozpoznanie
+```
+
 ## D. Pomocnicze
 
 ### ULDK — granice i obręby ★ używane
