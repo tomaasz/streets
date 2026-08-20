@@ -13,10 +13,17 @@ export const NAZWY_ZMIENNYCH = [
   'POSTGRES_PRISMA_URL',
 ];
 
+const TO_POSTGRES = (v) => /^postgres(ql)?:\/\//.test(v ?? '');
+
 export function connectionString() {
   for (const n of NAZWY_ZMIENNYCH) {
-    const v = process.env[n];
-    if (v) return v;
+    if (TO_POSTGRES(process.env[n])) return process.env[n];
+  }
+  // Integracja Marketplace na Vercelu pozwala nadać własny prefiks, więc
+  // zmienna może się nazywać STORAGE_URL albo NEON_URL. Sprawdzenie schematu
+  // adresu wystarczy, żeby nie złapać przy okazji adresu innego magazynu.
+  for (const n of Object.keys(process.env).sort()) {
+    if (n.endsWith('_URL') && TO_POSTGRES(process.env[n])) return process.env[n];
   }
   return null;
 }
