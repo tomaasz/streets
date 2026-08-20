@@ -151,7 +151,6 @@ async function main() {
     const kat = KAT[o.kategoria_bdot] ?? 'nieustalona';
     const ulicaId = o.ulica ? idUlicy.get(`${o.ulica.simc}:${o.ulica.sym_ul}`) ?? null : null;
     const drogaId = o.numer ? idDrogi.get(o.numer) ?? null : null;
-    if (!ulicaId && !drogaId) continue; // schemat wymaga jednego z dwóch
     await klient.query(
       `INSERT INTO odcinek_drogi
          (ulica_id, droga_id, kategoria, nr_drogi, klasa, zarzadca_id,
@@ -160,7 +159,7 @@ async function main() {
       [ulicaId, drogaId, kat, o.numer, o.klasa,
        idZarzadcy.get(ZARZADCA_DLA[kat]) ?? null,
        o.dlugosc_m, o.nawierzchnia,
-       o.nazwa_drogi ?? (o.ulica ? null : 'odcinek poza nazwaną ulicą'),
+       o.nazwa_drogi ?? (o.ulica ? null : 'odcinek bez nazwanej ulicy'),
        JSON.stringify(doMultiLine(o.geom))]
     );
     wstawione++;

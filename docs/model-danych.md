@@ -34,8 +34,10 @@ zarządcy.
 | `zrodlo`, `pewnosc` | skąd rekord i ile mu ufamy |
 | `podstawa_prawna` | numer uchwały albo rozporządzenia |
 
-Ograniczenie `CHECK (ulica_id IS NOT NULL OR droga_id IS NOT NULL)` nie pozwala
-wstawić odcinka, który nie jest zaczepiony ani o ulicę, ani o drogę.
+`ulica_id` i `droga_id` mogą być puste jednocześnie i to jest stan poprawny:
+większość sieci w gminie to drogi polne, leśne i dojazdy do pól — bez nazwy
+ulicy i bez numeru, a nadal z konkretnym właścicielem po stronie EGiB.
+Tożsamością odcinka jest jego geometria, nie przypisanie do ulicy.
 
 ## `droga`
 

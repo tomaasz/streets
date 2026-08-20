@@ -61,6 +61,32 @@ właściciela. Dokończenie bazy to:
 
 Zakładka **Braki** w aplikacji jest listą tej roboty, posortowaną po długości.
 
+## Co jest w bazie
+
+Stan na PRG z 2026-08-20 i BDOT10k w wersji 2026-04-15
+(pełna migawka: [`docs/stan-bazy.md`](docs/stan-bazy.md)):
+
+| | |
+|---|---:|
+| ulic w 25 miejscowościach | **710** |
+| odcinków dróg | **3 677** |
+| dróg numerowanych | **211** |
+| długość sieci | **949,4 km** |
+| **ulic z ustaloną kategorią i zarządcą** | **660 z 710** |
+
+| Kategoria | Zarządca | Ulic | Długość |
+|---|---|---:|---:|
+| krajowa | Generalny Dyrektor Dróg Krajowych i Autostrad | 6 | 30,1 km |
+| wojewódzka | Zarząd Województwa Mazowieckiego (MZDW) | 4 | 8,8 km |
+| powiatowa | Zarząd Powiatu Wyszkowskiego | 27 | 46,8 km |
+| gminna | Burmistrz Wyszkowa | 236 | 165,4 km |
+| wewnętrzna | właściciel terenu — do ustalenia z EGiB | 453 | 698,2 km |
+
+Jedenaście ulic ma więcej niż jednego zarządcę — m.in. ul. Warszawska
+(DK 62 na 543 m + gminna na 1 507 m) i ul. Generała Józefa Sowińskiego
+(DW 618 na 434 m + gminna 440725W na 1 223 m). To jest ten przypadek,
+dla którego model musi mieć odcinki.
+
 ## Ustalenia z danych, które warto znać
 
 * Gmina Wyszków używa **dwóch** bloków numerów dróg gminnych: `4405xxW`

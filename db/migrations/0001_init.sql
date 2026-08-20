@@ -127,9 +127,13 @@ CREATE TABLE IF NOT EXISTS odcinek_drogi (
   uwagi            text,
   geom             jsonb,
   utworzono        timestamptz NOT NULL DEFAULT now(),
-  zmodyfikowano    timestamptz NOT NULL DEFAULT now(),
-  CHECK (ulica_id IS NOT NULL OR droga_id IS NOT NULL)
+  zmodyfikowano    timestamptz NOT NULL DEFAULT now()
 );
+
+COMMENT ON COLUMN odcinek_drogi.ulica_id IS
+  'Ulica, po której odcinek biegnie. NULL jest poprawny: większość sieci '
+  'w gminie to drogi polne, leśne i dojazdy do pól — nie mają ani nazwy '
+  'ulicy, ani numeru, a nadal są drogami wewnętrznymi z konkretnym właścicielem.';
 
 COMMENT ON COLUMN odcinek_drogi.utrzymujacy_id IS
   'Podmiot faktycznie utrzymujący odcinek, jeśli inny niż zarządca — '

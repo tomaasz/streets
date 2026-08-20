@@ -132,9 +132,18 @@ export function wktLengthMeters(wkt) {
  */
 export function doMultiLine(geom) {
   if (!geom) return null;
-  if (geom.type === 'MultiLineString') return geom;
-  if (geom.type === 'LineString') {
-    return { type: 'MultiLineString', coordinates: [geom.coordinates] };
+  switch (geom.type) {
+    case 'MultiLineString':
+      return geom;
+    case 'LineString':
+      return { type: 'MultiLineString', coordinates: [geom.coordinates] };
+    // Place, skwery i ronda PRG trzyma jako poligony. Obrys traktujemy jak
+    // linię — inaczej te obiekty traciłyby geometrię i wypadały z dopasowania.
+    case 'Polygon':
+      return { type: 'MultiLineString', coordinates: geom.coordinates };
+    case 'MultiPolygon':
+      return { type: 'MultiLineString', coordinates: geom.coordinates.flat() };
+    default:
+      return null;
   }
-  return null;
 }

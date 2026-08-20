@@ -135,9 +135,16 @@ function main(prg, bdot) {
   }
 
   // --- agregacja: jedna ulica + kategoria + numer = jeden odcinek -------
+  // Sklejamy tylko to, co ma tożsamość: ulicę albo numer drogi. Odcinki bez
+  // jednego i drugiego (drogi polne, leśne, dojazdy do pól) zostają osobno —
+  // inaczej cała ta sieć zlewa się w jeden rekord na 500 km.
   const grupy = new Map();
+  let osobny = 0;
   for (const d of dopasowane) {
-    const g = `${d.ulica_idx ?? 'x'}|${d.kategoria_bdot}|${d.numer ?? ''}`;
+    const bezTozsamosci = d.ulica_idx === null && !d.numer;
+    const g = bezTozsamosci
+      ? `pojedynczy:${osobny++}`
+      : `${d.ulica_idx ?? 'x'}|${d.kategoria_bdot}|${d.numer ?? ''}`;
     let rec = grupy.get(g);
     if (!rec) {
       grupy.set(g, (rec = {
