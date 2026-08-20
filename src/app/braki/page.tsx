@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { braki } from '@/lib/zapytania';
+import { BrakBazy } from '@/components/BrakBazy';
+import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +18,9 @@ const WYJASNIENIA: Record<string, string> = {
 };
 
 export default async function Strona() {
-  const lista = await braki();
+  const wynik = await zBaza(() => braki());
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  const lista = wynik.dane;
   const wgProblemu = lista.reduce<Record<string, number>>((acc, r) => {
     acc[r.problem] = (acc[r.problem] ?? 0) + 1;
     return acc;

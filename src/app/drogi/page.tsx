@@ -1,11 +1,15 @@
 import { drogi } from '@/lib/zapytania';
+import { BrakBazy } from '@/components/BrakBazy';
+import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Strona() {
-  const lista = await drogi();
+  const wynik = await zBaza(() => drogi());
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  const lista = wynik.dane;
   const publiczne = lista.filter((d) => d.kategoria !== 'wewnetrzna');
 
   return (

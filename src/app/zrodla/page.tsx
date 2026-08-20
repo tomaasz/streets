@@ -1,9 +1,13 @@
+import { BrakBazy } from '@/components/BrakBazy';
+import { zBaza } from '@/lib/stan';
 import { zrodla } from '@/lib/zapytania';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Strona() {
-  const lista = await zrodla();
+  const wynik = await zBaza(() => zrodla());
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  const lista = wynik.dane;
   return (
     <>
       <h1 className="text-xl font-bold">Źródła danych</h1>

@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { miejscowosci, policzUlice, statystyki, ulice, zarzadcy } from '@/lib/zapytania';
 import { ETYKIETY_KATEGORII, KATEGORIE, metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii } from '@/components/Plakietka';
+import { BrakBazy } from '@/components/BrakBazy';
+import { zBaza } from '@/lib/stan';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,13 +21,17 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
     limit: 300,
   };
 
-  const [wiersze, ile, listaMiejscowosci, listaZarzadcow, stat] = await Promise.all([
-    ulice(filtry),
-    policzUlice(filtry),
-    miejscowosci(),
-    zarzadcy(),
-    statystyki(),
-  ]);
+  const wynik = await zBaza(() =>
+    Promise.all([
+      ulice(filtry),
+      policzUlice(filtry),
+      miejscowosci(),
+      zarzadcy(),
+      statystyki(),
+    ])
+  );
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  const [wiersze, ile, listaMiejscowosci, listaZarzadcow, stat] = wynik.dane;
 
   const parametryEksportu = new URLSearchParams(
     Object.entries(filtry).flatMap(([k, v]) =>

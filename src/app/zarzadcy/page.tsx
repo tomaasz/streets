@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { zarzadcy } from '@/lib/zapytania';
+import { BrakBazy } from '@/components/BrakBazy';
+import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +19,9 @@ const TYPY: Record<string, string> = {
 };
 
 export default async function Strona() {
-  const lista = await zarzadcy();
+  const wynik = await zBaza(() => zarzadcy());
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  const lista = wynik.dane;
   return (
     <>
       <h1 className="text-xl font-bold">Zarządcy dróg</h1>
