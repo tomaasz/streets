@@ -4,6 +4,8 @@ Baza wszystkich ulic gminy Wyszków wraz z odpowiedzią na pytanie **kto zarząd
 daną drogą** — zbudowana z otwartych danych GUGiK i wykazów z BIP, wystawiona
 jako aplikacja webowa (Next.js na Vercelu + Postgres w chmurze).
 
+**Działa pod:** https://streets-lyart.vercel.app
+
 TERC gminy: **143505** · powiat wyszkowski **1435** · województwo mazowieckie.
 
 ---
