@@ -1,5 +1,5 @@
 import { zapytaj } from './db';
-import type { Odcinek, WierszUlicy } from './typy';
+import type { Odcinek, WierszUlicy, Zrodlo } from './typy';
 
 export type FiltryUlic = {
   q?: string;
@@ -38,7 +38,8 @@ export async function ulice(f: FiltryUlic) {
   return zapytaj<WierszUlicy>(
     `SELECT v.id, v.slug, v.simc, v.sym_ul, v.miejscowosc, v.cecha, v.nazwa,
             v.nazwa_pelna, v.dlugosc_m, v.kategorie, v.zarzadcy, v.zarzadcy_kody,
-            v.numery_drog, v.liczba_odcinkow, v.ma_luke, v.wielu_zarzadcow
+            v.numery_drog, v.zrodla, v.pewnosc_min, v.liczba_odcinkow,
+            v.ma_luke, v.wielu_zarzadcow
        FROM v_ulica_zarzadcy v
        ${sql}
       ORDER BY v.miejscowosc, v.nazwa
@@ -71,12 +72,14 @@ export async function odcinkiUlicy(ulicaId: number) {
             o.opis_odcinka, o.geom,
             z.nazwa AS zarzadca, z.kod AS zarzadca_kod, z.typ AS zarzadca_typ,
             z.jednostka, z.telefon, z.email, z.www, z.podstawa_prawna,
+            zr.skrot AS zrodlo_skrot, zr.nazwa AS zrodlo_nazwa, zr.url AS zrodlo_url,
             u.nazwa AS utrzymujacy,
             d.przebieg
        FROM odcinek_drogi o
        LEFT JOIN zarzadca z ON z.id = o.zarzadca_id
        LEFT JOIN zarzadca u ON u.id = o.utrzymujacy_id
        LEFT JOIN droga d    ON d.id = o.droga_id
+       LEFT JOIN zrodlo_danych zr ON zr.kod = o.zrodlo
       WHERE o.ulica_id = $1
       ORDER BY o.kategoria, o.dlugosc_m DESC NULLS LAST`,
     [ulicaId]
@@ -168,8 +171,8 @@ export async function drogi() {
 }
 
 export async function zrodla() {
-  return zapytaj<{
-    kod: string; nazwa: string; gestor: string | null; url: string | null;
-    licencja: string | null; domyslna_pewnosc: number; opis: string | null;
-  }>(`SELECT * FROM zrodlo_danych ORDER BY domyslna_pewnosc DESC, nazwa`);
+  return zapytaj<Zrodlo>(
+    `SELECT kod, skrot, nazwa, gestor, url, licencja, domyslna_pewnosc, opis
+       FROM zrodlo_danych ORDER BY domyslna_pewnosc DESC, nazwa`
+  );
 }

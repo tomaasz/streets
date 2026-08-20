@@ -8,7 +8,8 @@ type Wiersz = {
   dlugosc_m: number | null; kategoria: string | null; nr_drogi: string | null;
   klasa: string | null; nawierzchnia: string | null; zarzadca: string | null;
   utrzymujacy: string | null; podstawa_prawna: string | null;
-  zrodlo: string | null; pewnosc: number | null;
+  zrodlo: string | null; zrodlo_nazwa: string | null;
+  zrodlo_url: string | null; pewnosc: number | null;
   odcinek_dlugosc_m: number | null; geom: unknown;
 };
 
@@ -42,11 +43,13 @@ export async function GET(req: Request) {
             o.kategoria::text AS kategoria, o.nr_drogi, o.klasa, o.nawierzchnia,
             o.dlugosc_m AS odcinek_dlugosc_m, o.podstawa_prawna, o.zrodlo, o.pewnosc,
             z.nazwa AS zarzadca, w.nazwa AS utrzymujacy,
+            zr.nazwa AS zrodlo_nazwa, zr.url AS zrodlo_url,
             COALESCE(o.geom, u.geom) AS geom
        FROM ulica u
        LEFT JOIN odcinek_drogi o ON o.ulica_id = u.id
        LEFT JOIN zarzadca z      ON z.id = o.zarzadca_id
        LEFT JOIN zarzadca w      ON w.id = o.utrzymujacy_id
+       LEFT JOIN zrodlo_danych zr ON zr.kod = o.zrodlo
        ${sql}
       ORDER BY u.miejscowosc, u.nazwa, o.kategoria`,
     par
@@ -77,7 +80,8 @@ export async function GET(req: Request) {
   const kolumny: (keyof Wiersz)[] = [
     'simc', 'sym_ul', 'miejscowosc', 'nazwa_pelna', 'dlugosc_m', 'kategoria',
     'nr_drogi', 'klasa', 'nawierzchnia', 'odcinek_dlugosc_m', 'zarzadca',
-    'utrzymujacy', 'podstawa_prawna', 'zrodlo', 'pewnosc',
+    'utrzymujacy', 'podstawa_prawna', 'zrodlo', 'zrodlo_nazwa',
+    'zrodlo_url', 'pewnosc',
   ];
   const csv = [
     kolumny.join(','),

@@ -73,13 +73,14 @@ async function main() {
   // --- słowniki --------------------------------------------------------
   for (const z of zrodla) {
     await klient.query(
-      `INSERT INTO zrodlo_danych (kod, nazwa, gestor, url, licencja, domyslna_pewnosc, opis)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
+      `INSERT INTO zrodlo_danych (kod, skrot, nazwa, gestor, url, licencja, domyslna_pewnosc, opis)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        ON CONFLICT (kod) DO UPDATE SET
-         nazwa = EXCLUDED.nazwa, gestor = EXCLUDED.gestor, url = EXCLUDED.url,
-         licencja = EXCLUDED.licencja, domyslna_pewnosc = EXCLUDED.domyslna_pewnosc,
-         opis = EXCLUDED.opis`,
-      [z.kod, z.nazwa, z.gestor, z.url, z.licencja, Number(z.domyslna_pewnosc), z.opis]
+         skrot = EXCLUDED.skrot, nazwa = EXCLUDED.nazwa, gestor = EXCLUDED.gestor,
+         url = EXCLUDED.url, licencja = EXCLUDED.licencja,
+         domyslna_pewnosc = EXCLUDED.domyslna_pewnosc, opis = EXCLUDED.opis`,
+      [z.kod, z.skrot ?? z.kod, z.nazwa, z.gestor, z.url, z.licencja,
+       Number(z.domyslna_pewnosc), z.opis]
     );
   }
 

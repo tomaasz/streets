@@ -46,6 +46,10 @@ Rejestr numerowanych dróg publicznych przechodzących przez gminę: `S8`, `62`,
 ulic, a pytania „którędy biegnie DW 618" i „kto zarządza ulicą Pułtuską" to dwa
 różne pytania.
 
+Kolumna `zrodla` niesie kody źródeł wszystkich odcinków ulicy, a `pewnosc_min`
+— najsłabsze ogniwo. Razem odpowiadają na pytanie „skąd to wiadomo", zadawane
+przy każdym wierszu tabeli, a nie dopiero po wejściu w kartę ulicy.
+
 ## `zarzadca`
 
 Słownik. `typ` odpowiada kategorii drogi, `podstawa_prawna` cytuje przepis, na
@@ -57,7 +61,7 @@ tysiącach wierszy.
 
 | Widok | Do czego |
 |---|---|
-| `v_ulica_zarzadcy` | ulica + zagregowane kategorie, zarządcy, numery dróg; flaga `wielu_zarzadcow` |
+| `v_ulica_zarzadcy` | ulica + zagregowane kategorie, zarządcy, numery dróg, źródła i najniższa pewność; flaga `wielu_zarzadcow` |
 | `v_braki` | lista rekordów do domknięcia, z powodem |
 | `v_statystyki_kategorii` | kilometry i liczby wg kategorii i zarządcy |
 

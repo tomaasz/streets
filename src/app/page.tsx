@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import { miejscowosci, policzUlice, statystyki, ulice, zarzadcy } from '@/lib/zapytania';
+import {
+  miejscowosci, policzUlice, statystyki, ulice, zarzadcy, zrodla,
+} from '@/lib/zapytania';
 import { ETYKIETY_KATEGORII, KATEGORIE, metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii } from '@/components/Plakietka';
+import { ZnacznikZrodla } from '@/components/Zrodlo';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 
@@ -28,10 +31,13 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
       miejscowosci(),
       zarzadcy(),
       statystyki(),
+      zrodla(),
     ])
   );
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
-  const [wiersze, ile, listaMiejscowosci, listaZarzadcow, stat] = wynik.dane;
+  const [wiersze, ile, listaMiejscowosci, listaZarzadcow, stat, listaZrodel] =
+    wynik.dane;
+  const slownikZrodel = new Map(listaZrodel.map((z) => [z.kod, z]));
 
   const parametryEksportu = new URLSearchParams(
     Object.entries(filtry).flatMap(([k, v]) =>
@@ -155,6 +161,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
               <th>Kategoria</th>
               <th>Zarządca</th>
               <th>Nr drogi</th>
+              <th>Źródło</th>
               <th className="text-right">Długość</th>
             </tr>
           </thead>
@@ -192,6 +199,13 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                   )}
                 </td>
                 <td className="whitespace-nowrap">{u.numery_drog.join(', ') || '—'}</td>
+                <td>
+                  <ZnacznikZrodla
+                    kody={u.zrodla}
+                    pewnosc={u.pewnosc_min}
+                    slownik={slownikZrodel}
+                  />
+                </td>
                 <td className="text-right whitespace-nowrap">{metryNaKm(u.dlugosc_m)}</td>
               </tr>
             ))}

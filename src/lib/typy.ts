@@ -17,6 +17,8 @@ export type WierszUlicy = {
   zarzadcy: string[];
   zarzadcy_kody: string[];
   numery_drog: string[];
+  zrodla: string[];
+  pewnosc_min: number | null;
   liczba_odcinkow: number;
   ma_luke: boolean | null;
   wielu_zarzadcow: boolean | null;
@@ -40,6 +42,9 @@ export type Odcinek = {
   podstawa_prawna: string | null;
   utrzymujacy: string | null;
   zrodlo: string;
+  zrodlo_skrot: string | null;
+  zrodlo_nazwa: string | null;
+  zrodlo_url: string | null;
   pewnosc: number;
   przebieg: string | null;
   uwagi: string | null;
@@ -71,6 +76,17 @@ export const KOLORY_KATEGORII: Record<string, string> = {
   gminna: 'var(--kat-gminna)',
   wewnetrzna: 'var(--kat-wewnetrzna)',
   nieustalona: 'var(--kat-nieustalona)',
+};
+
+export type Zrodlo = {
+  kod: string;
+  skrot: string | null;
+  nazwa: string;
+  gestor: string | null;
+  url: string | null;
+  licencja: string | null;
+  domyslna_pewnosc: number;
+  opis: string | null;
 };
 
 export function metryNaKm(m: number | null | undefined): string {

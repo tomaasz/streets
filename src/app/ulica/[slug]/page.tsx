@@ -115,7 +115,15 @@ export default async function Strona({
                       </a>
                     ) : null}
                   </Pole>
-                  <Pole etykieta="Źródło">{o.zrodlo}</Pole>
+                  <Pole etykieta="Źródło">
+                    {o.zrodlo_url ? (
+                      <a href={o.zrodlo_url} rel="noreferrer" target="_blank">
+                        {o.zrodlo_nazwa ?? o.zrodlo}
+                      </a>
+                    ) : (
+                      (o.zrodlo_nazwa ?? o.zrodlo)
+                    )}
+                  </Pole>
                 </dl>
 
                 {o.uwagi ? (
