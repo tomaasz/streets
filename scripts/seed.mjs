@@ -159,7 +159,8 @@ async function main() {
       zarzadca_id: idZarzadcy.get(ZARZADCA_DLA[rec.kategoria]) ?? null,
       dlugosc_gmina_m: Math.round(rec.dlugosc),
       zrodlo: opis?.zrodlo ?? 'bdot10k',
-      pewnosc: opis ? 2 : 1,
+      // pewność z pliku opisów; bez opisu zostaje surowy import z BDOT
+      pewnosc: opis ? Number(opis.pewnosc ?? 2) : 1,
       uwagi: opis?.uwagi ?? null,
     };
   });
@@ -177,7 +178,10 @@ async function main() {
       kategoria = EXCLUDED.kategoria, klasa = EXCLUDED.klasa,
       przebieg = COALESCE(EXCLUDED.przebieg, droga.przebieg),
       zarzadca_id = EXCLUDED.zarzadca_id,
-      dlugosc_gmina_m = EXCLUDED.dlugosc_gmina_m, uwagi = EXCLUDED.uwagi
+      dlugosc_gmina_m = EXCLUDED.dlugosc_gmina_m, uwagi = EXCLUDED.uwagi,
+      -- bez tych dwóch kolumn ponowny wsad zostawiał starą pewność
+      -- i rekord z opisem nadal wyglądał na surowy import
+      zrodlo = EXCLUDED.zrodlo, pewnosc = EXCLUDED.pewnosc
     RETURNING id, numer`);
 
   const idDrogi = new Map(zwroconeDrogi.map((r) => [r.numer, r.id]));

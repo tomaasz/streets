@@ -25,16 +25,16 @@ Migawka wygenerowana przez `npm run raport` na danych PRG z 2026-08-20 i BDOT10k
 | E67 | krajowa | Szlak europejski Via Baltica pokrywający się z S8 na odcinku przez gminę. | 11,8 | 2/3 |
 | 4403W | powiatowa | Wyszków – Brańszczyk – Długosiodło | 1,3 | 2/3 |
 | 4406W | powiatowa | od DK nr 62 – Kamieńczyk – Puste Łąki | 9,3 | 2/3 |
-| 4408W | powiatowa | — | 7,2 | 1/3 |
-| 4412W | powiatowa | — | 4,3 | 1/3 |
+| 4408W | powiatowa | Wyszków – Porządzie – Długosiodło | 7,2 | 2/3 |
+| 4412W | powiatowa | Leszczydół Stary – Leszczydół-Pustki | 4,3 | 2/3 |
 | 4413W | powiatowa | Wola Mystkowska – Kozłowo – Ostrowy | 0,9 | 2/3 |
 | 4414W | powiatowa | Wyszków – Popowo Kościelne | 4,6 | 2/3 |
-| 4415W | powiatowa | — | 3,2 | 1/3 |
+| 4415W | powiatowa | Leszczydół Stary – Leszczydół Działki – Leszczydół-Podwielątki – Wielątki | 3,2 | 2/3 |
 | 4417W | powiatowa | Kręgi – Olszanka | 4,3 | 2/3 |
 | 4418W | powiatowa | Rybno – Gulczewo | 4,0 | 2/3 |
 | 4419W | powiatowa | Wyszków – Drogoszewo – Ślubów | 6,6 | 2/3 |
-| 4421W | powiatowa | — | 0,7 | 1/3 |
-| 4422W | powiatowa | — | 0,5 | 1/3 |
+| 4421W | powiatowa | od węzła S8 – Lucynów – Mostówka – Zabrodzie | 0,7 | 1/3 |
+| 4422W | powiatowa | Puste Łąki – Urle – Jadów | 0,5 | 2/3 |
 | 618 | wojewodzka | Gołymin-Ośrodek – Pułtusk – Wyszków; klasa G. | 8,8 | 2/3 |
 
 ## Ulice o więcej niż jednym zarządcy
