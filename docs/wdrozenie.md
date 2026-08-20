@@ -78,6 +78,27 @@ DATABASE_URL="postgresql://…" node scripts/migrate.mjs --postgis
 
 ## 2. Projekt na Vercelu
 
+### Dwie pułapki, na które łatwo wpaść
+
+**Vercel wciąga `DATABASE_URL` z `.env.example`.** Na ekranie importu pokazuje
+się „Environment Variables — 1 Detected" i jeśli przejdziesz dalej bez
+sprawdzenia, przykładowa wartość (`user:haslo@ep-xxx-pooler…`) zostaje zapisana
+jako zmienna projektu. Potem integracja Storage odmawia podłączenia
+z komunikatem *„This project already has an existing environment variable with
+name DATABASE_URL"*. Usuń tę zmienną w Settings → Environment Variables
+i podłącz bazę jeszcze raz. Atrapa jest szkodliwa także wtedy, gdy obejdziesz
+kolizję innym prefiksem: aplikacja sprawdza `DATABASE_URL` jako pierwszy, więc
+przesłoniłaby prawdziwy adres.
+
+**Podłączenie bazy nie odświeża działającego deploymentu.** Vercel wstrzykuje
+zmienne w momencie tworzenia deploymentu, więc instancja zbudowana przed
+podłączeniem Storage nadal ma stary snapshot środowiska i pokazuje ekran
+konfiguracji. Po podłączeniu bazy zrób **Deployments → ⋯ → Redeploy**
+(build cache może zostać). Najpierw dodaj `DB_SCHEMA`, żeby jeden redeploy
+załatwił obie zmienne.
+
+### Import
+
 1. [vercel.com/new](https://vercel.com/new) → **Import Git Repository** →
    `tomaasz/streets`.
 2. Framework wykryje się jako Next.js; nie zmieniaj Build Command ani Output
