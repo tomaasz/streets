@@ -21,6 +21,12 @@ Używaj **puli połączeń** — na Neonie host z sufiksem `-pooler`, na Supabas
 port 6543. Funkcje serverless skalują się w poziomie i bez poolera wyczerpią
 limit połączeń bazy.
 
+**Trzymaj funkcje w tym samym regionie co bazę.** Każde żądanie renderuje się
+po stronie serwera i wykonuje kilka zapytań, więc podróż przez pół Europy
+mnoży się przez ich liczbę. Region ustawia się w `vercel.json` w polu
+`regions`: `lhr1` dla bazy w `eu-west-2` (Londyn), `fra1` dla `eu-central-1`
+(Frankfurt). Region bazy odczytasz z hosta w connection stringu.
+
 ### Baza, której już używasz
 
 Nie trzeba zakładać nowej. Ustaw `DB_SCHEMA` na własną nazwę:
