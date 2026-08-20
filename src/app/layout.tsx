@@ -12,6 +12,7 @@ const NAWIGACJA = [
   { href: '/', label: 'Ulice' },
   { href: '/drogi', label: 'Drogi numerowane' },
   { href: '/zarzadcy', label: 'Zarządcy' },
+  { href: '/akty', label: 'Akty prawne' },
   { href: '/braki', label: 'Braki' },
   { href: '/zrodla', label: 'Źródła' },
 ] as const;

@@ -46,7 +46,8 @@ pewnosc 3  akt prawa miejscowego albo ewidencja dróg zarządcy
 | Kategoria i numer drogi | **BDOT10k**, warstwa `OT_SKDR_L`, [paczka powiatowa](https://opendata.geoportal.gov.pl/bdot10k/) | `kategoriaZarzadzania`, `numerDrogi`, `klasaDrogi`, `materialNawierzchni` |
 | Granice, obręby, działki | **ULDK** [uldk.gugik.gov.pl](https://uldk.gugik.gov.pl/) | granica gminy, lista obrębów = miejscowości |
 | Przebieg dróg powiatowych | [BIP Gminy Wyszków](https://bip.wyszkow.pl/), [BIP Powiatu](https://bip.powiat-wyszkowski.pl/) | wykazy dróg powiatowych |
-| Rozstrzygnięcie | [Dziennik Urzędowy Woj. Mazowieckiego](https://edziennik.mazowieckie.pl/) | uchwały o zaliczeniu do kategorii |
+| Akty prawa miejscowego | [BIP Gminy Wyszków](https://bip.wyszkow.pl/) — importer `npm run data:akty` | uchwały Rady i zarządzenia Burmistrza dotyczące dróg i nazewnictwa |
+| Rozstrzygnięcie | [Dziennik Urzędowy Woj. Mazowieckiego](https://edziennik.mazowieckie.pl/) | pozycja ogłoszenia, od której akt obowiązuje |
 | Drogi wewnętrzne | **EGiB** powiatu, [wyszkowski.e-mapa.net](https://wyszkowski.e-mapa.net/) | właściciel działki drogowej = zarządca |
 
 Wszystkie źródła maszynowe są bezpłatne i nie wymagają rejestracji.
@@ -166,7 +167,7 @@ Filtry działają tak samo w API i w interfejsie.
 ```
 db/migrations/     schemat (0003 z PostGIS jest opcjonalna)
 db/seed/           słowniki: zarządcy, źródła, opisy dróg — ręcznie utrzymywane
-scripts/           harvest-prg, harvest-bdot, build-odcinki, migrate, seed
+scripts/           harvest-prg, harvest-bdot, harvest-akty-bip, build-odcinki, migrate, seed
 data/raw/          surowe pobrania z GUGiK (w repo, żeby dało się odtworzyć wynik)
 data/odcinki.json  wynik dopasowania BDOT ↔ PRG, wsad dla seed
 src/app/           Next.js App Router

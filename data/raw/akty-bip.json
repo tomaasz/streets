@@ -1,0 +1,199 @@
+{
+ "zrodlo": "BIP Gminy Wyszków — uchwały Rady Miejskiej",
+ "baza": "https://bip.wyszkow.pl/",
+ "frazy": [
+  "zaliczenia do kategorii dróg gminnych",
+  "pozbawienia kategorii drogi gminnej",
+  "przebiegu dróg gminnych",
+  "nadania nazwy ulicy",
+  "zmiany nazwy ulicy",
+  "nadania nazwy rondu",
+  "nadania nazwy skwerowi",
+  "zaliczenia drogi do kategorii"
+ ],
+ "pobrano": "2026-08-20",
+ "stron_przeszukanych": 284,
+ "liczba_aktow": 18,
+ "akty": [
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XXI/155/2008",
+   "rok": 2008,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2008_rok/sesja_xxi_2008/xxi_155_2008.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=126"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XV/85/2007",
+   "rok": 2007,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2007_rok/sesja_xv/xv_85_2007.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=150"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XV/86/2007",
+   "rok": 2007,
+   "data_podjecia": null,
+   "tytul": "w sprawie pozbawienia drogi kategorii drogi gminnej",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2007_rok/sesja_xv/xv_86_2007.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=150"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XVI/101/2007",
+   "rok": 2007,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=151"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XIX/127/2007",
+   "rok": 2007,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2007_rok/sesja_xix/xix_127_2007.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=175"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XVII/116/2007",
+   "rok": 2007,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=170"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XXXVI/274/2009",
+   "rok": 2009,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xxxvi_2009/xxxvi_274_2009.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=327"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XXXVI/275/2008",
+   "rok": 2008,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicom",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xxxvi_2009/xxxvi_275_2009.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=327"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLII/315/2009",
+   "rok": 2009,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy położonej w Wyszkowie",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xlii_2009/xlii_315_09.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=389"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLV/332/2009",
+   "rok": 2009,
+   "data_podjecia": null,
+   "tytul": "w sprawie wpisania budowy obwodnicy Marek na drodze S 8 oraz drogi S 17 na odcinku od projektowanej drogi S 8 do miejscowości Wiązowna do Programu Budowy Dróg Krajowych na lata 2008&#8211;2012 Ministerstwa Infrastruktury",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xlv_2009/xlv_332_2009.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=429"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLV/333/2009",
+   "rok": 2009,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazwy ulicy położonej w Wyszkowie",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xlv_2009/xlv_333_09.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=429"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLV/334/2009",
+   "rok": 2009,
+   "data_podjecia": null,
+   "tytul": "w sprawie nadania nazw ulicom",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2009_rok/sesja_xlv_2009/xlv_334_2009.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=429"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XXXVIII/40/2005",
+   "rok": 2005,
+   "data_podjecia": "2005-06-30",
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2005_rok/sesja_xxxviii/xxxviii_40_2005.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=186"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLV/11/2006",
+   "rok": 2006,
+   "data_podjecia": "2006-02-16",
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2006_rok/sesja_xlv/xlv_11_2006.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=162"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "XLVII/26/2006",
+   "rok": 2006,
+   "data_podjecia": "2006-04-27",
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=164"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "VII/29/2007",
+   "rok": 2007,
+   "data_podjecia": "2007-03-29",
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2007_rok/sesja_vii/vii_29_2007.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=138"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "IX/42/2007",
+   "rok": 2007,
+   "data_podjecia": "2007-05-31",
+   "tytul": "w sprawie zasad kształtowania nazewnictwa ulic, placów i innych terenowych obiektów publicznych na terenie gminy Wyszków",
+   "url_pdf": "https://bip.wyszkow.pl/pliki/rada_miejska/uchwaly_rm/2007_rok/sesja_ix/ix_42_2007.pdf",
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=141"
+  },
+  {
+   "organ": "Rada Miejska w Wyszkowie",
+   "rodzaj": "uchwała",
+   "numer": "IX/46/2007",
+   "rok": 2007,
+   "data_podjecia": "2007-05-31",
+   "tytul": "w sprawie nadania nazwy ulicy",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=141"
+  }
+ ]
+}

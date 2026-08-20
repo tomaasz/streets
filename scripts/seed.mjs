@@ -62,12 +62,17 @@ async function main() {
   process.stderr.write(`Schemat: ${nazwa}\n`);
   await klient.query('BEGIN');
 
-  const [zrodla, zarzadcy, opisy, prg, odc] = await Promise.all([
+  const [zrodla, zarzadcy, opisy, aktyCsv, prg, odc, aktyBip] = await Promise.all([
     readFile(new URL('../db/seed/zrodla.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../db/seed/zarzadcy.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../db/seed/drogi-opisy.csv', import.meta.url), 'utf8').then(czytajCsv),
+    readFile(new URL('../db/seed/akty.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../data/raw/prg-ulice.json', import.meta.url), 'utf8').then(JSON.parse),
     readFile(new URL('../data/odcinki.json', import.meta.url), 'utf8').then(JSON.parse),
+    // import z BIP jest opcjonalny — bez niego wsad ma działać
+    readFile(new URL('../data/raw/akty-bip.json', import.meta.url), 'utf8')
+      .then(JSON.parse)
+      .catch(() => ({ akty: [] })),
   ]);
 
   // --- słowniki --------------------------------------------------------
@@ -221,6 +226,57 @@ async function main() {
         nawierzchnia text, opis_odcinka text, geom jsonb)`, 250);
   const wstawione = wierszeOdcinkow.length;
   process.stderr.write(`Odcinki: ${wstawione}\n`);
+
+  // --- akty prawa miejscowego -------------------------------------------
+  // Ręczny plik ma pierwszeństwo nad importem: to w nim trafiają pozycje
+  // dziennika urzędowego i status, których crawler nie zna.
+  const wszystkieAkty = new Map();
+  for (const a of aktyBip.akty ?? []) {
+    wszystkieAkty.set(`${a.rodzaj}|${a.numer}|${a.organ}`, {
+      organ: a.organ, rodzaj: a.rodzaj, numer: a.numer,
+      data_podjecia: a.data_podjecia, tytul: a.tytul,
+      dziennik_rok: null, dziennik_pozycja: null,
+      data_ogloszenia: null, data_wejscia: null, status: 'nieustalony',
+      url: a.url_zrodla, url_pdf: a.url_pdf, zrodlo: 'bip-gmina', uwagi: null,
+    });
+  }
+  for (const a of aktyCsv) {
+    wszystkieAkty.set(`${a.rodzaj}|${a.numer}|${a.organ}`, {
+      ...a,
+      dziennik_rok: a.dziennik_rok ? Number(a.dziennik_rok) : null,
+      dziennik_pozycja: a.dziennik_pozycja ? Number(a.dziennik_pozycja) : null,
+      status: a.status ?? 'nieustalony',
+      zrodlo: a.zrodlo ?? 'uchwala',
+    });
+  }
+
+  const listaAktow = [...wszystkieAkty.values()];
+  if (listaAktow.length) {
+    await wsadem(klient, listaAktow, `
+      INSERT INTO akt_prawny (organ, rodzaj, numer, data_podjecia, tytul,
+                              dziennik_rok, dziennik_pozycja, data_ogloszenia,
+                              data_wejscia, status, url, url_pdf, zrodlo, uwagi)
+      SELECT organ, rodzaj, numer, data_podjecia, tytul, dziennik_rok,
+             dziennik_pozycja, data_ogloszenia, data_wejscia, status,
+             url, url_pdf, zrodlo, uwagi
+        FROM json_to_recordset($1::json) AS x(
+          organ text, rodzaj text, numer text, data_podjecia date, tytul text,
+          dziennik_rok integer, dziennik_pozycja integer, data_ogloszenia date,
+          data_wejscia date, status text, url text, url_pdf text,
+          zrodlo text, uwagi text)
+      ON CONFLICT (rodzaj, numer, organ) DO UPDATE SET
+        data_podjecia = COALESCE(EXCLUDED.data_podjecia, akt_prawny.data_podjecia),
+        tytul = EXCLUDED.tytul,
+        dziennik_rok = COALESCE(EXCLUDED.dziennik_rok, akt_prawny.dziennik_rok),
+        dziennik_pozycja = COALESCE(EXCLUDED.dziennik_pozycja, akt_prawny.dziennik_pozycja),
+        data_ogloszenia = COALESCE(EXCLUDED.data_ogloszenia, akt_prawny.data_ogloszenia),
+        data_wejscia = COALESCE(EXCLUDED.data_wejscia, akt_prawny.data_wejscia),
+        status = EXCLUDED.status,
+        url = COALESCE(EXCLUDED.url, akt_prawny.url),
+        url_pdf = COALESCE(EXCLUDED.url_pdf, akt_prawny.url_pdf),
+        zrodlo = EXCLUDED.zrodlo, uwagi = COALESCE(EXCLUDED.uwagi, akt_prawny.uwagi)`);
+  }
+  process.stderr.write(`Akty prawne: ${listaAktow.length}\n`);
 
   await klient.query('COMMIT');
   await klient.end();

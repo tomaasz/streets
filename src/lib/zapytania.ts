@@ -170,6 +170,63 @@ export async function drogi() {
   );
 }
 
+export type AktPrawny = {
+  id: number;
+  organ: string;
+  rodzaj: string;
+  numer: string;
+  data_podjecia: string | null;
+  tytul: string;
+  dziennik_rok: number | null;
+  dziennik_pozycja: number | null;
+  status: string;
+  url: string | null;
+  url_pdf: string | null;
+  uwagi: string | null;
+  powiazanych_ulic: number;
+  powiazanych_drog: number;
+};
+
+export async function akty(q?: string) {
+  const par: unknown[] = [];
+  let gdzie = '';
+  if (q) {
+    par.push(`%${q}%`);
+    gdzie = `WHERE bez_ogonkow(tytul) LIKE bez_ogonkow($1)
+                OR bez_ogonkow(numer) LIKE bez_ogonkow($1)`;
+  }
+  return zapytaj<AktPrawny>(
+    `SELECT id, organ, rodzaj, numer,
+            to_char(data_podjecia, 'YYYY-MM-DD')   AS data_podjecia,
+            tytul, dziennik_rok, dziennik_pozycja,
+            to_char(data_ogloszenia, 'YYYY-MM-DD') AS data_ogloszenia,
+            to_char(data_wejscia, 'YYYY-MM-DD')    AS data_wejscia,
+            status, url, url_pdf, uwagi,
+            powiazanych_ulic, powiazanych_drog
+       FROM v_akty ${gdzie}
+      ORDER BY data_podjecia DESC NULLS LAST, numer DESC
+      LIMIT 500`,
+    par
+  );
+}
+
+export async function aktyUlicy(ulicaId: number) {
+  return zapytaj<AktPrawny & { rola: string }>(
+    `SELECT a.id, organ, rodzaj, numer,
+            to_char(a.data_podjecia, 'YYYY-MM-DD')   AS data_podjecia,
+            tytul, dziennik_rok, dziennik_pozycja,
+            to_char(data_ogloszenia, 'YYYY-MM-DD') AS data_ogloszenia,
+            to_char(data_wejscia, 'YYYY-MM-DD')    AS data_wejscia,
+            status, url, url_pdf, uwagi,
+            powiazanych_ulic, powiazanych_drog, au.rola
+       FROM akt_ulica au
+       JOIN v_akty a ON a.id = au.akt_id
+      WHERE au.ulica_id = $1
+      ORDER BY a.data_podjecia DESC NULLS LAST`,
+    [ulicaId]
+  );
+}
+
 export async function zrodla() {
   return zapytaj<Zrodlo>(
     `SELECT kod, skrot, nazwa, gestor, url, licencja, domyslna_pewnosc, opis
