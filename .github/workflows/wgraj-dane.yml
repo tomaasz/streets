@@ -1,0 +1,79 @@
+# Zakłada schemat i wgrywa dane do bazy, bez instalowania czegokolwiek
+# lokalnie. Connection string trzymany jest jako sekret repozytorium,
+# więc nigdzie się nie przewija.
+#
+# Konfiguracja (raz):
+#   Settings -> Secrets and variables -> Actions -> New repository secret
+#   nazwa: DATABASE_URL
+#   wartość: connection string z Neona (host z sufiksem -pooler)
+#
+# Uruchomienie: zakładka Actions -> "Wgraj dane do bazy" -> Run workflow
+
+name: Wgraj dane do bazy
+
+on:
+  workflow_dispatch:
+    inputs:
+      schemat:
+        description: 'Schemat na tabele projektu (przy bazie współdzielonej zostaw "drogi")'
+        required: true
+        default: drogi
+        type: string
+      reset:
+        description: 'Skasować schemat przed migracją'
+        required: true
+        default: false
+        type: boolean
+      postgis:
+        description: 'Dołożyć kolumny PostGIS (Neon i Supabase je mają)'
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: wgraj-dane
+  cancel-in-progress: false
+
+jobs:
+  wgraj:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DB_SCHEMA: ${{ inputs.schemat }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Sprawdź, czy sekret jest ustawiony
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Brak sekretu DATABASE_URL — dodaj go w Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - name: Migracje
+        run: |
+          node scripts/migrate.mjs \
+            ${{ inputs.reset && '--reset' || '' }} \
+            ${{ inputs.postgis && '--postgis' || '' }}
+
+      - name: Wsad danych
+        run: npm run db:seed
+
+      - name: Raport stanu bazy
+        run: |
+          npm run --silent raport > raport.md
+          cat raport.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stan-bazy
+          path: raport.md

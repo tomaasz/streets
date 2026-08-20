@@ -137,13 +137,14 @@ jako GeoJSON w `jsonb`, żeby baza chodziła na dowolnym darmowym hostingu.
    Framework wykryje się sam (Next.js).
 3. **Zmienna środowiskowa.** W ustawieniach projektu dodaj `DATABASE_URL`
    dla środowisk Production, Preview i Development.
-4. **Migracja i wsad.** Z lokalnej maszyny, z `DATABASE_URL` wskazującym
-   na chmurę:
+4. **Migracja i wsad.** Albo z lokalnej maszyny (potrzebny tylko Node 20+):
 
    ```bash
-   DATABASE_URL="postgresql://..." npm run db:migrate
-   DATABASE_URL="postgresql://..." npm run db:seed
+   DATABASE_URL="postgresql://..." DB_SCHEMA=drogi npm run db:setup
    ```
+
+   albo bez instalowania czegokolwiek — dodaj `DATABASE_URL` jako sekret
+   repozytorium i uruchom workflow **Actions → Wgraj dane do bazy**.
 
 Aplikacja jest w całości server-side (`force-dynamic`), więc nie trzeba
 przebudowywać deploymentu po odświeżeniu danych.

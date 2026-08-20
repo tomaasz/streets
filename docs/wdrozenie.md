@@ -39,13 +39,35 @@ odmawia bez jawnego `--force` — w bazie współdzielonej zabrałoby to cudze
 tabele. Rozszerzenia (`pg_trgm`, `unaccent`, `postgis`) instalują się zawsze
 w `public`, bo są wspólne dla całej bazy.
 
-### Schemat i dane
+### Schemat i dane — wariant bez instalowania czegokolwiek
 
-Z lokalnej kopii repozytorium, wskazując na chmurę:
+W repozytorium jest workflow `Wgraj dane do bazy`, który robi migrację, wsad
+i raport na runnerze GitHuba. Connection string zostaje sekretem repozytorium
+i nigdzie się nie przewija.
+
+1. **Settings → Secrets and variables → Actions → New repository secret**,
+   nazwa `DATABASE_URL`, wartość — pooled connection string.
+2. **Actions → Wgraj dane do bazy → Run workflow.** Podaj schemat
+   (przy bazie współdzielonej zostaw `drogi`), zaznacz `postgis`, jeśli
+   chcesz kolumny geometryczne.
+3. Raport ze stanem bazy ląduje w podsumowaniu joba i jako artefakt.
+
+### Schemat i dane — z lokalnej maszyny
+
+Potrzebny tylko Node 20+:
+
+```bash
+git clone https://github.com/tomaasz/streets && cd streets
+npm install
+DATABASE_URL="postgresql://…" DB_SCHEMA=drogi npm run db:setup
+```
+
+`db:setup` to migracja, wsad i raport w jednym. Osobno:
 
 ```bash
 DATABASE_URL="postgresql://…" npm run db:migrate
 DATABASE_URL="postgresql://…" npm run db:seed
+DATABASE_URL="postgresql://…" npm run raport
 ```
 
 Jeśli baza ma PostGIS i chcesz zapytań przestrzennych:
