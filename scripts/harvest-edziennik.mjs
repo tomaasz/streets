@@ -24,26 +24,29 @@ const OUT = new URL('../data/raw/akty-edziennik.json', import.meta.url);
 const rozpoznanie = process.argv.includes('--rozpoznanie');
 
 /**
- * Organy wydające, których akty nas interesują — spisane z listy wydawców
- * serwisu (/publisher-group, grupa „W”).
+ * Wydawcy z listy serwisu (/publisher-group, grupa „W”) dotyczący Wyszkowa.
+ * Dziesięć pozycji, bo ta sama instytucja występuje pod kilkoma nazwami —
+ * zapis zmieniał się przez lata i branie jednego wariantu po cichu gubi
+ * całe roczniki.
  *
- * Ta sama instytucja występuje pod kilkoma nazwami, bo zapis zmieniał się
- * przez lata. Branie tylko jednego wariantu po cichu gubi całe roczniki,
- * więc odpytujemy wszystkie i sprowadzamy do wspólnego organu przy zapisie.
+ * Trzymamy same identyfikatory, a nazwę organu importer odczytuje ze strony
+ * wydawcy. Przypisanie numeru do nazwy na oko byłoby zgadywaniem, a pomyłka
+ * podpisałaby uchwały złym organem.
  */
-const ORGANY = [
-  { nazwa: 'Rada Miejska w Wyszkowie', organ: 'Rada Miejska w Wyszkowie' },
-  { nazwa: 'Burmistrz Wyszkowa', organ: 'Burmistrz Wyszkowa' },
-  { nazwa: 'Burmistrz Miasta i Gminy Wyszków', organ: 'Burmistrz Wyszkowa' },
-  { nazwa: 'Rada Powiatu w Wyszkowie', organ: 'Rada Powiatu Wyszkowskiego' },
-  { nazwa: 'Rada Powiatu Wyszkowskiego', organ: 'Rada Powiatu Wyszkowskiego' },
-  { nazwa: 'Zarząd Powiatu w Wyszkowie', organ: 'Zarząd Powiatu Wyszkowskiego' },
-  { nazwa: 'Zarząd Powiatu Wyszkowskiego', organ: 'Zarząd Powiatu Wyszkowskiego' },
-  { nazwa: 'Starosta Wyszkowski', organ: 'Starosta Wyszkowski' },
-  { nazwa: 'Starosta Powiatu Wyszkowskiego', organ: 'Starosta Wyszkowski' },
-  { nazwa: 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie',
-    organ: 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie' },
+const WYDAWCY = [1453, 1222, 282, 163, 760, 448, 468, 246, 1018, 1121];
+
+/** Sprowadzenie wariantów zapisu do jednego organu. */
+const KANON = [
+  [/burmistrz/i, 'Burmistrz Wyszkowa'],
+  [/rada miejska/i, 'Rada Miejska w Wyszkowie'],
+  [/rada powiatu/i, 'Rada Powiatu Wyszkowskiego'],
+  [/zarząd powiatu/i, 'Zarząd Powiatu Wyszkowskiego'],
+  [/starosta/i, 'Starosta Wyszkowski'],
+  [/komisja bezpieczeństwa/i, 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie'],
 ];
+
+export const kanonicznyOrgan = (nazwa) =>
+  KANON.find(([wz]) => wz.test(nazwa ?? ''))?.[1] ?? nazwa;
 
 const FRAZY = [
   'zaliczenia do kategorii dróg gminnych',
@@ -58,6 +61,7 @@ const FRAZY = [
 const KANDYDACI = [
   '/',
   '/publisher-group',
+  '/publisher/163',
   '/api/search',
   '/api/legalacts',
   '/api/acts',
@@ -118,7 +122,7 @@ async function main() {
     'Parser właściwego pobierania nie jest jeszcze dopasowany do tego serwisu.\n' +
       'Uruchom najpierw: npm run data:edziennik -- --rozpoznanie\n' +
       'i przekaż wynik — dopiszę parsowanie wyników wyszukiwania.\n\n' +
-      `Organy do objęcia: ${ORGANY.map((o) => o.nazwa).join(', ')}\n` +
+      `Wydawcy do objęcia: ${WYDAWCY.join(', ')}\n` +
       `Frazy: ${FRAZY.join('; ')}`
   );
 
@@ -127,7 +131,7 @@ async function main() {
     OUT,
     JSON.stringify(
       { zrodlo: BAZA, pobrano: new Date().toISOString().slice(0, 10),
-        organy: ORGANY, frazy: FRAZY, akty: [] },
+        wydawcy: WYDAWCY, frazy: FRAZY, akty: [] },
       null, 1
     ) + '\n'
   );
