@@ -126,9 +126,13 @@ jako GeoJSON w `jsonb`, żeby baza chodziła na dowolnym darmowym hostingu.
 
 ## Wdrożenie: Vercel + Postgres w chmurze
 
-1. **Baza.** Załóż darmowy projekt na [Neon](https://neon.com) (region
-   `eu-central-1`, blisko). Skopiuj **pooled** connection string — na Neonie host
-   ma sufiks `-pooler`. Alternatywy z darmowym planem: Supabase, Prisma Postgres.
+1. **Baza.** Vercel → Storage → Neon albo Supabase (oba mają darmowy plan
+   i PostGIS). Aplikacja czyta connection string z `DATABASE_URL`,
+   `POSTGRES_URL`, `DATABASE_URL_UNPOOLED`, `POSTGRES_URL_NON_POOLING` lub
+   `POSTGRES_PRISMA_URL`, więc obie integracje działają bez aliasu. Używaj puli
+   połączeń (Neon: host z sufiksem `-pooler`, Supabase: port 6543).
+   Masz już bazę, której chcesz użyć? Ustaw `DB_SCHEMA=drogi` — tabele pójdą
+   do własnego schematu i nic się nie zderzy.
 2. **Projekt.** Zaimportuj to repozytorium na [Vercel](https://vercel.com).
    Framework wykryje się sam (Next.js).
 3. **Zmienna środowiskowa.** W ustawieniach projektu dodaj `DATABASE_URL`

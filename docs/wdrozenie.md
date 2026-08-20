@@ -4,20 +4,40 @@ Całość mieści się w darmowych planach: Vercel Hobby + Neon Free.
 
 ## 1. Baza danych
 
-Polecany **[Neon](https://neon.com)** — plan Free, region `eu-central-1
-(Frankfurt)`, ma PostGIS i `pg_trgm`. Alternatywy z darmowym planem:
-[Supabase](https://supabase.com) (też PostGIS) i
-[Prisma Postgres](https://www.prisma.io/postgres).
+W Vercel Marketplace (Project → Storage) darmowy plan i Postgresa mają:
 
-Po założeniu projektu skopiuj **pooled** connection string — na Neonie host ma
-sufiks `-pooler`:
+| Provider | PostGIS | Uwagi |
+|---|---|---|
+| **Neon** | tak | 0,5 GB, baza usypia po nieaktywności; wstrzykuje `DATABASE_URL` |
+| **Supabase** | tak | 500 MB, projekt pauzowany po tygodniu bezczynności; wstrzykuje `POSTGRES_URL` |
+| **Nile** | nie | Postgres pod multi-tenant |
+| **Prisma Postgres** | nie | limit operacji, nie rozmiaru |
 
+Aplikacja czyta connection string po kolei z `DATABASE_URL`, `POSTGRES_URL`,
+`DATABASE_URL_UNPOOLED`, `POSTGRES_URL_NON_POOLING` i `POSTGRES_PRISMA_URL`,
+więc integracje Neona i Supabase działają bez dopisywania aliasu.
+
+Używaj **puli połączeń** — na Neonie host z sufiksem `-pooler`, na Supabase
+port 6543. Funkcje serverless skalują się w poziomie i bez poolera wyczerpią
+limit połączeń bazy.
+
+### Baza, której już używasz
+
+Nie trzeba zakładać nowej. Ustaw `DB_SCHEMA` na własną nazwę:
+
+```bash
+DB_SCHEMA=drogi DATABASE_URL="postgresql://…" npm run db:migrate
+DB_SCHEMA=drogi DATABASE_URL="postgresql://…" npm run db:seed
 ```
-postgresql://user:haslo@ep-xxxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
-```
 
-Pula jest istotna: funkcje serverless na Vercelu skalują się w poziomie i bez
-poolera wyczerpią limit połączeń bazy.
+Tabele trafią do schematu `drogi`, a `search_path` ustawia się na każdym
+połączeniu, więc nic nie koliduje z tym, co już w bazie jest. Tę samą zmienną
+dodaj w Environment Variables na Vercelu.
+
+`--reset` kasuje wyłącznie schemat docelowy. Skasowania `public` skrypt
+odmawia bez jawnego `--force` — w bazie współdzielonej zabrałoby to cudze
+tabele. Rozszerzenia (`pg_trgm`, `unaccent`, `postgis`) instalują się zawsze
+w `public`, bo są wspólne dla całej bazy.
 
 ### Schemat i dane
 

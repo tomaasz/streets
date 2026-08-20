@@ -4,7 +4,7 @@
 -- z GeoJSON-a. Reszta aplikacji działa bez tego kroku.
 -- =====================================================================
 
-CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;
 
 ALTER TABLE ulica        ADD COLUMN IF NOT EXISTS geom_pg geometry(MultiLineString, 4326);
 ALTER TABLE odcinek_drogi ADD COLUMN IF NOT EXISTS geom_pg geometry(MultiLineString, 4326);

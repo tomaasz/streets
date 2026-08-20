@@ -4,10 +4,9 @@
  * albo do szybkiego sprawdzenia po odświeżeniu danych.
  *   node scripts/raport.mjs > raport.md
  */
-import { polaczenie } from './lib/db.mjs';
+import { polaczenieZeSchematem } from './lib/db.mjs';
 
-const klient = polaczenie();
-await klient.connect();
+const { klient } = await polaczenieZeSchematem();
 
 const q = async (sql, par = []) => (await klient.query(sql, par)).rows;
 const km = (m) => (Number(m ?? 0) / 1000).toFixed(1).replace('.', ',');

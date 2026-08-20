@@ -4,7 +4,7 @@
  * Skrypt jest idempotentny — można go puścić ponownie po odświeżeniu danych.
  */
 import { readFile } from 'node:fs/promises';
-import { polaczenie, czytajCsv } from './lib/db.mjs';
+import { polaczenieZeSchematem, czytajCsv } from './lib/db.mjs';
 import { doMultiLine } from './lib/pl1992.mjs';
 
 const KAT = {
@@ -42,8 +42,8 @@ const slugify = (s) =>
   bezOgonkow(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 async function main() {
-  const klient = polaczenie();
-  await klient.connect();
+  const { klient, nazwa } = await polaczenieZeSchematem();
+  process.stderr.write(`Schemat: ${nazwa}\n`);
   await klient.query('BEGIN');
 
   const [zrodla, zarzadcy, opisy, prg, odc] = await Promise.all([

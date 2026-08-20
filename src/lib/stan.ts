@@ -8,6 +8,7 @@ export type Wynik<T> =
   | { ok: false; blad: string };
 
 const SPODZIEWANE = [
+  'connection stringa',
   'DATABASE_URL',
   'does not exist',
   'nie istnieje',

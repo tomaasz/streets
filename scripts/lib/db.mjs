@@ -1,18 +1,65 @@
 import pg from 'pg';
 
-export function polaczenie() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
+/**
+ * Integracje na Vercelu wstrzykują connection string pod różnymi nazwami:
+ * Neon daje DATABASE_URL, Supabase POSTGRES_URL, część providerów jedno
+ * i drugie. Zamiast zmuszać do ręcznego aliasu, sprawdzamy po kolei.
+ */
+export const NAZWY_ZMIENNYCH = [
+  'DATABASE_URL',
+  'POSTGRES_URL',
+  'DATABASE_URL_UNPOOLED',
+  'POSTGRES_URL_NON_POOLING',
+  'POSTGRES_PRISMA_URL',
+];
+
+export function connectionString() {
+  for (const n of NAZWY_ZMIENNYCH) {
+    const v = process.env[n];
+    if (v) return v;
+  }
+  return null;
+}
+
+/**
+ * Schemat, w którym trzymamy tabele. Domyślnie `public`, ale gdy baza jest
+ * współdzielona z inną aplikacją, wystarczy ustawić DB_SCHEMA=drogi i nic
+ * się nie zderzy.
+ */
+export const schemat = () => process.env.DB_SCHEMA || 'public';
+
+const BEZPIECZNA_NAZWA = /^[a-z_][a-z0-9_]*$/;
+
+export function sprawdzSchemat(nazwa = schemat()) {
+  if (!BEZPIECZNA_NAZWA.test(nazwa)) {
     throw new Error(
-      'Brak DATABASE_URL. Skopiuj .env.example do .env i wpisz connection string z Neona.'
+      `DB_SCHEMA="${nazwa}" — dozwolone są małe litery, cyfry i podkreślenie.`
+    );
+  }
+  return nazwa;
+}
+
+export function polaczenie() {
+  const cs = connectionString();
+  if (!cs) {
+    throw new Error(
+      'Brak connection stringa. Ustaw DATABASE_URL (albo POSTGRES_URL) — ' +
+        'skopiuj .env.example do .env i wpisz dane z panelu bazy.'
     );
   }
   return new pg.Client({
-    connectionString,
-    ssl: connectionString.includes('sslmode=disable')
-      ? false
-      : { rejectUnauthorized: false },
+    connectionString: cs,
+    ssl: cs.includes('sslmode=disable') ? false : { rejectUnauthorized: false },
   });
+}
+
+/** Klient z ustawionym search_path na docelowy schemat. */
+export async function polaczenieZeSchematem() {
+  const nazwa = sprawdzSchemat();
+  const klient = polaczenie();
+  await klient.connect();
+  await klient.query(`SET search_path TO "${nazwa}", public`);
+  return { klient, nazwa };
 }
 
 /** Minimalny parser CSV — obsługuje cudzysłowy i przecinki w polach. */

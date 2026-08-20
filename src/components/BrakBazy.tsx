@@ -1,18 +1,18 @@
 const KROKI = [
   {
-    tytul: 'Załóż darmową bazę Postgres',
+    tytul: 'Podłącz Postgresa',
     tresc:
-      'Na neon.com (plan Free) utwórz projekt w regionie eu-central-1 i skopiuj pooled connection string — host ma sufiks -pooler. Równie dobrze zadziała Supabase albo Prisma Postgres.',
+      'Vercel → Storage → Neon, Supabase, Nile albo Prisma Postgres (wszystkie mają darmowy plan; Neon i Supabase mają też PostGIS). Integracja sama wstrzykuje connection string. Można też podpiąć bazę, której już używasz — patrz niżej.',
   },
   {
-    tytul: 'Dodaj zmienną DATABASE_URL',
+    tytul: 'Sprawdź nazwę zmiennej',
     tresc:
-      'W ustawieniach projektu na Vercelu: Settings → Environment Variables → DATABASE_URL, dla Production, Preview i Development. Po dodaniu zrób redeploy.',
+      'Aplikacja czyta po kolei DATABASE_URL, POSTGRES_URL, DATABASE_URL_UNPOOLED, POSTGRES_URL_NON_POOLING i POSTGRES_PRISMA_URL, więc integracje Neona i Supabase działają bez zmian. Po dodaniu zmiennej zrób redeploy.',
   },
   {
     tytul: 'Załóż schemat i wgraj dane',
     tresc:
-      'Z lokalnej kopii repozytorium: DATABASE_URL="postgresql://…" npm run db:migrate && npm run db:seed',
+      'Z lokalnej kopii repozytorium: DATABASE_URL="postgresql://…" npm run db:migrate && npm run db:seed. Dane źródłowe leżą w katalogu data/, więc trwa to sekundy.',
   },
 ];
 
@@ -21,9 +21,8 @@ export function BrakBazy({ szczegoly }: { szczegoly?: string }) {
     <div className="karta p-6">
       <h1 className="text-lg font-bold">Baza nie jest jeszcze podłączona</h1>
       <p className="mt-2 max-w-[70ch] text-sm text-[var(--tekst-2)]">
-        Aplikacja jest wdrożona, ale nie ma połączenia z Postgresem. Dane
-        źródłowe leżą w repozytorium (<code>data/</code>), więc wypełnienie bazy
-        to trzy kroki:
+        Aplikacja jest wdrożona, ale nie ma połączenia z Postgresem. Wszystkie
+        dane źródłowe są w repozytorium, więc wypełnienie bazy to trzy kroki:
       </p>
 
       <ol className="mt-4 grid gap-3">
@@ -39,6 +38,14 @@ export function BrakBazy({ szczegoly }: { szczegoly?: string }) {
           </li>
         ))}
       </ol>
+
+      <p className="mt-5 max-w-[70ch] text-sm text-[var(--tekst-2)]">
+        <strong className="text-[var(--tekst)]">Baza współdzielona z innym projektem?</strong>{' '}
+        Ustaw <code>DB_SCHEMA=drogi</code> — tabele trafią do własnego schematu
+        i nic się nie zderzy. Przy takim ustawieniu <code>db:migrate --reset</code>{' '}
+        kasuje wyłącznie ten schemat; skasowania <code>public</code> skrypt
+        odmawia bez <code>--force</code>.
+      </p>
 
       {szczegoly ? (
         <p className="mt-5 text-xs text-[var(--tekst-2)]">

@@ -11,8 +11,8 @@ CREATE INDEX IF NOT EXISTS idx_odcinek_zarzadca  ON odcinek_drogi (zarzadca_id);
 
 -- Wyszukiwarka: unaccent + trigram, żeby "kosciuszki" znajdowało
 -- "Tadeusza Kościuszki".
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pg_trgm  SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS unaccent SCHEMA public;
 
 -- unaccent() jest STABLE, więc nie wchodzi wprost do indeksu — opakowujemy.
 CREATE OR REPLACE FUNCTION bez_ogonkow(txt text)
