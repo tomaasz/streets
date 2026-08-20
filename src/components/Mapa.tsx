@@ -74,28 +74,31 @@ export function Mapa({
         role="img"
         aria-label="Przebieg dróg"
       >
-        {warstwy.map((w, i) =>
-          linie(w.geom).map((l, j) => (
-            <path
-              key={`${i}-${j}`}
-              d={
-                'M' +
-                l.map((p) => `${x(p[0]).toFixed(6)},${y(p[1]).toFixed(6)}`).join('L')
-              }
-              fill="none"
-              stroke={
-                w.kategoria
-                  ? (KOLORY_KATEGORII[w.kategoria] ?? 'var(--tekst-2)')
-                  : 'var(--akcent)'
-              }
-              strokeWidth={(w.grubosc ?? 2.5) * skala}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {w.etykieta ? <title>{w.etykieta}</title> : null}
-            </path>
-          ))
-        )}
+        {warstwy.map((w, i) => (
+          <g
+            key={i}
+            fill="none"
+            stroke={
+              w.kategoria
+                ? (KOLORY_KATEGORII[w.kategoria] ?? 'var(--tekst-2)')
+                : 'var(--linia)'
+            }
+            strokeWidth={(w.grubosc ?? 2.5) * skala}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {w.etykieta ? <title>{w.etykieta}</title> : null}
+            {linie(w.geom).map((l, j) => (
+              <path
+                key={j}
+                d={
+                  'M' +
+                  l.map((p) => `${x(p[0]).toFixed(6)},${y(p[1]).toFixed(6)}`).join('L')
+                }
+              />
+            ))}
+          </g>
+        ))}
       </svg>
     </div>
   );

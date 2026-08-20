@@ -12,11 +12,17 @@
  * Wynik: data/odcinki.json — wsad dla scripts/seed.mjs.
  */
 import { readFile, writeFile } from 'node:fs/promises';
+import { doMultiLine } from './lib/pl1992.mjs';
 
 const TOLERANCJA_M = Number(process.env.TOLERANCJA_M ?? 25);
 const KROK_M = 15;
 const KOMORKA_M = 50;
 const MIN_UDZIAL = 0.5;
+// Przy skrzyżowaniu oś drogi poprzecznej przechodzi w promieniu tolerancji
+// od osi ulicy i bez tego progu wchodzi do bazy jako 4-metrowy "odcinek".
+// Odrzucamy więc próbki, których kierunek rozjeżdża się z kierunkiem ulicy.
+const MAX_KAT_ST = Number(process.env.MAX_KAT_ST ?? 35);
+const MIN_DLUGOSC_M = Number(process.env.MIN_DLUGOSC_M ?? 15);
 
 const PRG = new URL('../data/raw/prg-ulice.json', import.meta.url);
 const BDOT = new URL('../data/raw/bdot-drogi.json', import.meta.url);
@@ -32,27 +38,42 @@ function ustawProjekcje(punkty) {
   mLon = 111320 * Math.cos((lat0 * Math.PI) / 180);
 }
 
-/** Dogęszcza linię tak, by odstęp między punktami nie przekraczał kroku. */
+/**
+ * Dogęszcza linię tak, by odstęp między punktami nie przekraczał kroku,
+ * i dokleja do każdego punktu lokalny kierunek odcinka jako [x, y, kat].
+ * Kąt liczymy modulo 180 stopni — zwrot linii jest nieistotny.
+ */
 function dogesc(linia, krok = KROK_M) {
   const out = [];
-  for (let i = 0; i < linia.length; i++) {
-    out.push(linia[i]);
-    if (i + 1 === linia.length) break;
+  for (let i = 0; i + 1 < linia.length; i++) {
     const [x1, y1] = linia[i];
     const [x2, y2] = linia[i + 1];
     const d = Math.hypot(x2 - x1, y2 - y1);
-    const n = Math.floor(d / krok);
-    for (let k = 1; k <= n; k++) {
-      out.push([x1 + ((x2 - x1) * k) / (n + 1), y1 + ((y2 - y1) * k) / (n + 1)]);
+    if (d === 0) continue;
+    const kat = ((Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI + 180) % 180;
+    const n = Math.max(1, Math.round(d / krok));
+    for (let k = 0; k < n; k++) {
+      out.push([x1 + ((x2 - x1) * k) / n, y1 + ((y2 - y1) * k) / n, kat]);
     }
   }
+  const ost = linia.at(-1);
+  if (ost && out.length) out.push([ost[0], ost[1], out.at(-1)[2]]);
   return out;
+}
+
+/** Różnica kierunków dwóch linii, w stopniach, z zakresu 0-90. */
+function roznicaKatow(a, b) {
+  const d = Math.abs(a - b) % 180;
+  return d > 90 ? 180 - d : d;
 }
 
 const klucz = (x, y) =>
   `${Math.floor(x / KOMORKA_M)}:${Math.floor(y / KOMORKA_M)}`;
 
 function main(prg, bdot) {
+  for (const u of prg.ulice) u.geom = doMultiLine(u.geom);
+  for (const d of bdot.drogi) d.geom = doMultiLine(d.geom);
+
   const wszystkie = [
     ...prg.ulice.flatMap((u) => u.geom?.coordinates?.flat() ?? []),
     ...bdot.drogi.flatMap((d) => d.geom.coordinates.flat()),
@@ -63,11 +84,11 @@ function main(prg, bdot) {
   const siatka = new Map();
   prg.ulice.forEach((u, idx) => {
     for (const linia of u.geom?.coordinates ?? []) {
-      for (const p of dogesc(linia.map(rzut))) {
-        const k = klucz(p[0], p[1]);
+      for (const [x, y, kat] of dogesc(linia.map(rzut))) {
+        const k = klucz(x, y);
         let kubelek = siatka.get(k);
         if (!kubelek) siatka.set(k, (kubelek = []));
-        kubelek.push([p[0], p[1], idx]);
+        kubelek.push([x, y, idx, kat]);
       }
     }
   });
@@ -76,12 +97,13 @@ function main(prg, bdot) {
   );
 
   const zasieg = Math.ceil(TOLERANCJA_M / KOMORKA_M);
-  function najblizszaUlica(x, y) {
+  function najblizszaUlica(x, y, kat) {
     let best = null, bestD = TOLERANCJA_M;
     const cx = Math.floor(x / KOMORKA_M), cy = Math.floor(y / KOMORKA_M);
     for (let dx = -zasieg; dx <= zasieg; dx++) {
       for (let dy = -zasieg; dy <= zasieg; dy++) {
-        for (const [px, py, idx] of siatka.get(`${cx + dx}:${cy + dy}`) ?? []) {
+        for (const [px, py, idx, pkat] of siatka.get(`${cx + dx}:${cy + dy}`) ?? []) {
+          if (roznicaKatow(kat, pkat) > MAX_KAT_ST) continue;
           const d = Math.hypot(px - x, py - y);
           if (d < bestD) { bestD = d; best = idx; }
         }
@@ -96,9 +118,9 @@ function main(prg, bdot) {
     const glosy = new Map();
     let probek = 0;
     for (const linia of d.geom.coordinates) {
-      for (const p of dogesc(linia.map(rzut))) {
+      for (const [x, y, kat] of dogesc(linia.map(rzut))) {
         probek++;
-        const idx = najblizszaUlica(p[0], p[1]);
+        const idx = najblizszaUlica(x, y, kat);
         if (idx !== null) glosy.set(idx, (glosy.get(idx) ?? 0) + 1);
       }
     }
@@ -137,7 +159,11 @@ function main(prg, bdot) {
     rec.czesci.push(...d.geom.coordinates);
   }
 
-  const odcinki = [...grupy.values()].map((r) => ({
+  const odcinki = [...grupy.values()]
+    // Grupa krótsza niż tolerancja dopasowania nie niesie informacji —
+    // to resztka po skrzyżowaniu, nie odcinek drogi.
+    .filter((r) => r.ulica_idx === null || r.dlugosc_m >= MIN_DLUGOSC_M)
+    .map((r) => ({
     ulica: r.ulica_idx === null ? null : {
       simc: prg.ulice[r.ulica_idx].simc,
       sym_ul: prg.ulice[r.ulica_idx].sym_ul,

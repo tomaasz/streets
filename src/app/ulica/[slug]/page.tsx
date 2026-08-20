@@ -45,12 +45,21 @@ export default async function Strona({
           Przebieg
         </h2>
         <Mapa
-          warstwy={odcinki.map((o) => ({
+          warstwy={[
+            // oś ulicy z PRG pod spodem — widać ją tam, gdzie żaden
+            // odcinek z BDOT się nie dopasował
+            {
+              geom: u.geom,
+              grubosc: 5,
+              etykieta: `${u.nazwa_pelna} — oś ulicy z PRG`,
+            },
+            ...odcinki.map((o) => ({
             geom: o.geom,
             kategoria: o.kategoria,
             etykieta: `${o.kategoria}${o.nr_drogi ? ` nr ${o.nr_drogi}` : ''} — ${o.zarzadca ?? 'zarządca nieustalony'}`,
             grubosc: 3,
-          }))}
+            })),
+          ]}
         />
       </section>
 

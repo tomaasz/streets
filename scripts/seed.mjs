@@ -5,6 +5,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { polaczenie, czytajCsv } from './lib/db.mjs';
+import { doMultiLine } from './lib/pl1992.mjs';
 
 const KAT = {
   krajowa: 'krajowa',
@@ -104,7 +105,7 @@ async function main() {
          aktualizacja = EXCLUDED.aktualizacja
        RETURNING id`,
       [u.simc, u.sym_ul, u.terc_gmina, u.miejscowosc, cecha, nazwa, slug,
-       u.dlugosc_m, u.x_2180, u.y_2180, JSON.stringify(u.geom), prg.pobrano]
+       u.dlugosc_m, u.x_2180, u.y_2180, JSON.stringify(doMultiLine(u.geom)), prg.pobrano]
     );
     idUlicy.set(`${u.simc}:${u.sym_ul}`, rows[0].id);
   }
@@ -160,7 +161,7 @@ async function main() {
        idZarzadcy.get(ZARZADCA_DLA[kat]) ?? null,
        o.dlugosc_m, o.nawierzchnia,
        o.nazwa_drogi ?? (o.ulica ? null : 'odcinek poza nazwaną ulicą'),
-       JSON.stringify(o.geom)]
+       JSON.stringify(doMultiLine(o.geom))]
     );
     wstawione++;
   }

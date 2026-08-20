@@ -84,7 +84,10 @@ export function wktToGeoJson(wkt) {
     return { type: 'Point', coordinates: pair(body.replace(/[()]/g, '')) };
   }
   if (type === 'LINESTRING') {
-    return { type: 'LineString', coordinates: ring(body.replace(/[()]/g, '')) };
+    return {
+      type: 'MultiLineString',
+      coordinates: [ring(body.replace(/[()]/g, ''))],
+    };
   }
   if (type === 'MULTILINESTRING') {
     const parts = [...body.matchAll(/\(([^()]*)\)/g)].map((x) => ring(x[1]));
@@ -120,4 +123,18 @@ export function wktLengthMeters(wkt) {
     }
   }
   return Math.round(total);
+}
+
+/**
+ * Sprowadza geometrię liniową do MultiLineString. PRG zwraca raz LINESTRING,
+ * raz MULTILINESTRING — bez normalizacji `coordinates` znaczy raz listę linii,
+ * a raz listę punktów, i każdy konsument tej geometrii wykłada się inaczej.
+ */
+export function doMultiLine(geom) {
+  if (!geom) return null;
+  if (geom.type === 'MultiLineString') return geom;
+  if (geom.type === 'LineString') {
+    return { type: 'MultiLineString', coordinates: [geom.coordinates] };
+  }
+  return null;
 }
