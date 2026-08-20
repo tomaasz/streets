@@ -18,7 +18,8 @@
     "data:all": "npm run data:prg && npm run data:bdot && npm run data:build",
     "raport": "node scripts/raport.mjs",
     "db:setup": "node scripts/migrate.mjs && node scripts/seed.mjs && node scripts/raport.mjs",
-    "data:akty": "node scripts/harvest-akty-bip.mjs"
+    "data:akty": "node scripts/harvest-akty-bip.mjs",
+    "data:edziennik": "node scripts/harvest-edziennik.mjs"
   },
   "dependencies": {
     "next": "16.3.1",

@@ -13,7 +13,7 @@
  ],
  "pobrano": "2026-08-20",
  "stron_przeszukanych": 284,
- "liczba_aktow": 18,
+ "liczba_aktow": 21,
  "akty": [
   {
    "organ": "Rada Miejska w Wyszkowie",
@@ -136,6 +136,26 @@
    "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=429"
   },
   {
+   "organ": "Burmistrz Wyszkowa",
+   "rodzaj": "zarządzenie",
+   "numer": "251/2016",
+   "rok": 2016,
+   "data_podjecia": null,
+   "tytul": "w sprawie ustalenia Regulaminu dowozu uczniów do placówek oświatowych, dla których organem prowadzącym jest Gmina Wyszków",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=12690"
+  },
+  {
+   "organ": "Burmistrz Wyszkowa",
+   "rodzaj": "zarządzenie",
+   "numer": "44/2022",
+   "rok": 2022,
+   "data_podjecia": null,
+   "tytul": "w sprawie powołania Komisji ds. oceny zgłoszonych prac i wyłonienia laureatów w poszczególnych kategoriach, w ramach projektu pn. „Łagodzenie zmian klimatu i adaptacja do ich skutków w Wyszkowie”",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=25478"
+  },
+  {
    "organ": "Rada Miejska w Wyszkowie",
    "rodzaj": "uchwała",
    "numer": "XXXVIII/40/2005",
@@ -194,6 +214,16 @@
    "tytul": "w sprawie nadania nazwy ulicy",
    "url_pdf": null,
    "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=141"
+  },
+  {
+   "organ": "Burmistrz Wyszkowa",
+   "rodzaj": "zarządzenie",
+   "numer": "20/2026",
+   "rok": 2026,
+   "data_podjecia": "2025-10-15",
+   "tytul": "w sprawie powołania Zespołu Projektowego do realizacji zadania pn.: „Modernizacja ulicy Gen. Wł. Sikorskiego w Wyszkowie”",
+   "url_pdf": null,
+   "url_zrodla": "https://bip.wyszkow.pl/index.php?cmd=zawartosc&opt=pokaz&id=33309"
   }
  ]
 }
