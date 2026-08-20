@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --tlo: #ffffff;
+  --tlo-2: #f6f7f9;
+  --tekst: #16181d;
+  --tekst-2: #5b6270;
+  --linia: #e2e5ea;
+  --akcent: #1f4b8e;
+
+  --kat-krajowa: #c0392b;
+  --kat-wojewodzka: #d98324;
+  --kat-powiatowa: #b08800;
+  --kat-gminna: #2f7d4f;
+  --kat-wewnetrzna: #6b7280;
+  --kat-nieustalona: #8b5cf6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tlo: #101216;
+    --tlo-2: #171a20;
+    --tekst: #e8eaee;
+    --tekst-2: #9aa2b1;
+    --linia: #262b34;
+    --akcent: #7aa5e8;
+
+    --kat-krajowa: #ef6b5c;
+    --kat-wojewodzka: #e9a13b;
+    --kat-powiatowa: #d9b800;
+    --kat-gminna: #4fbe80;
+    --kat-wewnetrzna: #98a1b0;
+    --kat-nieustalona: #a78bfa;
+  }
+}
+
+@theme inline {
+  --color-tlo: var(--tlo);
+  --color-tlo-2: var(--tlo-2);
+  --color-tekst: var(--tekst);
+  --color-tekst-2: var(--tekst-2);
+  --color-linia: var(--linia);
+  --color-akcent: var(--akcent);
+}
+
+html { color-scheme: light dark; }
+
+body {
+  background: var(--tlo);
+  color: var(--tekst);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-feature-settings: "tnum" 1;
+}
+
+a { color: var(--akcent); }
+
+.plakietka {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  border: 1px solid currentColor;
+}
+
+.karta {
+  background: var(--tlo-2);
+  border: 1px solid var(--linia);
+  border-radius: 0.6rem;
+}
+
+table.dane { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+table.dane th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--tekst-2);
+  border-bottom: 1px solid var(--linia);
+  padding: 0.5rem 0.6rem;
+  white-space: nowrap;
+}
+table.dane td {
+  border-bottom: 1px solid var(--linia);
+  padding: 0.5rem 0.6rem;
+  vertical-align: top;
+}
+table.dane tr:hover td { background: var(--tlo-2); }
+
+.przewijalne { overflow-x: auto; }

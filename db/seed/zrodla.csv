@@ -1,0 +1,10 @@
+kod,nazwa,gestor,url,licencja,domyslna_pewnosc,opis
+prg,"Państwowy Rejestr Granic — warstwa ulic","GUGiK","https://services.gugik.gov.pl/uug/","dane otwarte, bez opłat",2,"Nazwy ulic z identyfikatorami TERYT (SIMC, SYM_UL) i osią ulicy. Pobierane przez Usługę Uniwersalnego Wyszukiwania."
+bdot10k,"Baza Danych Obiektów Topograficznych 1:10000, warstwa OT_SKDR_L","GUGiK","https://opendata.geoportal.gov.pl/bdot10k/","dane otwarte, bez opłat",1,"Osie dróg z kategorią zarządzania, numerem drogi, klasą i nawierzchnią. Aktualizowana powiatami — traktować jako szkielet do weryfikacji, nie jako źródło prawdy."
+uldk,"Usługa Lokalizacji Działek Katastralnych","GUGiK","https://uldk.gugik.gov.pl/","dane otwarte, bez opłat",2,"Granice gmin i obrębów ewidencyjnych, geometria działek po identyfikatorze."
+bip-gmina,"BIP Gminy Wyszków","Urząd Miejski w Wyszkowie","https://bip.wyszkow.pl/","informacja publiczna",2,"Wykazy dróg, uchwały Rady Miejskiej, ogłoszenia."
+bip-powiat,"BIP Powiatu Wyszkowskiego","Starostwo Powiatowe w Wyszkowie","https://bip.powiat-wyszkowski.pl/","informacja publiczna",2,"Uchwały o przebiegu dróg powiatowych, mapa dróg powiatowych."
+uchwala,"Akt prawa miejscowego","Rada Miejska / Rada Powiatu / Zarząd Województwa","https://edziennik.mazowieckie.pl/","informacja publiczna",3,"Uchwała o zaliczeniu drogi do kategorii i o jej przebiegu. Źródło rozstrzygające."
+ewidencja-drog,"Ewidencja dróg zarządcy","zarządca drogi",,"wewnętrzna",3,"Książka drogi, dziennik objazdu, mapa techniczno-eksploatacyjna — rozporządzenie MI z 16.02.2005 (Dz.U. 2005 nr 67 poz. 582)."
+egib,"Ewidencja gruntów i budynków","Starostwo Powiatowe w Wyszkowie","https://wyszkowski.e-mapa.net/","na wniosek",2,"Właściciel działki drogowej — rozstrzyga o zarządcy drogi wewnętrznej (art. 8 ust. 2 udp)."
+weryfikacja-terenowa,"Weryfikacja w terenie","operator bazy",,,3,"Objazd, zdjęcie, notatka służbowa."

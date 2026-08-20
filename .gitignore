@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Lokalne sekrety
+.env
+.env.local
+.env*.local
+
+# Paczki źródłowe (BDOT10k ma ~45 MB) — pobierane skryptem, nie trzymamy w repo
+data/cache/

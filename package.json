@@ -1,0 +1,38 @@
+{
+  "name": "drogi-wyszkow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baza dróg i ulic gminy Wyszków wraz z zarządcami",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed": "node scripts/seed.mjs",
+    "db:reset": "node scripts/migrate.mjs --reset && node scripts/seed.mjs",
+    "data:prg": "node scripts/harvest-prg.mjs",
+    "data:bdot": "node scripts/harvest-bdot.mjs",
+    "data:build": "node scripts/build-odcinki.mjs",
+    "data:all": "npm run data:prg && npm run data:bdot && npm run data:build"
+  },
+  "dependencies": {
+    "next": "16.3.1",
+    "pg": "8.16.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.13",
+    "@types/node": "22.15.3",
+    "@types/pg": "8.15.5",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "tailwindcss": "4.1.13",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
