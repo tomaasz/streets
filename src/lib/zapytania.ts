@@ -132,12 +132,21 @@ export async function zarzadcy() {
   );
 }
 
-export async function braki(limit = 500) {
+export async function braki(limit = 300) {
   return zapytaj<{
     id: number; slug: string; miejscowosc: string; nazwa_pelna: string;
-    dlugosc_m: number | null; problem: string;
+    dlugosc_m: number | null; problem: string; waga: number;
   }>(
-    `SELECT * FROM v_braki ORDER BY dlugosc_m DESC NULLS LAST LIMIT ${limit}`
+    `SELECT * FROM v_braki
+      ORDER BY waga, dlugosc_m DESC NULLS LAST
+      LIMIT ${limit}`
+  );
+}
+
+export async function brakiPodsumowanie() {
+  return zapytaj<{ problem: string; waga: number; ile: string; dlugosc_m: string | null }>(
+    `SELECT problem, waga, COUNT(*) AS ile, SUM(dlugosc_m) AS dlugosc_m
+       FROM v_braki GROUP BY problem, waga ORDER BY waga`
   );
 }
 

@@ -80,7 +80,14 @@ SELECT
     WHEN BOOL_OR(o.kategoria = 'nieustalona')               THEN 'nieustalona kategoria'
     WHEN BOOL_OR(o.zarzadca_id IS NULL)                     THEN 'brak zarządcy'
     WHEN MIN(o.pewnosc) = 1                                 THEN 'do weryfikacji (import maszynowy)'
-  END AS problem
+  END AS problem,
+  -- waga sortuje robotę: najpierw dziury, na końcu masowa weryfikacja
+  CASE
+    WHEN COUNT(o.id) = 0                                    THEN 1
+    WHEN BOOL_OR(o.kategoria = 'nieustalona')               THEN 2
+    WHEN BOOL_OR(o.zarzadca_id IS NULL)                     THEN 3
+    ELSE                                                         4
+  END AS waga
 FROM ulica u
 LEFT JOIN odcinek_drogi o ON o.ulica_id = u.id
 GROUP BY u.id

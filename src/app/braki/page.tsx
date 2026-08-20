@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { braki } from '@/lib/zapytania';
+import { braki, brakiPodsumowanie } from '@/lib/zapytania';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
@@ -18,13 +18,9 @@ const WYJASNIENIA: Record<string, string> = {
 };
 
 export default async function Strona() {
-  const wynik = await zBaza(() => braki());
+  const wynik = await zBaza(() => Promise.all([braki(), brakiPodsumowanie()]));
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
-  const lista = wynik.dane;
-  const wgProblemu = lista.reduce<Record<string, number>>((acc, r) => {
-    acc[r.problem] = (acc[r.problem] ?? 0) + 1;
-    return acc;
-  }, {});
+  const [lista, podsumowanie] = wynik.dane;
 
   return (
     <>
@@ -36,20 +32,27 @@ export default async function Strona() {
       </p>
 
       <div className="mt-5 grid gap-3">
-        {Object.entries(wgProblemu).map(([problem, ile]) => (
-          <div key={problem} className="karta p-3">
-            <div className="flex items-baseline gap-3">
-              <strong>{problem}</strong>
-              <span className="text-sm text-[var(--tekst-2)]">{ile} ulic</span>
+        {podsumowanie.map((p) => (
+          <div key={p.problem} className="karta p-3">
+            <div className="flex flex-wrap items-baseline gap-3">
+              <strong>{p.problem}</strong>
+              <span className="text-sm text-[var(--tekst-2)]">
+                {p.ile} ulic · {metryNaKm(Number(p.dlugosc_m))}
+              </span>
             </div>
             <p className="mt-1 text-sm text-[var(--tekst-2)]">
-              {WYJASNIENIA[problem]}
+              {WYJASNIENIA[p.problem]}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="przewijalne mt-6">
+      <p className="mt-6 text-sm text-[var(--tekst-2)]">
+        Poniżej {lista.length} pozycji, od najpilniejszych: najpierw ulice bez
+        żadnego odcinka, na końcu masowa weryfikacja importu.
+      </p>
+
+      <div className="przewijalne mt-2">
         <table className="dane">
           <thead>
             <tr>
