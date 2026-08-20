@@ -62,6 +62,7 @@ const KANDYDACI = [
   '/',
   '/publisher-group',
   '/publisher/163',
+  '/keywords-condensed',
   '/api/search',
   '/api/legalacts',
   '/api/acts',
