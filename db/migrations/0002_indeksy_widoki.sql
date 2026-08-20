@@ -1,5 +1,10 @@
 -- =====================================================================
 -- Indeksy, wyszukiwanie pełnotekstowe i widoki raportowe
+--
+-- Widoki są najpierw kasowane, a potem tworzone od nowa. CREATE OR REPLACE
+-- VIEW nie umie usuwać ani przemianowywać kolumn, więc gdy późniejsza
+-- migracja zmieni kształt widoku, powtórny przebieg tego pliku kończy się
+-- błędem 42P16.
 -- =====================================================================
 
 CREATE INDEX IF NOT EXISTS idx_ulica_miejscowosc ON ulica (miejscowosc);
@@ -27,7 +32,8 @@ CREATE INDEX IF NOT EXISTS idx_ulica_szukaj
 -- Ulica z dwoma zarządcami ma tu dwa wpisy w tablicy — to jest ten
 -- przypadek, który psuje płaski model "jedna ulica = jeden zarządca".
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_ulica_zarzadcy AS
+DROP VIEW IF EXISTS v_ulica_zarzadcy;
+CREATE VIEW v_ulica_zarzadcy AS
 SELECT
   u.id,
   u.slug,
@@ -68,7 +74,8 @@ GROUP BY u.id;
 -- ---------------------------------------------------------------------
 -- Raport kompletności — lista roboty do domknięcia.
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_braki AS
+DROP VIEW IF EXISTS v_braki;
+CREATE VIEW v_braki AS
 SELECT
   u.id,
   u.slug,
@@ -97,7 +104,8 @@ HAVING COUNT(o.id) = 0
     OR MIN(o.pewnosc) = 1;
 
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_statystyki_kategorii AS
+DROP VIEW IF EXISTS v_statystyki_kategorii;
+CREATE VIEW v_statystyki_kategorii AS
 SELECT
   o.kategoria::text            AS kategoria,
   z.nazwa                      AS zarzadca,
