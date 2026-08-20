@@ -15,7 +15,8 @@
     "data:prg": "node scripts/harvest-prg.mjs",
     "data:bdot": "node scripts/harvest-bdot.mjs",
     "data:build": "node scripts/build-odcinki.mjs",
-    "data:all": "npm run data:prg && npm run data:bdot && npm run data:build"
+    "data:all": "npm run data:prg && npm run data:bdot && npm run data:build",
+    "raport": "node scripts/raport.mjs"
   },
   "dependencies": {
     "next": "16.3.1",

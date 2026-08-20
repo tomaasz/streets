@@ -15,7 +15,7 @@ type Wiersz = {
 function warunki(f: FiltryUlic) {
   const gdzie: string[] = [];
   const par: unknown[] = [];
-  if (f.q) { par.push(`%${f.q}%`); gdzie.push(`bez_ogonkow(u.nazwa) LIKE bez_ogonkow($${par.length})`); }
+  if (f.q) { par.push(`%${f.q}%`); gdzie.push(`bez_ogonkow(u.nazwa_pelna) LIKE bez_ogonkow($${par.length})`); }
   if (f.kategoria) { par.push(f.kategoria); gdzie.push(`o.kategoria::text = $${par.length}`); }
   if (f.miejscowosc) { par.push(f.miejscowosc); gdzie.push(`u.miejscowosc = $${par.length}`); }
   if (f.zarzadca) { par.push(f.zarzadca); gdzie.push(`z.kod = $${par.length}`); }
