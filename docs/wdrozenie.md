@@ -68,7 +68,9 @@ npm install
 DATABASE_URL="postgresql://…" DB_SCHEMA=drogi npm run db:setup
 ```
 
-`db:setup` to migracja, wsad i raport w jednym. Osobno:
+`db:setup` to migracja, wsad i raport w jednym. Wsad idzie do bazy paczkami
+po kilkaset wierszy w jednym zapytaniu, więc przez sieć trwa kilkanaście
+sekund, a nie kwadrans. Osobno:
 
 ```bash
 DATABASE_URL="postgresql://…" npm run db:migrate
