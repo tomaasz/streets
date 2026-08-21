@@ -1,0 +1,34 @@
+[Unit]
+Description=Odświeżenie bazy dróg gminy Wyszków (PRG, BDOT10k, BIP, uchwały)
+Documentation=file:%h/projekty/streets/deploy/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projekty/streets
+
+# Sekrety siedzą w pliku 0600, nie w tej jednostce.
+# Plik zawiera DATABASE_URL (pooled, Neon) i DB_SCHEMA=drogi.
+EnvironmentFile=%h/.config/drogi/aktualizacja.env
+
+ExecStart=%h/projekty/streets/deploy/odswiezenie.sh
+
+# data:prg przemiata usługę GUGiK i potrafi zejść grubo ponad godzinę
+TimeoutStartSec=4h
+Nice=10
+IOSchedulingClass=idle
+
+# nic poniżej nie jest potrzebne temu zadaniu
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/projekty/streets/data
+ReadWritePaths=%h/projekty/streets/node_modules
+ReadWritePaths=%h/logs/drogi
+ReadWritePaths=%h/.local/share/drogi
+ReadWritePaths=%h/.npm
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true

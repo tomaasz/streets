@@ -1,0 +1,13 @@
+[Unit]
+Description=Cotygodniowe odswiezenie bazy drog gminy Wyszkow
+
+[Timer]
+OnCalendar=Mon 03:30
+# rozrzut, zeby nie uderzac w GUGiK co do sekundy
+RandomizedDelaySec=20m
+# jesli serwer byl w poniedzialek wylaczony, zadanie pojdzie po starcie
+Persistent=true
+Unit=drogi-odswiezenie.service
+
+[Install]
+WantedBy=timers.target

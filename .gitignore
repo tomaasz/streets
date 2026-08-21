@@ -15,3 +15,7 @@ data/cache/
 
 # Zrodlowe PDF-y uchwal — pobierane z e-dziennika, nie trzymamy w repo
 data/uchwaly/
+
+# Python — tylko scripts/pdf/ i deploy/ maja skrypty pythonowe
+__pycache__/
+*.pyc
