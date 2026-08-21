@@ -22,12 +22,12 @@ import { czytajXlsx, dataZSeriala } from './lib/xlsx.mjs';
 const KATALOG = new URL('../data/edziennik/', import.meta.url);
 const OUT = new URL('../data/raw/akty-edziennik.json', import.meta.url);
 
-// Interesują nas akty o drogach, ulicach i nazewnictwie. Wzorzec pracuje na
-// tytule przepuszczonym przez bezOgonkow(), bo inaczej odmiana wycina to,
-// czego szukamy: „drodze” nie zawiera „drog”, a „dróg” — po ogonku w środku
-// — też nie. Uchwały „w sprawie nadania nazwy drodze wewnętrznej” to
-// większość tego, co gmina publikuje w dzienniku.
-const TEMAT = /(drog|drodz|ulic|rond|skwer|\bplac\w*)/;
+// Interesują nas akty o drogach, ulicach i nazewnictwie. Odmiana musi być
+// w tym wzorcu widoczna wprost: „drodze” nie zawiera „drog”, a „dróg” ma
+// ogonek w środku. Uchwały „w sprawie nadania nazwy drodze wewnętrznej” to
+// większość tego, co gmina publikuje w dzienniku, i wcześniej przepadały.
+// Ten sam wzorzec siedzi w scripts/lib/akty.mjs i w edziennik-samodzielny.mjs.
+const TEMAT = /(dr[oó]g|drodz|ulic|rond|skwer|\bplac\w*)/i;
 
 // Tytuł w eksporcie e-dziennika nazywa organ w dopełniaczu („Uchwała …
 // Rady Miejskiej w Wyszkowie”), a BIP w mianowniku („Rada Miejska”). Bez
@@ -137,7 +137,7 @@ function zPliku(nazwa, wiersze) {
     const tytul = (w[kol.tytul] ?? '').replace(/\s+/g, ' ').trim();
     if (!tytul) continue;
     wszystkich++;
-    if (!TEMAT.test(bezOgonkow(tytul))) continue;
+    if (!TEMAT.test(tytul)) continue;
 
     // Rodzaj, numer i organ bywają w osobnych kolumnach albo w jednej
     // komórce razem z tytułem.

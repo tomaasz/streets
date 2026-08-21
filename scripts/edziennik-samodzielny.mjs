@@ -30,15 +30,15 @@ const plik = argi.includes('--plik') ? argi[argi.indexOf('--plik') + 1] : null;
 const WYDAWCY = [1453, 1222, 282, 163, 760, 448, 468, 246, 1018, 1121];
 
 const TEMAT =
-  /(drog|ulic|rond|skwer|\bplac\b|kategori\w+ dróg|nazw\w+ (ulic|rond|skwer|plac))/i;
+  /(dr[oó]g|drodz|ulic|rond|skwer|\bplac\w*)/i;
 
 const KANON = [
-  [/burmistrz/i, 'Burmistrz Wyszkowa'],
-  [/rada miejska/i, 'Rada Miejska w Wyszkowie'],
-  [/rada powiatu/i, 'Rada Powiatu Wyszkowskiego'],
-  [/zarząd powiatu/i, 'Zarząd Powiatu Wyszkowskiego'],
-  [/starosta/i, 'Starosta Wyszkowski'],
-  [/komisja bezpieczeństwa/i, 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie'],
+  [/burmistrz\w*/i, 'Burmistrz Wyszkowa'],
+  [/rad\w*\s+miejsk\w*/i, 'Rada Miejska w Wyszkowie'],
+  [/rad\w*\s+powiatu/i, 'Rada Powiatu Wyszkowskiego'],
+  [/zarząd\w*\s+powiatu/i, 'Zarząd Powiatu Wyszkowskiego'],
+  [/starost\w*/i, 'Starosta Wyszkowski'],
+  [/komisj\w*\s+bezpieczeństwa/i, 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie'],
 ];
 const organ = (n) => KANON.find(([w]) => w.test(n ?? ''))?.[1] ?? (n || 'nieustalony');
 
