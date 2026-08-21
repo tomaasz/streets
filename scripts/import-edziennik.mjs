@@ -22,17 +22,24 @@ import { czytajXlsx, dataZSeriala } from './lib/xlsx.mjs';
 const KATALOG = new URL('../data/edziennik/', import.meta.url);
 const OUT = new URL('../data/raw/akty-edziennik.json', import.meta.url);
 
-// Interesują nas akty o drogach, ulicach i nazewnictwie.
-const TEMAT =
-  /(drog|ulic|rond|skwer|\bplac\b|kategori\w+ dróg|nazw\w+ (ulic|rond|skwer|plac))/i;
+// Interesują nas akty o drogach, ulicach i nazewnictwie. Wzorzec pracuje na
+// tytule przepuszczonym przez bezOgonkow(), bo inaczej odmiana wycina to,
+// czego szukamy: „drodze” nie zawiera „drog”, a „dróg” — po ogonku w środku
+// — też nie. Uchwały „w sprawie nadania nazwy drodze wewnętrznej” to
+// większość tego, co gmina publikuje w dzienniku.
+const TEMAT = /(drog|drodz|ulic|rond|skwer|\bplac\w*)/;
 
+// Tytuł w eksporcie e-dziennika nazywa organ w dopełniaczu („Uchwała …
+// Rady Miejskiej w Wyszkowie”), a BIP w mianowniku („Rada Miejska”). Bez
+// wzorców odpornych na odmianę ten sam akt wchodzi do bazy dwa razy —
+// klucz to (rodzaj, numer, organ).
 const KANON = [
-  [/burmistrz/i, 'Burmistrz Wyszkowa'],
-  [/rada miejska/i, 'Rada Miejska w Wyszkowie'],
-  [/rada powiatu/i, 'Rada Powiatu Wyszkowskiego'],
-  [/zarząd powiatu/i, 'Zarząd Powiatu Wyszkowskiego'],
-  [/starosta/i, 'Starosta Wyszkowski'],
-  [/komisja bezpieczeństwa/i, 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie'],
+  [/burmistrz\w*/i, 'Burmistrz Wyszkowa'],
+  [/rad\w*\s+miejsk\w*/i, 'Rada Miejska w Wyszkowie'],
+  [/rad\w*\s+powiatu/i, 'Rada Powiatu Wyszkowskiego'],
+  [/zarząd\w*\s+powiatu/i, 'Zarząd Powiatu Wyszkowskiego'],
+  [/starost\w*/i, 'Starosta Wyszkowski'],
+  [/komisj\w*\s+bezpieczeństwa/i, 'Komisja Bezpieczeństwa i Porządku Publicznego w Wyszkowie'],
 ];
 const kanonicznyOrgan = (n) => KANON.find(([w]) => w.test(n ?? ''))?.[1] ?? (n || null);
 
@@ -130,7 +137,7 @@ function zPliku(nazwa, wiersze) {
     const tytul = (w[kol.tytul] ?? '').replace(/\s+/g, ' ').trim();
     if (!tytul) continue;
     wszystkich++;
-    if (!TEMAT.test(tytul)) continue;
+    if (!TEMAT.test(bezOgonkow(tytul))) continue;
 
     // Rodzaj, numer i organ bywają w osobnych kolumnach albo w jednej
     // komórce razem z tytułem.

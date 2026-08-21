@@ -14,6 +14,23 @@ const encje = (s) =>
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
     .replace(/&amp;/g, '&');
 
+/**
+ * Eksport z e-dziennika opatruje każdy element przedrostkiem przestrzeni nazw
+ * (`<x:row>`, `<x:c>`), a Excel i większość generatorów pisze je gołe.
+ * Wzorce muszą przyjmować oba warianty, inaczej arkusz wychodzi pusty.
+ */
+const P = '(?:[A-Za-z_][\\w.-]*:)?';
+const RE = {
+  row: new RegExp(`<${P}row\\b[^>]*>([\\s\\S]*?)</${P}row>`, 'g'),
+  c: new RegExp(
+    `<${P}c\\b([^>]*?)/>|<${P}c\\b([^>]*)>([\\s\\S]*?)</${P}c>`,
+    'g'
+  ),
+  t: new RegExp(`<${P}t\\b[^>]*>([\\s\\S]*?)</${P}t>`, 'g'),
+  si: new RegExp(`<${P}si>([\\s\\S]*?)</${P}si>`, 'g'),
+  v: new RegExp(`<${P}v\\b[^>]*>([\\s\\S]*?)</${P}v>`),
+};
+
 /** Numer kolumny z adresu komórki: A→0, B→1, ... AA→26 */
 function kolumna(adres) {
   const litery = /^([A-Z]+)/.exec(adres)?.[1] ?? 'A';
@@ -43,8 +60,8 @@ export function czytajXlsx(buf) {
 
   // wspólne teksty; komórki typu "s" trzymają indeks do tej tablicy
   const wspolne = [];
-  for (const m of czytaj('xl/sharedStrings.xml').matchAll(/<si>([\s\S]*?)<\/si>/g)) {
-    const kawalki = [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((t) => t[1]);
+  for (const m of czytaj('xl/sharedStrings.xml').matchAll(RE.si)) {
+    const kawalki = [...m[1].matchAll(RE.t)].map((t) => t[1]);
     wspolne.push(encje(kawalki.join('')));
   }
 
@@ -57,25 +74,30 @@ export function czytajXlsx(buf) {
     })();
 
   const wiersze = [];
-  for (const wm of arkusz.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
+  for (const wm of arkusz.matchAll(RE.row)) {
     const komorki = [];
-    for (const cm of wm[1].matchAll(/<c\b([^>]*)\/>|<c\b([^>]*)>([\s\S]*?)<\/c>/g)) {
+    // Adres komórki jest w XLSX opcjonalny. Gdy go nie ma — a e-dziennik go nie
+    // podaje — obowiązuje kolejność wystąpienia, nie „A1” dla wszystkich.
+    let nastepna = 0;
+    for (const cm of wm[1].matchAll(RE.c)) {
       const atrybuty = cm[1] ?? cm[2] ?? '';
       const tresc = cm[3] ?? '';
-      const adres = /r="([A-Z]+\d+)"/.exec(atrybuty)?.[1] ?? 'A1';
-      const typ = /t="([^"]+)"/.exec(atrybuty)?.[1];
+      const adres = /\br="([A-Z]+\d+)"/.exec(atrybuty)?.[1];
+      const typ = /\bt="([^"]+)"/.exec(atrybuty)?.[1];
       let wartosc = '';
       if (typ === 's') {
-        const i = Number(/<v>([\s\S]*?)<\/v>/.exec(tresc)?.[1] ?? -1);
+        const i = Number(RE.v.exec(tresc)?.[1] ?? -1);
         wartosc = wspolne[i] ?? '';
       } else if (typ === 'inlineStr') {
         wartosc = encje(
-          [...tresc.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((t) => t[1]).join('')
+          [...tresc.matchAll(RE.t)].map((t) => t[1]).join('')
         );
       } else {
-        wartosc = encje(/<v>([\s\S]*?)<\/v>/.exec(tresc)?.[1] ?? '');
+        wartosc = encje(RE.v.exec(tresc)?.[1] ?? '');
       }
-      komorki[kolumna(adres)] = wartosc.trim();
+      const i = adres ? kolumna(adres) : nastepna;
+      komorki[i] = wartosc.trim();
+      nastepna = i + 1;
     }
     wiersze.push([...komorki].map((k) => k ?? ''));
   }
