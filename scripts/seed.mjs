@@ -62,7 +62,8 @@ async function main() {
   process.stderr.write(`Schemat: ${nazwa}\n`);
   await klient.query('BEGIN');
 
-  const [zrodla, zarzadcy, opisy, aktyCsv, prg, odc, aktyBip] = await Promise.all([
+  const [zrodla, zarzadcy, opisy, aktyCsv, prg, odc, aktyBip, aktyEd] =
+    await Promise.all([
     readFile(new URL('../db/seed/zrodla.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../db/seed/zarzadcy.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../db/seed/drogi-opisy.csv', import.meta.url), 'utf8').then(czytajCsv),
@@ -71,6 +72,9 @@ async function main() {
     readFile(new URL('../data/odcinki.json', import.meta.url), 'utf8').then(JSON.parse),
     // import z BIP jest opcjonalny — bez niego wsad ma działać
     readFile(new URL('../data/raw/akty-bip.json', import.meta.url), 'utf8')
+      .then(JSON.parse)
+      .catch(() => ({ akty: [] })),
+    readFile(new URL('../data/raw/akty-edziennik.json', import.meta.url), 'utf8')
       .then(JSON.parse)
       .catch(() => ({ akty: [] })),
   ]);
@@ -228,8 +232,9 @@ async function main() {
   process.stderr.write(`Odcinki: ${wstawione}\n`);
 
   // --- akty prawa miejscowego -------------------------------------------
-  // Ręczny plik ma pierwszeństwo nad importem: to w nim trafiają pozycje
-  // dziennika urzędowego i status, których crawler nie zna.
+  // Kolejność ma znaczenie: BIP zna tytuł i PDF, e-dziennik dokłada pozycję
+  // i datę ogłoszenia, a plik ręczny bije oba, bo tam trafiają ustalenia
+  // zrobione przez człowieka. Kolejne warstwy nadpisują poprzednie.
   const wszystkieAkty = new Map();
   for (const a of aktyBip.akty ?? []) {
     wszystkieAkty.set(`${a.rodzaj}|${a.numer}|${a.organ}`, {
@@ -238,6 +243,22 @@ async function main() {
       dziennik_rok: null, dziennik_pozycja: null,
       data_ogloszenia: null, data_wejscia: null, status: 'nieustalony',
       url: a.url_zrodla, url_pdf: a.url_pdf, zrodlo: 'bip-gmina', uwagi: null,
+    });
+  }
+  for (const a of aktyEd.akty ?? []) {
+    const klucz = `${a.rodzaj}|${a.numer}|${a.organ}`;
+    wszystkieAkty.set(klucz, {
+      ...(wszystkieAkty.get(klucz) ?? {}),
+      organ: a.organ, rodzaj: a.rodzaj, numer: a.numer,
+      data_podjecia: a.data_podjecia, tytul: a.tytul,
+      dziennik_rok: a.dziennik_rok, dziennik_pozycja: a.dziennik_pozycja,
+      data_ogloszenia: a.data_ogloszenia,
+      data_wejscia: wszystkieAkty.get(klucz)?.data_wejscia ?? null,
+      status: 'nieustalony',
+      url: wszystkieAkty.get(klucz)?.url ?? null,
+      url_pdf: wszystkieAkty.get(klucz)?.url_pdf ?? null,
+      zrodlo: 'uchwala',
+      uwagi: wszystkieAkty.get(klucz)?.uwagi ?? null,
     });
   }
   for (const a of aktyCsv) {
@@ -276,7 +297,11 @@ async function main() {
         url_pdf = COALESCE(EXCLUDED.url_pdf, akt_prawny.url_pdf),
         zrodlo = EXCLUDED.zrodlo, uwagi = COALESCE(EXCLUDED.uwagi, akt_prawny.uwagi)`);
   }
-  process.stderr.write(`Akty prawne: ${listaAktow.length}\n`);
+  process.stderr.write(
+    `Akty prawne: ${listaAktow.length} ` +
+      `(BIP ${aktyBip.akty?.length ?? 0}, e-dziennik ${aktyEd.akty?.length ?? 0}, ` +
+      `ręcznie ${aktyCsv.length})\n`
+  );
 
   await klient.query('COMMIT');
   await klient.end();
