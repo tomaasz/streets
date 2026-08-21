@@ -20,7 +20,8 @@
     "db:setup": "node scripts/migrate.mjs && node scripts/seed.mjs && node scripts/raport.mjs",
     "data:akty": "node scripts/harvest-akty-bip.mjs",
     "data:edziennik": "node scripts/harvest-edziennik.mjs",
-    "data:edziennik-xlsx": "node scripts/import-edziennik.mjs"
+    "data:edziennik-xlsx": "node scripts/import-edziennik.mjs",
+    "data:edziennik-auto": "node scripts/harvest-edziennik-auto.mjs --do-bazy"
   },
   "dependencies": {
     "next": "16.3.1",

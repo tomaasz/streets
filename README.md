@@ -47,7 +47,7 @@ pewnosc 3  akt prawa miejscowego albo ewidencja dróg zarządcy
 | Granice, obręby, działki | **ULDK** [uldk.gugik.gov.pl](https://uldk.gugik.gov.pl/) | granica gminy, lista obrębów = miejscowości |
 | Przebieg dróg powiatowych | [BIP Gminy Wyszków](https://bip.wyszkow.pl/), [BIP Powiatu](https://bip.powiat-wyszkowski.pl/) | wykazy dróg powiatowych |
 | Akty prawa miejscowego | [BIP Gminy Wyszków](https://bip.wyszkow.pl/) — importer `npm run data:akty` | uchwały Rady i zarządzenia Burmistrza dotyczące dróg i nazewnictwa |
-| Rozstrzygnięcie | [Dziennik Urzędowy Woj. Mazowieckiego](https://edziennik.mazowieckie.pl/) | pozycja ogłoszenia, od której akt obowiązuje |
+| Rozstrzygnięcie | [Dziennik Urzędowy Woj. Mazowieckiego](https://edziennik.mazowieckie.pl/) — `npm run data:edziennik-auto` | uchwały z pozycją ogłoszenia; [automatyczna aktualizacja](docs/automatyczna-aktualizacja.md) |
 | Drogi wewnętrzne | **EGiB** powiatu, [wyszkowski.e-mapa.net](https://wyszkowski.e-mapa.net/) | właściciel działki drogowej = zarządca |
 
 Wszystkie źródła maszynowe są bezpłatne i nie wymagają rejestracji.
