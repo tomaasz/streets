@@ -104,8 +104,19 @@ async function main() {
 
   await klient.query('BEGIN');
 
+  // Odcinki założone przez poprzedni przebieg tego skryptu kasujemy na
+  // starcie. Gdyby stały do końca, sprawdzenie „czy ulica ma już odcinki”
+  // widziałoby wynik poprzedniego uruchomienia i skrypt oscylowałby:
+  // raz zakłada odcinek, raz go kasuje.
+  const [{ ile: doSkasowania }] = await q(
+    "SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE zrodlo = 'uchwala'"
+  );
+  await klient.query("DELETE FROM odcinek_drogi WHERE zrodlo = 'uchwala'");
+
   const bezDopasowania = [];
   const bezOdcinkow = [];
+  // ulica_id -> podstawa prawna, na podstawie ktorej wchodzi regula pierwszenstwa
+  const nadpisania = new Map();
   let powiazanUlic = 0;
   let powiazanDrog = 0;
 
@@ -174,6 +185,7 @@ async function main() {
           [zapisany.id, u.id, poz.opis]
         );
         powiazanUlic++;
+        nadpisania.set(u.id, podstawaPrawna({ ...akt, organ }));
 
         const [{ ile }] = await q(
           'SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE ulica_id = $1',
@@ -193,12 +205,6 @@ async function main() {
     }
   }
 
-  // Odcinki zakładane z uchwał — kasujemy i wstawiamy od nowa, żeby
-  // powtórny przebieg nie mnożył wierszy.
-  const [{ ile: doSkasowania }] = await q(
-    "SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE zrodlo = 'uchwala'"
-  );
-  await klient.query("DELETE FROM odcinek_drogi WHERE zrodlo = 'uchwala'");
   for (const o of bezOdcinkow) {
     await klient.query(
       `INSERT INTO odcinek_drogi
@@ -210,6 +216,74 @@ async function main() {
        o.dlugosc_km == null ? null : Math.round(o.dlugosc_km * 1000), o.podstawa]
     );
   }
+
+  // ------------------------------------------------------------------
+  // Reguła pierwszeństwa źródeł
+  //
+  // Uchwała rady jest aktem, który kategorię drogi *ustanawia*. BDOT10k to
+  // odczyt z mapy — pomocny, ale wtórny. Gdy oba mówią co innego o drodze
+  // wymienionej w uchwale, rozstrzyga uchwała.
+  //
+  // Dwa ograniczenia, oba celowe:
+  //   - nie ruszamy odcinków krajowych, wojewódzkich i powiatowych. Uchwała
+  //     rady gminy nie może przekwalifikować cudzej drogi; jeśli BDOT widzi
+  //     tam wyższą kategorię, to znaczy, że ulica ma odcinki obu rodzajów
+  //     i trzeba je rozdzielić w terenie, a nie zaklepać zapytaniem;
+  //   - `zrodlo` zostaje przy `bdot10k`, bo stamtąd pochodzi sam odcinek
+  //     i jego geometria. Uchwała odpowiada za kategorię i zarządcę —
+  //     i to widać w `podstawa_prawna` oraz w `pewnosc`.
+  //
+  // Uchwała nie wskazuje odcinków tak, żeby dało się je dopasować do
+  // geometrii, więc przypisanie jest na poziomie całej ulicy. Mówi o tym
+  // wprost `uwagi`.
+  //
+  // WAŻNE: `db:seed` kasuje i odtwarza wszystkie odcinki o źródle
+  // `bdot10k`, więc te nadpisania giną przy każdym odświeżeniu danych.
+  // Dlatego `data:uchwaly` musi chodzić PO `db:seed` — reguła jest
+  // wyliczana od nowa co tydzień, a nie zapisana raz na zawsze.
+  // ------------------------------------------------------------------
+  const idUlic = [...nadpisania.keys()];
+  const podstawy = idUlic.map((id) => nadpisania.get(id));
+  const NADRZEDNE = ['krajowa', 'wojewodzka', 'powiatowa'];
+
+  const { rowCount: przekwalifikowanych } = await klient.query(
+    `UPDATE odcinek_drogi o SET
+       kategoria = 'gminna',
+       zarzadca_id = $3,
+       pewnosc = 3,
+       podstawa_prawna = p.podstawa,
+       uwagi = COALESCE(o.uwagi || ' ', '') ||
+               'Kategoria i zarządca z uchwały; BDOT10k widział tu drogę wewnętrzną. '
+               || 'Przypisanie dotyczy całej ulicy — uchwała nie wskazuje odcinka '
+               || 'w sposób pozwalający na dopasowanie do geometrii.',
+       zmodyfikowano = now()
+     FROM unnest($1::int[], $2::text[]) AS p(ulica_id, podstawa)
+     WHERE o.ulica_id = p.ulica_id
+       AND o.kategoria IN ('wewnetrzna', 'nieustalona')`,
+    [idUlic, podstawy, idZarzadcy]
+  );
+
+  const { rowCount: potwierdzonych } = await klient.query(
+    `UPDATE odcinek_drogi o SET
+       zarzadca_id = COALESCE(o.zarzadca_id, $3),
+       pewnosc = 3,
+       podstawa_prawna = p.podstawa,
+       zmodyfikowano = now()
+     FROM unnest($1::int[], $2::text[]) AS p(ulica_id, podstawa)
+     WHERE o.ulica_id = p.ulica_id
+       AND o.kategoria = 'gminna'
+       AND (o.pewnosc < 3 OR o.podstawa_prawna IS DISTINCT FROM p.podstawa)`,
+    [idUlic, podstawy, idZarzadcy]
+  );
+
+  const nietkniete = (
+    await q(
+      `SELECT o.kategoria::text k, COUNT(*)::int n FROM odcinek_drogi o
+        WHERE o.ulica_id = ANY($1) AND o.kategoria = ANY($2)
+        GROUP BY 1 ORDER BY 2 DESC`,
+      [idUlic, NADRZEDNE]
+    )
+  );
 
   if (NA_SUCHO) {
     await klient.query('ROLLBACK');
@@ -223,6 +297,13 @@ async function main() {
       `Powiązań akt–droga: ${powiazanDrog}\n` +
       `Odcinków z uchwał: skasowano ${doSkasowania}, założono ${bezOdcinkow.length}` +
       ` (${(bezOdcinkow.reduce((s, o) => s + (o.dlugosc_km ?? 0), 0)).toFixed(1)} km)\n`
+  );
+  process.stderr.write(
+    `\nReguła pierwszeństwa (uchwała > BDOT10k):\n` +
+      `  przekwalifikowanych z wewnętrznej na gminną: ${przekwalifikowanych}\n` +
+      `  potwierdzonych jako gminne (podstawa prawna, pewność 3): ${potwierdzonych}\n` +
+      `  nietkniętych, bo kategoria nadrzędna: ` +
+      (nietkniete.map((r) => `${r.k} ${r.n}`).join(', ') || 'brak') + '\n'
   );
   if (bezDopasowania.length) {
     process.stderr.write(`\nNiedopasowane — do decyzji człowieka (${bezDopasowania.length}):\n`);

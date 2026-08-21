@@ -1,9 +1,11 @@
 # Stan bazy dróg gminy Wyszków
 
-Migawka wygenerowana przez `npm run raport` na danych PRG z 2026-08-20 i BDOT10k w wersji 2026-04-15. Odtworzysz ją tym samym poleceniem po każdym odświeżeniu danych.
+Migawka wygenerowana przez `npm run raport` na danych PRG z 2026-08-21, BDOT10k w wersji 2026-04-15 oraz trzech uchwałach Rady Miejskiej w Wyszkowie o zaliczeniu dróg do kategorii dróg gminnych. Odtworzysz ją tym samym poleceniem po każdym odświeżeniu danych.
+
+Od 2026-08-21 obowiązuje **reguła pierwszeństwa źródeł**: tam, gdzie uchwała rady mówi co innego niż odczyt z BDOT10k, rozstrzyga uchwała — bo to ona kategorię drogi ustanawia, a BDOT jest odczytem z mapy. Reguła nie dotyka odcinków krajowych, wojewódzkich i powiatowych: uchwała rady gminy nie może przekwalifikować cudzej drogi. Szczegóły w `scripts/import-uchwaly.mjs`.
 
 - ulic: **710** w 25 miejscowościach
-- odcinków dróg: **3677**
+- odcinków dróg: **3678**
 - dróg numerowanych: **211**
 - długość sieci: **949,4 km**
 
@@ -14,8 +16,8 @@ Migawka wygenerowana przez `npm run raport` na danych PRG z 2026-08-20 i BDOT10k
 | krajowa | Generalny Dyrektor Dróg Krajowych i Autostrad | 6 | 8 | 30,1 |
 | wojewodzka | Zarząd Województwa Mazowieckiego | 4 | 4 | 8,8 |
 | powiatowa | Zarząd Powiatu Wyszkowskiego | 27 | 36 | 46,8 |
-| gminna | Burmistrz Wyszkowa | 236 | 293 | 165,4 |
-| wewnetrzna | — | 453 | 3336 | 698,2 |
+| gminna | Burmistrz Wyszkowa | 241 | 336 | 176,6 |
+| wewnetrzna | — | 411 | 3294 | 687,1 |
 
 ## Drogi publiczne numerowane
 
@@ -59,6 +61,6 @@ Takich ulic jest 11.
 
 | Problem | Ulic |
 |---|---:|
-| brak zarządcy | 453 |
-| do weryfikacji (import maszynowy) | 207 |
-| brak odcinków | 50 |
+| brak zarządcy | 411 |
+| brak odcinków | 49 |
+| do weryfikacji (import maszynowy) | 43 |
