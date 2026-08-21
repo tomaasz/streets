@@ -150,6 +150,19 @@ Sprawdzone i odrzucone drogi obejścia:
 * **Osobne hosty** (`api.`, `edzienniki.`, `edziennik2.`) — nie istnieją w DNS.
 * **`/rss`, `/feed`, `/opendata`, `/api/v1/acts`** — 403 albo brak odpowiedzi.
 
+Układ samego serwisu, do orientacji przy poprawianiu parsera:
+
+| Zakładka | Ścieżka | Co zawiera |
+|---|---|---|
+| Dzienniki | `/actbymonths` | akty rocznikami i miesiącami |
+| **Skorowidz** | `/keywords-condensed` | **indeks haseł przedmiotowych** — najkrótsza droga do aktów drogowych, bo grupuje tematycznie zamiast po wydawcach |
+| Organy wydające | `/publisher-group`, `/publisher/<id>` | lista wydawców i akty każdego z nich |
+| Pobieranie | — | oprogramowanie do weryfikacji podpisu elektronicznego i format LAPX/ZIPX, nie dane |
+| Certyfikaty | — | certyfikaty podpisu wydawcy |
+
+Importer chodzi dziś po `/publisher/<id>`, bo stamtąd mamy potwierdzony układ
+tabeli. Skorowidz może się okazać krótszy, ale jego układu jeszcze nie znamy.
+
 Innego wydania tych samych danych po prostu nie ma. Automatyzacja musi więc
 działać z sieci, którą serwis przyjmuje, albo trzeba wystąpić do Mazowieckiego
 Urzędu Wojewódzkiego o dostęp dla konkretnego adresu IP. Import z e-dziennika trzeba więc uruchamiać z sieci, która nie jest
