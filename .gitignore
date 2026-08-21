@@ -12,3 +12,6 @@ next-env.d.ts
 
 # Paczki źródłowe (BDOT10k ma ~45 MB) — pobierane skryptem, nie trzymamy w repo
 data/cache/
+
+# Zrodlowe PDF-y uchwal — pobierane z e-dziennika, nie trzymamy w repo
+data/uchwaly/
