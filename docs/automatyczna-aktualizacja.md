@@ -13,6 +13,30 @@ czyta tabelę aktów, odsiewa te niedotyczące dróg ani nazewnictwa i zapisuje
 resztę do bazy. Nowe akty dochodzą, istniejące są aktualizowane po kluczu
 (rodzaj, numer, organ). Nic nie kasuje.
 
+## Wariant bez repozytorium na komputerze urzędu
+
+`scripts/edziennik-samodzielny.mjs` to jeden plik bez zależności. Wystarczy go
+skopiować na maszynę z Node 18+ — nie trzeba klonować repozytorium ani
+instalować pakietów, a **hasło do bazy nigdy nie trafia na tę maszynę**.
+Skrypt pobiera akty i wysyła je do aplikacji, a ona zapisuje je u siebie.
+
+```bash
+node edziennik-samodzielny.mjs                 # tylko pobierz i pokaż
+export APLIKACJA=https://streets-lyart.vercel.app
+export IMPORT_TOKEN=…
+node edziennik-samodzielny.mjs --wyslij        # pobierz i wyślij
+```
+
+Token ustaw najpierw w projekcie na Vercelu jako zmienną `IMPORT_TOKEN`
+(Settings → Environment Variables) i zrób redeploy. Dopóki jej nie ma, endpoint
+importu jest wyłączony i odpowiada kodem 503 — świeży deployment nie stoi
+otworem. Bez poprawnego tokenu odpowiada 401.
+
+Endpoint sprawdza każde pole osobno: rodzaj musi być jednym ze znanych, daty
+muszą mieć postać RRRR-MM-DD, adresy muszą zaczynać się od http, a pozycja bez
+numeru albo bez tytułu odpada. Do bazy nie trafia nic, czego kształtu nie
+sprawdzono.
+
 ## Gdzie to uruchomić
 
 Serwis odrzuca połączenia z centrów danych — stoi za Akamai Bot Managerem.
