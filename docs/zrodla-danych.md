@@ -136,7 +136,23 @@ Stan sprawdzony z funkcji na Vercelu w regionie `lhr1`:
 | **edziennik.mazowieckie.pl** | **brak odpowiedzi, timeout po 20 s** |
 
 Z sieci Google Cloud ten sam serwis zwraca `403 Dostęp zablokowany` z numerem
-zgłoszenia. Import z e-dziennika trzeba więc uruchamiać z sieci, która nie jest
+zgłoszenia. Blokadę stawia Akamai Bot Manager — widać go w konsoli przeglądarki
+jako skrypt `edziennik.mazowieckie.pl/akam/…`.
+
+Sprawdzone i odrzucone drogi obejścia:
+
+* **ELI, `api.sejm.gov.pl/eli`** — obejmuje wyłącznie Dziennik Ustaw i Monitor
+  Polski, dzienników wojewódzkich tam nie ma.
+* **`dziennikiurzedowe.gov.pl`** — krajowy spis dzienników, ale dla Mazowsza
+  odsyła wprost pod `edziennik.mazowieckie.pl/actbymonths`, czyli pod ten sam
+  zablokowany host.
+* **`dane.gov.pl`** — nie publikuje dzienników wojewódzkich.
+* **Osobne hosty** (`api.`, `edzienniki.`, `edziennik2.`) — nie istnieją w DNS.
+* **`/rss`, `/feed`, `/opendata`, `/api/v1/acts`** — 403 albo brak odpowiedzi.
+
+Innego wydania tych samych danych po prostu nie ma. Automatyzacja musi więc
+działać z sieci, którą serwis przyjmuje, albo trzeba wystąpić do Mazowieckiego
+Urzędu Wojewódzkiego o dostęp dla konkretnego adresu IP. Import z e-dziennika trzeba więc uruchamiać z sieci, która nie jest
 blokowana — z komputera w urzędzie albo z hostingu o polskim adresie:
 
 ```bash
