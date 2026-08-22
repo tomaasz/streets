@@ -41,6 +41,10 @@ export async function GET(req: Request) {
     slug: sp.get('slug') ?? undefined,
   });
 
+  // Identyfikatory na końcu ORDER BY domykają kolejność. Kilkanaście grup ma
+  // remis na (miejscowość, nazwa, kategoria) i bez nich wracałyby w dowolnej
+  // kolejności — a wtedy cotygodniowe odświeżenie danych produkuje w eksporcie
+  // różnice tam, gdzie nic się nie zmieniło.
   const wiersze = await zapytaj<Wiersz>(
     `SELECT u.simc, u.sym_ul, u.miejscowosc, u.nazwa_pelna, u.dlugosc_m,
             o.kategoria::text AS kategoria, o.nr_drogi, o.klasa, o.nawierzchnia,
@@ -54,7 +58,7 @@ export async function GET(req: Request) {
        LEFT JOIN zarzadca w      ON w.id = o.utrzymujacy_id
        LEFT JOIN zrodlo_danych zr ON zr.kod = o.zrodlo
        ${sql}
-      ORDER BY u.miejscowosc, u.nazwa, o.kategoria`,
+      ORDER BY u.miejscowosc, u.nazwa, o.kategoria, o.id, u.id`,
     par
   );
 
