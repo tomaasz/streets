@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { odcinkiUlicy, ulica } from '@/lib/zapytania';
 import { metryNaKm } from '@/lib/typy';
 import { Mapa } from '@/components/Mapa';
+import { MapaInteraktywna } from '@/components/MapaInteraktywna';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
 
 export const dynamic = 'force-dynamic';
@@ -44,23 +45,39 @@ export default async function Strona({
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--tekst-2)]">
           Przebieg
         </h2>
-        <Mapa
-          warstwy={[
-            // oś ulicy z PRG pod spodem — widać ją tam, gdzie żaden
-            // odcinek z BDOT się nie dopasował
-            {
-              geom: u.geom,
-              grubosc: 5,
-              etykieta: `${u.nazwa_pelna} — oś ulicy z PRG`,
-            },
-            ...odcinki.map((o) => ({
-            geom: o.geom,
-            kategoria: o.kategoria,
-            etykieta: `${o.kategoria}${o.nr_drogi ? ` nr ${o.nr_drogi}` : ''} — ${o.zarzadca ?? 'zarządca nieustalony'}`,
-            grubosc: 3,
-            })),
-          ]}
-        />
+        {/*
+          Mapa interaktywna dokłada podkład z Geoportalu i zoom, ale wchodzi
+          dopiero po stronie przeglądarki. Do tego czasu — i gdy JavaScript
+          jest wyłączony albo Geoportal nie odpowiada — widać to samo SVG
+          renderowane na serwerze. Przebieg drogi jest więc na ekranie od
+          razu, bez pustego prostokąta i bez przeskoku układu.
+        */}
+        <MapaInteraktywna
+          zrodloDanych={`/api/mapa?slug=${encodeURIComponent(u.slug)}`}
+          podkladDomyslny="orto"
+          wysokosc={420}
+          legenda={false}
+        >
+          <Mapa
+            wysokosc={420}
+            tlo={false}
+            warstwy={[
+              // oś ulicy z PRG pod spodem — widać ją tam, gdzie żaden
+              // odcinek z BDOT się nie dopasował
+              {
+                geom: u.geom,
+                grubosc: 5,
+                etykieta: `${u.nazwa_pelna} — oś ulicy z PRG`,
+              },
+              ...odcinki.map((o) => ({
+                geom: o.geom,
+                kategoria: o.kategoria,
+                etykieta: `${o.kategoria}${o.nr_drogi ? ` nr ${o.nr_drogi}` : ''} — ${o.zarzadca ?? 'zarządca nieustalony'}`,
+                grubosc: 3,
+              })),
+            ]}
+          />
+        </MapaInteraktywna>
       </section>
 
       <section className="mt-6">

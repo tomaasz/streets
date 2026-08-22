@@ -13,9 +13,11 @@ type Wiersz = {
   odcinek_dlugosc_m: number | null; geom: unknown;
 };
 
-function warunki(f: FiltryUlic) {
+function warunki(f: FiltryUlic & { slug?: string }) {
   const gdzie: string[] = [];
   const par: unknown[] = [];
+  // slug wskazuje jedną ulicę — używa go mapa na stronie ulicy
+  if (f.slug) { par.push(f.slug); gdzie.push(`u.slug = $${par.length}`); }
   if (f.q) { par.push(`%${f.q}%`); gdzie.push(`bez_ogonkow(u.nazwa_pelna) LIKE bez_ogonkow($${par.length})`); }
   if (f.kategoria) { par.push(f.kategoria); gdzie.push(`o.kategoria::text = $${par.length}`); }
   if (f.miejscowosc) { par.push(f.miejscowosc); gdzie.push(`u.miejscowosc = $${par.length}`); }
@@ -36,6 +38,7 @@ export async function GET(req: Request) {
     kategoria: sp.get('kategoria') ?? undefined,
     miejscowosc: sp.get('miejscowosc') ?? undefined,
     zarzadca: sp.get('zarzadca') ?? undefined,
+    slug: sp.get('slug') ?? undefined,
   });
 
   const wiersze = await zapytaj<Wiersz>(

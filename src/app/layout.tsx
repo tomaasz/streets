@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const NAWIGACJA = [
   { href: '/', label: 'Ulice' },
+  { href: '/mapa', label: 'Mapa' },
   { href: '/drogi', label: 'Drogi numerowane' },
   { href: '/zarzadcy', label: 'Zarządcy' },
   { href: '/akty', label: 'Akty prawne' },

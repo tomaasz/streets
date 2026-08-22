@@ -159,8 +159,48 @@ przebudowywać deploymentu po odświeżeniu danych.
 | `GET /api/ulice?q=&kategoria=&miejscowosc=&zarzadca=` | lista ulic z zarządcami, JSON |
 | `GET /api/eksport?format=csv` | pełny wykaz ulica × odcinek, CSV z BOM (Excel) |
 | `GET /api/eksport?format=geojson` | to samo z geometrią, EPSG:4326 |
+| `GET /api/mapa?kategoria=&miejscowosc=&zarzadca=&q=&slug=` | dane dla mapy: te same odcinki, ale odchudzone, uproszczone i z ETagiem |
 
 Filtry działają tak samo w API i w interfejsie.
+
+`/api/eksport` i `/api/mapa` różni przeznaczenie. Eksport jest plikiem do
+pobrania — ma komplet kolumn i pełną geometrię, bo trafia do QGIS-a. Mapa jest
+odpytywana przy każdym wejściu na stronę, więc powtarzalne teksty (zarządca,
+źródło, podstawa prawna) idą raz do `slowniki`, puste pola nie wchodzą do
+JSON-a wcale, a geometria przechodzi przez Douglasa–Peuckera z tolerancją
+metra — poniżej błędu własnego BDOT10k. Zmierzone na pełnej bazie gminy
+(788 odcinków): 882 → 389 kB, po gzipie 154 → 70 kB, wierzchołków 19 798 →
+8874. `s-maxage` z ETagiem sprawiają, że drugie wejście na mapę obsługuje CDN,
+nie baza — odpowiedź na `If-None-Match` to 304 bez ciała.
+
+Kolejność wierszy w zapytaniu jest domknięta identyfikatorami, żeby te same
+dane zawsze dawały ten sam bajt i ten sam ETag; bez tego kilkanaście grup
+o tej samej ulicy i kategorii mogłoby wrócić w dowolnej kolejności, a różne
+instancje serverless podawałyby CDN-owi różne znaczniki tej samej treści.
+
+## Mapa
+
+Mapa (`/mapa` oraz sekcja „Przebieg” na stronie ulicy) stoi na **OpenLayers
+w układzie PL-1992 (EPSG:2180)** — nie na Leaflecie ani na MapLibre GL.
+Powód jest jeden i twardy: z podkładów GUGiK-a tylko ortofotomapa jest
+wystawiona w Web Mercatorze. Mapa topograficzna i BDOT10k istnieją wyłącznie
+w EPSG:2180 (do sprawdzenia w GetCapabilities obu usług), więc biblioteka
+umiejąca sam Web Mercator oznaczałaby rezygnację z podkładu, na którym urząd
+pracuje na co dzień.
+
+Co z tego wynika w praktyce:
+
+* Na ekranach o podwyższonej gęstości kafel 512 px trafia na 256 px CSS —
+  podkład jest ostry zamiast rozmyty (`siatkaWmts` w `src/lib/geoportal.ts`;
+  drabinka GUGiK-a w trzech miejscach idzie co ×2,5, więc leafletowe
+  `detectRetina` by tu nie zadziałało).
+* Zoom jest płynny, nie skokowy, a etykiety ulic same odsuwają się od siebie.
+* Drogi rysują się w dwóch warstwach — obwódka pod spodem, kolor kategorii na
+  wierzchu — żeby czytały się i nad mapą topograficzną, i nad zdjęciem
+  lotniczym.
+* Zanim OpenLayers się doczyta, widać SVG wyrenderowane na serwerze
+  (`src/components/Mapa.tsx`). Ten sam rysunek zostaje, gdy JavaScript jest
+  wyłączony albo Geoportal nie odpowiada.
 
 ## Struktura
 
@@ -171,7 +211,7 @@ scripts/           harvest-prg, harvest-bdot, harvest-akty-bip, build-odcinki, m
 data/raw/          surowe pobrania z GUGiK (w repo, żeby dało się odtworzyć wynik)
 data/odcinki.json  wynik dopasowania BDOT ↔ PRG, wsad dla seed
 src/app/           Next.js App Router
-src/lib/           dostęp do bazy i zapytania
+src/lib/           dostęp do bazy, zapytania, podkłady WMTS i styl mapy
 ```
 
 ## Jak działa dopasowanie BDOT ↔ PRG

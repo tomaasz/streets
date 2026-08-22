@@ -89,3 +89,253 @@ table.dane td {
 table.dane tr:hover td { background: var(--tlo-2); }
 
 .przewijalne { overflow-x: auto; }
+
+/* ---------------------------------------------------------------- mapa --
+   OpenLayers wnosi własny arkusz (`ol/ol.css`) zbudowany pod jasny motyw
+   i pod przyciski w rozmiarze z 2012 roku. Poniżej doprowadzamy jego
+   kontrolki do tych samych zmiennych, na których stoi reszta strony, i
+   dokładamy panel warstw oraz dymek — obie rzeczy renderuje React, więc
+   z ol.css nie mają nic wspólnego poza sąsiedztwem.
+   ---------------------------------------------------------------------- */
+
+.mapa-ol {
+  background: var(--tlo-2);
+}
+
+/* płótno mapy przejmuje gesty, żeby przewijanie strony nie walczyło z zoomem */
+.mapa-ol canvas {
+  touch-action: pan-x pan-y;
+}
+
+.mapa-ol .ol-control {
+  background: transparent;
+  padding: 0;
+  border-radius: 0.4rem;
+}
+
+.mapa-ol .ol-control button {
+  width: 1.9rem;
+  height: 1.9rem;
+  margin: 0.15rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tekst);
+  background: color-mix(in srgb, var(--tlo) 92%, transparent);
+  border: 1px solid var(--linia);
+  border-radius: 0.4rem;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+}
+
+.mapa-ol .ol-control button:hover,
+.mapa-ol .ol-control button:focus-visible {
+  background: var(--tlo);
+  border-color: var(--akcent);
+}
+
+.mapa-ol .ol-zoom {
+  top: 0.5rem;
+  left: 0.5rem;
+}
+
+.mapa-ol .ol-full-screen {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.mapa-ol .ol-scale-bar {
+  bottom: 0.6rem;
+  left: 0.6rem;
+}
+
+.mapa-ol .ol-scale-text,
+.mapa-ol .ol-scale-step-text {
+  color: var(--tekst);
+  text-shadow: 0 0 3px var(--tlo), 0 0 3px var(--tlo);
+  font-size: 0.7rem;
+}
+
+.mapa-ol .ol-scale-singlebar {
+  border-color: var(--tekst);
+}
+
+.mapa-ol .ol-attribution {
+  background: color-mix(in srgb, var(--tlo) 88%, transparent);
+  border: 1px solid var(--linia);
+  border-radius: 0.4rem;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.mapa-ol .ol-attribution ul {
+  color: var(--tekst-2);
+  text-shadow: none;
+}
+
+/* --- panel warstw i legendy --- */
+
+.mapa-panel {
+  position: absolute;
+  top: 2.9rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 11.5rem;
+  max-height: calc(100% - 5rem);
+  overflow: auto;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--tlo) 92%, transparent);
+  border: 1px solid var(--linia);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.18);
+}
+
+.mapa-panel-grupa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.mapa-panel-grupa legend {
+  padding: 0;
+  font-weight: 600;
+  color: var(--tekst-2);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+}
+
+.mapa-panel label,
+.mapa-panel-wpis {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.mapa-panel-wpis {
+  cursor: default;
+}
+
+.mapa-panel-osobno {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--linia);
+}
+
+.mapa-panel-przycisk {
+  padding: 0.25rem 0.4rem;
+  font: inherit;
+  color: var(--tekst);
+  background: var(--tlo-2);
+  border: 1px solid var(--linia);
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.mapa-panel-przycisk:hover {
+  border-color: var(--akcent);
+}
+
+.mapa-probka {
+  flex: none;
+  width: 1.1rem;
+  height: 0.2rem;
+  border-radius: 999px;
+}
+
+/* --- dymek odcinka --- */
+
+.mapa-dymek:empty {
+  display: none;
+}
+
+.mapa-dymek {
+  position: relative;
+  min-width: 14rem;
+  max-width: 19rem;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--tekst);
+  background: var(--tlo);
+  border: 1px solid var(--linia);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
+}
+
+/* dzióbek wskazujący klikniętą drogę */
+.mapa-dymek::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  border: 7px solid transparent;
+  border-top-color: var(--tlo);
+}
+
+.mapa-dymek-zamknij {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.3rem;
+  padding: 0 0.2rem;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--tekst-2);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.mapa-dymek-dane {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.1rem 0.5rem;
+  margin: 0.45rem 0 0;
+}
+
+.mapa-dymek-dane dt {
+  color: var(--tekst-2);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-top: 0.1rem;
+}
+
+.mapa-dymek-dane dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.mapa-dymek-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Na wąskim ekranie panel zjada mapę — zwężamy go i chowamy nazwy
+   podkładów pod skróty nie da rady, więc zostaje sam mniejszy krok. */
+@media (max-width: 640px) {
+  .mapa-panel {
+    width: 9.5rem;
+    padding: 0.4rem 0.45rem;
+    font-size: 0.7rem;
+  }
+
+  .mapa-dymek {
+    min-width: 11rem;
+    max-width: 15rem;
+  }
+}
