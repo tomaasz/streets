@@ -218,7 +218,7 @@ export async function aktyUlicy(ulicaId: number) {
             tytul, dziennik_rok, dziennik_pozycja,
             to_char(data_ogloszenia, 'YYYY-MM-DD') AS data_ogloszenia,
             to_char(data_wejscia, 'YYYY-MM-DD')    AS data_wejscia,
-            status, url, url_pdf, uwagi,
+            status, url, url_pdf, a.uwagi,
             powiazanych_ulic, powiazanych_drog, au.rola
        FROM akt_ulica au
        JOIN v_akty a ON a.id = au.akt_id
