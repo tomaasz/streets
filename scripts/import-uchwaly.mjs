@@ -251,6 +251,7 @@ async function main() {
        kategoria = 'gminna',
        zarzadca_id = $3,
        pewnosc = 3,
+       zrodlo = 'uchwala',
        podstawa_prawna = p.podstawa,
        uwagi = COALESCE(o.uwagi || ' ', '') ||
                'Kategoria i zarządca z uchwały; BDOT10k widział tu drogę wewnętrzną. '
@@ -267,6 +268,7 @@ async function main() {
     `UPDATE odcinek_drogi o SET
        zarzadca_id = COALESCE(o.zarzadca_id, $3),
        pewnosc = 3,
+       zrodlo = 'uchwala',
        podstawa_prawna = p.podstawa,
        zmodyfikowano = now()
      FROM unnest($1::int[], $2::text[]) AS p(ulica_id, podstawa)

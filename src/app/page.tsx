@@ -206,6 +206,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                     slownik={slownikZrodel}
                     x_2180={u.x_2180}
                     y_2180={u.y_2180}
+                    url_pdf={u.url_pdf}
                   />
                 </td>
                 <td className="text-right whitespace-nowrap">{metryNaKm(u.dlugosc_m)}</td>

@@ -22,12 +22,14 @@ export function ZnacznikZrodla({
   slownik,
   x_2180,
   y_2180,
+  url_pdf,
 }: {
   kody: string[];
   pewnosc?: number | null;
   slownik: Map<string, Zrodlo>;
   x_2180?: number | null;
   y_2180?: number | null;
+  url_pdf?: string | null;
 }) {
   if (!kody.length) return <span className="text-[var(--tekst-2)]">—</span>;
 
@@ -51,6 +53,8 @@ export function ZnacznikZrodla({
           } else {
             linkUrl = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
           }
+        } else if (kod === 'uchwala' && url_pdf) {
+          linkUrl = url_pdf;
         }
 
         return (

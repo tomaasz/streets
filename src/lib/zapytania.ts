@@ -35,11 +35,12 @@ function warunki(f: FiltryUlic) {
 export async function ulice(f: FiltryUlic) {
   const { sql, par } = warunki(f);
   const limit = Math.min(f.limit ?? 200, 2000);
-  return zapytaj<WierszUlicy>(
+  return zapytaj<WierszUlicy & { url_pdf?: string }>(
     `SELECT v.id, v.slug, v.simc, v.sym_ul, v.miejscowosc, v.cecha, v.nazwa,
             v.nazwa_pelna, v.dlugosc_m, v.kategorie, v.zarzadcy, v.zarzadcy_kody,
             v.numery_drog, v.zrodla, v.pewnosc_min, v.liczba_odcinkow,
-            v.ma_luke, v.wielu_zarzadcow, u.x_2180, u.y_2180
+            v.ma_luke, v.wielu_zarzadcow, u.x_2180, u.y_2180,
+            (SELECT a.url_pdf FROM akt_ulica au JOIN akt_prawny a ON a.id = au.akt_id WHERE au.ulica_id = v.id AND a.url_pdf IS NOT NULL LIMIT 1) AS url_pdf
        FROM v_ulica_zarzadcy v
        JOIN ulica u ON u.id = v.id
        ${sql}

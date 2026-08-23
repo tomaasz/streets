@@ -24,6 +24,7 @@ export type WierszUlicy = {
   wielu_zarzadcow: boolean | null;
   x_2180: number | null;
   y_2180: number | null;
+  url_pdf?: string;
   geom: GeoJSONLinie | null;
 };
 
