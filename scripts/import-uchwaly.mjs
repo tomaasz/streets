@@ -126,15 +126,17 @@ async function main() {
     // nazwy akt wszedłby do bazy drugi raz, bo klucz to (rodzaj, numer, organ).
     const organ = kanonicznyOrgan(akt.organ_zrodlowy) ?? 'nieustalony';
     const [zapisany] = await q(
-      `INSERT INTO akt_prawny (organ, rodzaj, numer, data_podjecia, tytul, zrodlo, uwagi)
-       VALUES ($1, 'uchwała', $2, $3, $4, 'uchwala', $5)
+      `INSERT INTO akt_prawny (organ, rodzaj, numer, data_podjecia, tytul, zrodlo, url_pdf, uwagi)
+       VALUES ($1, 'uchwała', $2, $3, $4, 'uchwala', $5, $6)
        ON CONFLICT (rodzaj, numer, organ) DO UPDATE SET
          data_podjecia = COALESCE(EXCLUDED.data_podjecia, akt_prawny.data_podjecia),
          tytul = EXCLUDED.tytul,
          zrodlo = EXCLUDED.zrodlo,
+         url_pdf = EXCLUDED.url_pdf,
          uwagi = EXCLUDED.uwagi
        RETURNING id`,
       [organ, akt.numer, akt.data_podjecia, akt.tytul,
+       `/uchwaly/${akt.plik}`,
        `Odczytane z ${akt.plik}`]
     );
 
