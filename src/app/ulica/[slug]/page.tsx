@@ -133,13 +133,19 @@ export default async function Strona({
                     ) : null}
                   </Pole>
                   <Pole etykieta="Źródło">
-                    {o.zrodlo_url ? (
-                      <a href={o.zrodlo_url} rel="noreferrer" target="_blank">
-                        {o.zrodlo_nazwa ?? o.zrodlo}
-                      </a>
-                    ) : (
-                      (o.zrodlo_nazwa ?? o.zrodlo)
-                    )}
+                    {(() => {
+                      let url = o.zrodlo_url;
+                      if (o.zrodlo === 'bdot10k') {
+                        url = 'https://opendata.geoportal.gov.pl/bdot10k/schemat2021/14/1435_GML.zip';
+                      }
+                      return url ? (
+                        <a href={url} rel="noreferrer" target="_blank">
+                          {o.zrodlo_nazwa ?? o.zrodlo}
+                        </a>
+                      ) : (
+                        (o.zrodlo_nazwa ?? o.zrodlo)
+                      );
+                    })()}
                   </Pole>
                 </dl>
 
