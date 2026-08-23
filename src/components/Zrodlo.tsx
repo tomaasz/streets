@@ -20,10 +20,14 @@ export function ZnacznikZrodla({
   kody,
   pewnosc,
   slownik,
+  x_2180,
+  y_2180,
 }: {
   kody: string[];
   pewnosc?: number | null;
   slownik: Map<string, Zrodlo>;
+  x_2180?: number | null;
+  y_2180?: number | null;
 }) {
   if (!kody.length) return <span className="text-[var(--tekst-2)]">—</span>;
 
@@ -40,7 +44,13 @@ export function ZnacznikZrodla({
         // HOTFIX: dopóki baza się nie odświeży na produkcji (w poniedziałek),
         // wymuszamy tu właściwy, poprawny adres pobierania.
         if (kod === 'bdot10k') {
-          linkUrl = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
+          if (x_2180 && y_2180) {
+            // bbox o wielkości 1x1 km wokół środka ulicy
+            const bbox = `${x_2180 - 500},${y_2180 - 500},${x_2180 + 500},${y_2180 + 500}`;
+            linkUrl = `https://mapy.geoportal.gov.pl/imap/Imgp_2.html?bbox=${bbox}`;
+          } else {
+            linkUrl = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
+          }
         }
 
         return (

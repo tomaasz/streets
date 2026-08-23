@@ -39,8 +39,9 @@ export async function ulice(f: FiltryUlic) {
     `SELECT v.id, v.slug, v.simc, v.sym_ul, v.miejscowosc, v.cecha, v.nazwa,
             v.nazwa_pelna, v.dlugosc_m, v.kategorie, v.zarzadcy, v.zarzadcy_kody,
             v.numery_drog, v.zrodla, v.pewnosc_min, v.liczba_odcinkow,
-            v.ma_luke, v.wielu_zarzadcow
+            v.ma_luke, v.wielu_zarzadcow, u.x_2180, u.y_2180
        FROM v_ulica_zarzadcy v
+       JOIN ulica u ON u.id = v.id
        ${sql}
       ORDER BY v.miejscowosc, v.nazwa
       LIMIT ${limit} OFFSET ${Math.max(0, f.offset ?? 0)}`,

@@ -136,7 +136,12 @@ export default async function Strona({
                     {(() => {
                       let url = o.zrodlo_url;
                       if (o.zrodlo === 'bdot10k') {
-                        url = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
+                        if (u.x_2180 && u.y_2180) {
+                          const bbox = `${u.x_2180 - 500},${u.y_2180 - 500},${u.x_2180 + 500},${u.y_2180 + 500}`;
+                          url = `https://mapy.geoportal.gov.pl/imap/Imgp_2.html?bbox=${bbox}`;
+                        } else {
+                          url = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
+                        }
                       }
                       return url ? (
                         <a href={url} rel="noreferrer" target="_blank">

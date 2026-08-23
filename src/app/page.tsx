@@ -204,6 +204,8 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                     kody={u.zrodla}
                     pewnosc={u.pewnosc_min}
                     slownik={slownikZrodel}
+                    x_2180={u.x_2180}
+                    y_2180={u.y_2180}
                   />
                 </td>
                 <td className="text-right whitespace-nowrap">{metryNaKm(u.dlugosc_m)}</td>

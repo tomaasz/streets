@@ -22,6 +22,8 @@ export type WierszUlicy = {
   liczba_odcinkow: number;
   ma_luke: boolean | null;
   wielu_zarzadcow: boolean | null;
+  x_2180: number | null;
+  y_2180: number | null;
   geom: GeoJSONLinie | null;
 };
 
