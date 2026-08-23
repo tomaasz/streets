@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { odcinkiUlicy, ulica } from '@/lib/zapytania';
+import { aktyUlicy, odcinkiUlicy, ulica } from '@/lib/zapytania';
 import { metryNaKm } from '@/lib/typy';
 import { Mapa } from '@/components/Mapa';
 import { MapaInteraktywna } from '@/components/MapaInteraktywna';
@@ -18,6 +18,7 @@ export default async function Strona({
   if (!u) notFound();
 
   const odcinki = await odcinkiUlicy(u.id);
+  const akty = await aktyUlicy(u.id);
 
   return (
     <>
@@ -117,7 +118,20 @@ export default async function Strona({
                     <Pole etykieta="Utrzymujący (porozumienie)">{o.utrzymujacy}</Pole>
                   ) : null}
                   {o.podstawa_prawna ? (
-                    <Pole etykieta="Podstawa prawna">{o.podstawa_prawna}</Pole>
+                    <Pole etykieta="Podstawa prawna">
+                      {(() => {
+                        // Próbujemy znaleźć akt w liście powiązanych aktów na podstawie tekstu
+                        const akt = akty.find((a) => o.podstawa_prawna?.includes(`nr ${a.numer}`));
+                        if (akt?.url_pdf) {
+                          return (
+                            <a href={akt.url_pdf} target="_blank" rel="noreferrer">
+                              {o.podstawa_prawna}
+                            </a>
+                          );
+                        }
+                        return o.podstawa_prawna;
+                      })()}
+                    </Pole>
                   ) : null}
                   {o.klasa ? <Pole etykieta="Klasa drogi">{o.klasa}</Pole> : null}
                   {o.nawierzchnia ? (
@@ -142,7 +156,13 @@ export default async function Strona({
                         } else {
                           url = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
                         }
+                      } else if (o.zrodlo === 'uchwala') {
+                        const akt = akty.find((a) => o.podstawa_prawna?.includes(`nr ${a.numer}`));
+                        if (akt?.url_pdf) {
+                          url = akt.url_pdf;
+                        }
                       }
+                      
                       return url ? (
                         <a href={url} rel="noreferrer" target="_blank">
                           {o.zrodlo_nazwa ?? o.zrodlo}
