@@ -136,7 +136,7 @@ export default async function Strona({
                     {(() => {
                       let url = o.zrodlo_url;
                       if (o.zrodlo === 'bdot10k') {
-                        url = 'https://opendata.geoportal.gov.pl/bdot10k/schemat2021/14/1435_GML.zip';
+                        url = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
                       }
                       return url ? (
                         <a href={url} rel="noreferrer" target="_blank">

@@ -40,7 +40,7 @@ export function ZnacznikZrodla({
         // HOTFIX: dopóki baza się nie odświeży na produkcji (w poniedziałek),
         // wymuszamy tu właściwy, poprawny adres pobierania.
         if (kod === 'bdot10k') {
-          linkUrl = 'https://opendata.geoportal.gov.pl/bdot10k/schemat2021/14/1435_GML.zip';
+          linkUrl = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
         }
 
         return (
