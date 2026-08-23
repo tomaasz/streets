@@ -68,6 +68,9 @@ jobs:
       - name: Wsad danych
         run: npm run db:seed
 
+      - name: Przetworzenie uchwał
+        run: npm run data:uchwaly
+
       - name: Raport stanu bazy
         run: |
           npm run --silent raport > raport.md
