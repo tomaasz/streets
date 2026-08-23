@@ -35,11 +35,19 @@ export function ZnacznikZrodla({
         const tytul = z
           ? `${z.nazwa}${z.gestor ? ` · ${z.gestor}` : ''}`
           : kod;
+          
+        let linkUrl = z?.url;
+        // HOTFIX: dopóki baza się nie odświeży na produkcji (w poniedziałek),
+        // wymuszamy tu właściwy, poprawny adres pobierania.
+        if (kod === 'bdot10k') {
+          linkUrl = 'https://opendata.geoportal.gov.pl/bdot10k/schemat2021/14/1435_GML.zip';
+        }
+
         return (
           <span key={kod}>
             {i > 0 ? <span className="text-[var(--tekst-2)]">, </span> : null}
-            {z?.url ? (
-              <a href={z.url} title={tytul} rel="noreferrer" target="_blank">
+            {linkUrl ? (
+              <a href={linkUrl} title={tytul} rel="noreferrer" target="_blank">
                 {etykieta}
               </a>
             ) : (
