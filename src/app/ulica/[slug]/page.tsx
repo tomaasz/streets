@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { aktyUlicy, odcinkiUlicy, ulica } from '@/lib/zapytania';
+import { odcinkiUlicy, ulica } from '@/lib/zapytania';
 import { metryNaKm } from '@/lib/typy';
+import { bdot10kUrl } from '@/lib/zrodlo';
 import { Mapa } from '@/components/Mapa';
 import { MapaInteraktywna } from '@/components/MapaInteraktywna';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
@@ -18,7 +19,6 @@ export default async function Strona({
   if (!u) notFound();
 
   const odcinki = await odcinkiUlicy(u.id);
-  const akty = await aktyUlicy(u.id);
 
   return (
     <>
@@ -119,18 +119,13 @@ export default async function Strona({
                   ) : null}
                   {o.podstawa_prawna ? (
                     <Pole etykieta="Podstawa prawna">
-                      {(() => {
-                        // Próbujemy znaleźć akt w liście powiązanych aktów na podstawie tekstu
-                        const akt = akty.find((a) => o.podstawa_prawna?.includes(`nr ${a.numer}`));
-                        if (akt?.url_pdf) {
-                          return (
-                            <a href={akt.url_pdf} target="_blank" rel="noreferrer">
-                              {o.podstawa_prawna}
-                            </a>
-                          );
-                        }
-                        return o.podstawa_prawna;
-                      })()}
+                      {o.akt_url_pdf ? (
+                        <a href={o.akt_url_pdf} target="_blank" rel="noreferrer">
+                          {o.podstawa_prawna}
+                        </a>
+                      ) : (
+                        o.podstawa_prawna
+                      )}
                     </Pole>
                   ) : null}
                   {o.klasa ? <Pole etykieta="Klasa drogi">{o.klasa}</Pole> : null}
@@ -150,17 +145,9 @@ export default async function Strona({
                     {(() => {
                       let url = o.zrodlo_url;
                       if (o.zrodlo === 'bdot10k') {
-                        if (u.x_2180 && u.y_2180) {
-                          const bbox = `${u.x_2180 - 500},${u.y_2180 - 500},${u.x_2180 + 500},${u.y_2180 + 500}`;
-                          url = `https://mapy.geoportal.gov.pl/imap/Imgp_2.html?bbox=${bbox}`;
-                        } else {
-                          url = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
-                        }
-                      } else if (o.zrodlo === 'uchwala') {
-                        const akt = akty.find((a) => o.podstawa_prawna?.includes(`nr ${a.numer}`));
-                        if (akt?.url_pdf) {
-                          url = akt.url_pdf;
-                        }
+                        url = bdot10kUrl(u.x_2180, u.y_2180);
+                      } else if (o.zrodlo === 'uchwala' && o.akt_url_pdf) {
+                        url = o.akt_url_pdf;
                       }
                       
                       return url ? (

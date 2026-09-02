@@ -57,7 +57,14 @@ export function pula(): Pool {
       max: 1,
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 10_000,
-      ssl: cs.includes('sslmode=disable') ? false : { rejectUnauthorized: false },
+      // rejectUnauthorized: true weryfikuje certyfikat serwera przeciw
+      // systemowemu zbiorowi zaufanych CA Node.js — Neon i Supabase (oba
+      // wymienione w docs/wdrozenie.md) używają certyfikatów z publicznie
+      // zaufanych CA, więc to działa bez dokładania własnego łańcucha.
+      // false wyłączałoby tę weryfikację całkowicie: kanał zostaje
+      // zaszyfrowany, ale klient przyjąłby certyfikat od kogokolwiek —
+      // otwiera to na man-in-the-middle na connection stringu i danych.
+      ssl: cs.includes('sslmode=disable') ? false : { rejectUnauthorized: true },
     });
     pool.on('connect', (klient) => {
       void klient.query(`SET search_path TO "${nazwa}", public`);

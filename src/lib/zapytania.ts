@@ -76,12 +76,23 @@ export async function odcinkiUlicy(ulicaId: number) {
             z.jednostka, z.telefon, z.email, z.www, z.podstawa_prawna,
             zr.skrot AS zrodlo_skrot, zr.nazwa AS zrodlo_nazwa, zr.url AS zrodlo_url,
             u.nazwa AS utrzymujacy,
-            d.przebieg
+            d.przebieg,
+            akt.numer AS akt_numer, akt.url_pdf AS akt_url_pdf
        FROM odcinek_drogi o
        LEFT JOIN zarzadca z ON z.id = o.zarzadca_id
        LEFT JOIN zarzadca u ON u.id = o.utrzymujacy_id
        LEFT JOIN droga d    ON d.id = o.droga_id
        LEFT JOIN zrodlo_danych zr ON zr.kod = o.zrodlo
+       -- podstawa prawna jako klucz obcy, nie jako dopasowanie tekstu:
+       -- zobacz db/migrations/0006_akt_odcinek.sql
+       LEFT JOIN LATERAL (
+         SELECT a.numer, a.url_pdf
+           FROM akt_odcinek ao
+           JOIN akt_prawny a ON a.id = ao.akt_id
+          WHERE ao.odcinek_id = o.id AND ao.rola = 'zaliczenie do kategorii'
+          ORDER BY a.data_podjecia DESC NULLS LAST
+          LIMIT 1
+       ) akt ON true
       WHERE o.ulica_id = $1
       ORDER BY o.kategoria, o.dlugosc_m DESC NULLS LAST`,
     [ulicaId]

@@ -5,6 +5,10 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 
+# Next 16 generuje je przy każdym dev/build (agentRules w next.config.ts)
+/AGENTS.md
+/CLAUDE.md
+
 # Lokalne sekrety
 .env
 .env.local

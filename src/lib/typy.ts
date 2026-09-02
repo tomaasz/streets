@@ -52,6 +52,9 @@ export type Odcinek = {
   przebieg: string | null;
   uwagi: string | null;
   geom: GeoJSONLinie | null;
+  /** Akt prawny powiązany z tym odcinkiem przez akt_odcinek — klucz obcy, nie zgadywanie po tekście. */
+  akt_numer: string | null;
+  akt_url_pdf: string | null;
 };
 
 export const KATEGORIE = [

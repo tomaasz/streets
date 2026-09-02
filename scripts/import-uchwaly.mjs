@@ -115,7 +115,8 @@ async function main() {
 
   const bezDopasowania = [];
   const bezOdcinkow = [];
-  // ulica_id -> podstawa prawna, na podstawie ktorej wchodzi regula pierwszenstwa
+  // ulica_id -> { podstawa, aktId }, na podstawie ktorej wchodzi regula pierwszenstwa
+  // i przez ktora akt_odcinek wie, ktory akt jest zrodlem powiazania
   const nadpisania = new Map();
   let powiazanUlic = 0;
   let powiazanDrog = 0;
@@ -187,7 +188,10 @@ async function main() {
           [zapisany.id, u.id, poz.opis]
         );
         powiazanUlic++;
-        nadpisania.set(u.id, podstawaPrawna({ ...akt, organ }));
+        nadpisania.set(u.id, {
+          podstawa: podstawaPrawna({ ...akt, organ }),
+          aktId: zapisany.id,
+        });
 
         const [{ ile }] = await q(
           'SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE ulica_id = $1',
@@ -201,6 +205,7 @@ async function main() {
             dlugosc_km: poz.dlugosc_km,
             opis: poz.opis,
             podstawa: podstawaPrawna({ ...akt, organ }),
+            aktId: zapisany.id,
           });
         }
       }
@@ -208,14 +213,21 @@ async function main() {
   }
 
   for (const o of bezOdcinkow) {
-    await klient.query(
+    const [{ id: odcinekId }] = await q(
       `INSERT INTO odcinek_drogi
          (ulica_id, kategoria, zarzadca_id, opis_odcinka, dlugosc_m,
           podstawa_prawna, zrodlo, pewnosc, uwagi)
        VALUES ($1, 'gminna', $2, $3, $4, $5, 'uchwala', 3,
-               'Odcinek założony na podstawie uchwały — BDOT10k go nie zna.')`,
+               'Odcinek założony na podstawie uchwały — BDOT10k go nie zna.')
+       RETURNING id`,
       [o.ulica_id, idZarzadcy, o.opis,
        o.dlugosc_km == null ? null : Math.round(o.dlugosc_km * 1000), o.podstawa]
+    );
+    await klient.query(
+      `INSERT INTO akt_odcinek (akt_id, odcinek_id, rola)
+       VALUES ($1, $2, 'zaliczenie do kategorii')
+       ON CONFLICT (akt_id, odcinek_id, rola) DO NOTHING`,
+      [o.aktId, odcinekId]
     );
   }
 
@@ -245,7 +257,8 @@ async function main() {
   // wyliczana od nowa co tydzień, a nie zapisana raz na zawsze.
   // ------------------------------------------------------------------
   const idUlic = [...nadpisania.keys()];
-  const podstawy = idUlic.map((id) => nadpisania.get(id));
+  const podstawy = idUlic.map((id) => nadpisania.get(id).podstawa);
+  const aktyDlaUlic = idUlic.map((id) => nadpisania.get(id).aktId);
   const NADRZEDNE = ['krajowa', 'wojewodzka', 'powiatowa'];
 
   const { rowCount: przekwalifikowanych } = await klient.query(
@@ -280,6 +293,35 @@ async function main() {
     [idUlic, podstawy, idZarzadcy]
   );
 
+  // ------------------------------------------------------------------
+  // akt_odcinek: klucz obcy, nie tylko tekst w podstawa_prawna.
+  //
+  // Oba UPDATE-y wyżej ustawiają zrodlo = 'uchwala' na dokładnie tych
+  // odcinkach, które reguła pierwszeństwa właśnie przypisała do uchwały —
+  // to ten sam znacznik, po którym rozpoznaje je scripts/seed.mjs. Stare
+  // powiązania kasujemy przed odtworzeniem z tego samego powodu, co
+  // akt_ulica/akt_droga wyżej: gdy zwycięski akt dla ulicy się zmienił
+  // (poprawka w danych źródłowych), stare powiązanie nie może zostać.
+  // ------------------------------------------------------------------
+  await klient.query(
+    `DELETE FROM akt_odcinek ao
+       USING odcinek_drogi o
+      WHERE ao.odcinek_id = o.id
+        AND o.ulica_id = ANY($1::int[])
+        AND ao.rola = 'zaliczenie do kategorii'`,
+    [idUlic]
+  );
+
+  const { rowCount: powiazanOdcinkow } = await klient.query(
+    `INSERT INTO akt_odcinek (akt_id, odcinek_id, rola)
+     SELECT p.akt_id, o.id, 'zaliczenie do kategorii'
+       FROM unnest($1::int[], $2::int[]) AS p(ulica_id, akt_id)
+       JOIN odcinek_drogi o ON o.ulica_id = p.ulica_id
+      WHERE o.zrodlo = 'uchwala'
+     ON CONFLICT (akt_id, odcinek_id, rola) DO NOTHING`,
+    [idUlic, aktyDlaUlic]
+  );
+
   const nietkniete = (
     await q(
       `SELECT o.kategoria::text k, COUNT(*)::int n FROM odcinek_drogi o
@@ -306,6 +348,7 @@ async function main() {
     `\nReguła pierwszeństwa (uchwała > BDOT10k):\n` +
       `  przekwalifikowanych z wewnętrznej na gminną: ${przekwalifikowanych}\n` +
       `  potwierdzonych jako gminne (podstawa prawna, pewność 3): ${potwierdzonych}\n` +
+      `  powiązań akt–odcinek (akt_odcinek): ${powiazanOdcinkow}\n` +
       `  nietkniętych, bo kategoria nadrzędna: ` +
       (nietkniete.map((r) => `${r.k} ${r.n}`).join(', ') || 'brak') + '\n'
   );

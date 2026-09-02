@@ -56,7 +56,8 @@ export function polaczenie() {
   }
   return new pg.Client({
     connectionString: cs,
-    ssl: cs.includes('sslmode=disable') ? false : { rejectUnauthorized: false },
+    // patrz src/lib/db.ts — ten sam powód dla weryfikacji certyfikatu
+    ssl: cs.includes('sslmode=disable') ? false : { rejectUnauthorized: true },
   });
 }
 

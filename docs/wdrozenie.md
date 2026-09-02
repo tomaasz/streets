@@ -4,14 +4,19 @@ Całość mieści się w darmowych planach: Vercel Hobby + Neon Free.
 
 ## 1. Baza danych
 
-W Vercel Marketplace (Project → Storage) darmowy plan i Postgresa mają:
+Aplikacja wymaga PostGIS (migracja `0003_postgis.sql` zakłada rozszerzenie
+i na nim stoi upraszczanie geometrii oraz filtrowanie mapy po zasięgu widoku
+— patrz `docs/model-danych.md`). W Vercel Marketplace (Project → Storage)
+darmowy plan i PostGIS razem mają:
 
 | Provider | PostGIS | Uwagi |
 |---|---|---|
 | **Neon** | tak | 0,5 GB, baza usypia po nieaktywności; wstrzykuje `DATABASE_URL` |
 | **Supabase** | tak | 500 MB, projekt pauzowany po tygodniu bezczynności; wstrzykuje `POSTGRES_URL` |
-| **Nile** | nie | Postgres pod multi-tenant |
-| **Prisma Postgres** | nie | limit operacji, nie rozmiaru |
+
+`Nile` i `Prisma Postgres` mają darmowy plan, ale bez PostGIS — migracja
+`0003` zawiedzie na `CREATE EXTENSION postgis`, więc nie nadają się dla tej
+aplikacji.
 
 Aplikacja czyta connection string po kolei z `DATABASE_URL`, `POSTGRES_URL`,
 `DATABASE_URL_UNPOOLED`, `POSTGRES_URL_NON_POOLING` i `POSTGRES_PRISMA_URL`,
@@ -54,8 +59,8 @@ i nigdzie się nie przewija.
 1. **Settings → Secrets and variables → Actions → New repository secret**,
    nazwa `DATABASE_URL`, wartość — pooled connection string.
 2. **Actions → Wgraj dane do bazy → Run workflow.** Podaj schemat
-   (przy bazie współdzielonej zostaw `drogi`), zaznacz `postgis`, jeśli
-   chcesz kolumny geometryczne.
+   (przy bazie współdzielonej zostaw `drogi`). Migracja zakłada PostGIS
+   automatycznie.
 3. Raport ze stanem bazy ląduje w podsumowaniu joba i jako artefakt.
 
 ### Schemat i dane — z lokalnej maszyny
@@ -78,11 +83,9 @@ DATABASE_URL="postgresql://…" npm run db:seed
 DATABASE_URL="postgresql://…" npm run raport
 ```
 
-Jeśli baza ma PostGIS i chcesz zapytań przestrzennych:
-
-```bash
-DATABASE_URL="postgresql://…" node scripts/migrate.mjs --postgis
-```
+`npm run db:migrate` zakłada rozszerzenie PostGIS przy okazji (migracja
+`0003`) — osobnego kroku nie ma, baza musi je tylko udostępniać (patrz
+tabela dostawców wyżej).
 
 ## 2. Projekt na Vercelu
 

@@ -107,8 +107,8 @@ dla którego model musi mieć odcinki.
 
 ```bash
 npm install
-cp .env.example .env          # wpisz DATABASE_URL
-npm run db:migrate            # schemat
+cp .env.example .env          # wpisz DATABASE_URL (Postgres z PostGIS — patrz niżej)
+npm run db:migrate            # schemat, w tym rozszerzenie PostGIS
 npm run data:all              # pobierz PRG + BDOT10k i zbuduj odcinki (~40 min)
 npm run db:seed               # wsad do bazy
 npm run dev                   # http://localhost:3000
@@ -117,20 +117,18 @@ npm run dev                   # http://localhost:3000
 `npm run data:all` odpytuje usługi GUGiK; jeżeli `data/raw/*.json` już są
 w repozytorium, można od razu przejść do `db:seed`.
 
-Baza z PostGIS (Neon, Supabase) — dodatkowo:
-
-```bash
-node scripts/migrate.mjs --postgis
-```
-
-Migracja `0003` dokłada kolumny `geometry(MultiLineString, 4326)` obok
-`jsonb` i indeksy GiST. Aplikacja działa bez niej — geometria jest trzymana
-jako GeoJSON w `jsonb`, żeby baza chodziła na dowolnym darmowym hostingu.
+**PostGIS jest wymagany**, nie opcjonalny: migracja `0003` zakłada
+rozszerzenie i dokłada kolumny `geometry(MultiLineString, 4326)` — generowane
+automatycznie z `geom` (jsonb) przy każdym zapisie — z indeksami GiST.
+`/api/mapa` liczy na nich upraszczanie geometrii i filtrowanie po zasięgu
+widoku wprost w bazie, zamiast w JavaScripcie przy każdym zapytaniu. Neon
+i Supabase — jedyni darmowi dostawcy Postgresa wymienieni niżej — oba mają
+PostGIS na darmowym planie.
 
 ## Wdrożenie: Vercel + Postgres w chmurze
 
 1. **Baza.** Vercel → Storage → Neon albo Supabase (oba mają darmowy plan
-   i PostGIS). Aplikacja czyta connection string z `DATABASE_URL`,
+   i PostGIS — wymagany, patrz wyżej). Aplikacja czyta connection string z `DATABASE_URL`,
    `POSTGRES_URL`, `DATABASE_URL_UNPOOLED`, `POSTGRES_URL_NON_POOLING` lub
    `POSTGRES_PRISMA_URL`, więc obie integracje działają bez aliasu. Używaj puli
    połączeń (Neon: host z sufiksem `-pooler`, Supabase: port 6543).
@@ -205,7 +203,7 @@ Co z tego wynika w praktyce:
 ## Struktura
 
 ```
-db/migrations/     schemat (0003 z PostGIS jest opcjonalna)
+db/migrations/     schemat (0003 zakłada PostGIS — wymagany)
 db/seed/           słowniki: zarządcy, źródła, opisy dróg — ręcznie utrzymywane
 scripts/           harvest-prg, harvest-bdot, harvest-akty-bip, build-odcinki, migrate, seed
 data/raw/          surowe pobrania z GUGiK (w repo, żeby dało się odtworzyć wynik)

@@ -197,6 +197,16 @@ async function main() {
   process.stderr.write(`Drogi numerowane: ${idDrogi.size}\n`);
 
   // --- odcinki ----------------------------------------------------------
+  // Ile było przed skasowaniem — potrzebne do progu bezpieczeństwa niżej.
+  // Zewnętrzna kontrola (deploy/kontrola-danych.py) sprawdza pliki źródłowe
+  // przed uruchomieniem tego skryptu, ale nie każda ścieżka wywołania jej
+  // wpina (patrz .github/workflows/wgraj-dane.yml) — ten próg działa zawsze,
+  // wewnątrz tej samej transakcji, niezależnie od tego, czy zewnętrzna
+  // kontrola w ogóle zdążyła się uruchomić.
+  const [{ ile: bylo }] = await klient
+    .query("SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE zrodlo = 'bdot10k'")
+    .then((r) => r.rows);
+
   await klient.query('DELETE FROM odcinek_drogi WHERE zrodlo = $1', ['bdot10k']);
 
   const wierszeOdcinkow = odc.odcinki.map((o) => {
@@ -229,7 +239,21 @@ async function main() {
         klasa text, zarzadca_id smallint, dlugosc_m integer,
         nawierzchnia text, opis_odcinka text, geom jsonb)`, 250);
   const wstawione = wierszeOdcinkow.length;
-  process.stderr.write(`Odcinki: ${wstawione}\n`);
+  process.stderr.write(`Odcinki: ${wstawione} (poprzednio ${bylo})\n`);
+
+  // Próg 50%: dużo więcej niż zwykła zmienność źródeł tydzień do tygodnia,
+  // dużo mniej niż rząd wielkości — łapie pusty/obcięty data/odcinki.json,
+  // nie łapie normalnej zmienności BDOT10k. Ten sam próg co PROG_BLOKADY
+  // w deploy/kontrola-danych.py, tu jako druga, niezależna linia obrony.
+  if (bylo > 0 && wstawione < bylo * 0.5) {
+    await klient.query('ROLLBACK');
+    await klient.end();
+    throw new Error(
+      `Odcinków do wstawienia (${wstawione}) to mniej niż połowa tego, co już ` +
+        `było w bazie (${bylo}) — wygląda na pusty albo obcięty data/odcinki.json. ` +
+        `Wsad wstrzymany, baza nietknięta. Sprawdź dane w data/ i uruchom ponownie ręcznie.`
+    );
+  }
 
   // --- akty prawa miejscowego -------------------------------------------
   // Kolejność ma znaczenie: BIP zna tytuł i PDF, e-dziennik dokłada pozycję

@@ -1,7 +1,5 @@
 import { createHash } from 'node:crypto';
 import { zapytaj } from '@/lib/db';
-import { uproscGeometrie } from '@/lib/geometria';
-import type { GeoJSONLinie } from '@/lib/typy';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +15,12 @@ export const dynamic = 'force-dynamic';
  *  1. Nazwy zarządców, źródeł i podstaw prawnych powtarzają się w setkach
  *     odcinków — idą raz, do `slowniki`, a przy odcinku zostaje indeks.
  *  2. Puste pola w ogóle nie trafiają do JSON-a zamiast lądować tam jako null.
- *  3. Geometria przechodzi przez Douglasa–Peuckera z tolerancją metra, czyli
- *     wyraźnie poniżej błędu własnego BDOT10k (mapa 1:10 000). Przy widoku
- *     całej gminy ucina to ponad połowę wierzchołków — i tyleż samo pracy
- *     rendererowi.
+ *  3. Geometria upraszcza się w bazie, na `geom_pg` (PostGIS, patrz
+ *     db/migrations/0003_postgis.sql) — ST_SimplifyPreserveTopology w metrach
+ *     PL-1992, nie Douglas–Peucker w Node.js na stopniach WGS84. Tolerancja
+ *     metra jest wyraźnie poniżej błędu własnego BDOT10k (mapa 1:10 000).
+ *     Przy widoku całej gminy ucina to ponad połowę wierzchołków — i tyleż
+ *     samo pracy bazie zamiast serwerowej funkcji przy każdym cache-missie.
  *
  * Na koniec odpowiedź dostaje ETag i `s-maxage`, więc drugie wejście na mapę
  * nie rusza już bazy: obsługuje je CDN.
@@ -39,7 +39,8 @@ type Wiersz = {
   zrodlo: string | null;
   zrodlo_nazwa: string | null;
   zrodlo_url: string | null;
-  geom: GeoJSONLinie | null;
+  /** GeoJSON jako tekst — wynik ST_AsGeoJSON, jeszcze nie sparsowany. */
+  geom_json: string | null;
 };
 
 /** Zbiera powtarzalne teksty do słownika i oddaje indeks. */
@@ -94,19 +95,33 @@ export async function GET(req: Request) {
   const tolerancja = Number.isFinite(zadana)
     ? Math.max(0, Math.min(25, zadana))
     : domyslnaTolerancja;
+  par.push(tolerancja);
+  const pTolerancja = par.length;
 
   // Identyfikatory na końcu ORDER BY nie są ozdobą: bez nich wiersze o tej
   // samej ulicy i kategorii (a takich grup jest kilkanaście) wracają
   // w dowolnej kolejności. Ciało odpowiedzi zmieniałoby się wtedy bajt
   // w bajt przy tych samych danych, a razem z nim ETag — i dwie instancje
   // serverless podawałyby CDN-owi dwa różne znaczniki tej samej treści.
+  //
+  // Uproszczenie idzie w PL-1992 (ST_Transform do 2180), nie na stopniach
+  // WGS84 — tolerancja w metrach jest wtedy dokładna, a nie przybliżona
+  // przez cos(szerokości), jak liczył poprzedni, wycofany kod w JS.
   const wiersze = await zapytaj<Wiersz>(
     `SELECT u.slug, u.nazwa_pelna, u.miejscowosc,
             o.kategoria::text AS kategoria, o.nr_drogi,
             o.dlugosc_m AS odcinek_dlugosc_m, o.pewnosc, o.podstawa_prawna,
             o.zrodlo, z.nazwa AS zarzadca,
             zr.nazwa AS zrodlo_nazwa, zr.url AS zrodlo_url,
-            COALESCE(o.geom, u.geom) AS geom
+            ST_AsGeoJSON(
+              ST_Transform(
+                ST_SimplifyPreserveTopology(
+                  ST_Transform(COALESCE(o.geom_pg, u.geom_pg), 2180),
+                  $${pTolerancja}
+                ),
+                4326
+              ), 6
+            ) AS geom_json
        FROM ulica u
        LEFT JOIN odcinek_drogi o ON o.ulica_id = u.id
        LEFT JOIN zarzadca z      ON z.id = o.zarzadca_id
@@ -123,8 +138,8 @@ export async function GET(req: Request) {
 
   const features: unknown[] = [];
   for (const w of wiersze) {
-    const geom = uproscGeometrie(w.geom, tolerancja);
-    if (!geom) continue;
+    if (!w.geom_json) continue;
+    const geom = JSON.parse(w.geom_json);
 
     let zrodlo: number | undefined;
     if (w.zrodlo) {

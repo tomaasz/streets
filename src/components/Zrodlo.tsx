@@ -1,3 +1,4 @@
+import { bdot10kUrl } from '@/lib/zrodlo';
 import type { Zrodlo } from '@/lib/typy';
 
 const OPIS_PEWNOSCI: Record<number, string> = {
@@ -43,16 +44,8 @@ export function ZnacznikZrodla({
           : kod;
           
         let linkUrl = z?.url;
-        // HOTFIX: dopóki baza się nie odświeży na produkcji (w poniedziałek),
-        // wymuszamy tu właściwy, poprawny adres pobierania.
         if (kod === 'bdot10k') {
-          if (x_2180 && y_2180) {
-            // bbox o wielkości 1x1 km wokół środka ulicy
-            const bbox = `${x_2180 - 500},${y_2180 - 500},${x_2180 + 500},${y_2180 + 500}`;
-            linkUrl = `https://mapy.geoportal.gov.pl/imap/Imgp_2.html?bbox=${bbox}`;
-          } else {
-            linkUrl = 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/';
-          }
+          linkUrl = bdot10kUrl(x_2180, y_2180);
         } else if (kod === 'uchwala' && url_pdf) {
           linkUrl = url_pdf;
         }

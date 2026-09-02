@@ -3,19 +3,22 @@
  * Uruchamia migracje z db/migrations w kolejności nazw.
  *
  *   --reset     wyczyść schemat docelowy przed migracją
- *   --postgis   dołóż migrację 0003 (wymaga rozszerzenia PostGIS)
  *   --force     pozwól na --reset schematu `public`
  *
  * Schemat bierze się z DB_SCHEMA (domyślnie `public`). Gdy bazę dzielisz
  * z inną aplikacją, ustaw np. DB_SCHEMA=drogi — wtedy nic się nie zderzy,
  * a --reset kasuje wyłącznie nasze tabele.
+ *
+ * PostGIS (migracja 0003) jest od teraz wymagany, nie opcjonalny — Neon
+ * i Supabase, jedyni darmowi dostawcy z docs/wdrozenie.md, oba go mają.
+ * Migracja sama zakłada rozszerzenie (`CREATE EXTENSION IF NOT EXISTS`),
+ * więc nie trzeba już osobnej flagi, żeby ją włączyć.
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { polaczenie, sprawdzSchemat } from './lib/db.mjs';
 
 const KATALOG = new URL('../db/migrations/', import.meta.url);
 const reset = process.argv.includes('--reset');
-const zPostgis = process.argv.includes('--postgis');
 const force = process.argv.includes('--force');
 
 const nazwa = sprawdzSchemat();
@@ -43,7 +46,6 @@ process.stderr.write(`Schemat: ${nazwa}\n`);
 
 const pliki = (await readdir(KATALOG))
   .filter((f) => f.endsWith('.sql'))
-  .filter((f) => zPostgis || !f.includes('postgis'))
   .sort();
 
 for (const plik of pliki) {

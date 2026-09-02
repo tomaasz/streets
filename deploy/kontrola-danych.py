@@ -19,7 +19,7 @@ import os
 import sys
 from pathlib import Path
 
-REPO = Path(os.environ.get("REPO", "/home/tomaasz/projekty/streets"))
+REPO = Path(os.environ.get("REPO") or Path(__file__).resolve().parent.parent)
 KONFIG = Path(
     os.environ.get(
         "PUNKT_ODNIESIENIA",

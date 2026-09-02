@@ -13,10 +13,14 @@ Obiekt adresowy z PRG. Klucz naturalny to para `(simc, sym_ul)` — sam `SYM_UL`
 powtarza się między miejscowościami. `slug` służy do adresów URL,
 `nazwa_pelna` jest kolumną generowaną (`cecha || ' ' || nazwa`).
 
-Geometria leży w `jsonb` jako GeoJSON w EPSG:4326. Wybór świadomy: dzięki temu
-baza działa na dowolnym darmowym Postgresie, bez PostGIS. Migracja
-`0003_postgis_opcjonalnie.sql` dokłada obok kolumnę `geometry` i indeksy GiST
-tam, gdzie rozszerzenie jest dostępne.
+Geometria leży w `jsonb` jako GeoJSON w EPSG:4326 — to kolumna źródłowa,
+wypełniana przez skrypty importu. Migracja `0003_postgis.sql` dokłada obok
+kolumnę `geometry`, generowaną automatycznie z `geom` (GENERATED ALWAYS AS,
+funkcje ST_* są IMMUTABLE), z indeksem GiST. PostGIS jest wymagany — Neon
+i Supabase, jedyni darmowi dostawcy z `docs/wdrozenie.md`, oba go mają.
+`/api/mapa` upraszcza geometrię i filtruje po zasięgu widoku na kolumnie
+`geometry`, więc jsonb zostaje formatem źródłowym i wymiany (eksport
+GeoJSON), a nie tym, na czym stoją właściwe zapytania przestrzenne.
 
 ## `odcinek_drogi`
 
@@ -33,6 +37,13 @@ zarządcy.
 | `wlasciciel`, `dzialki` | dla dróg wewnętrznych: kto i na czym (art. 8 ust. 2) |
 | `zrodlo`, `pewnosc` | skąd rekord i ile mu ufamy |
 | `podstawa_prawna` | numer uchwały albo rozporządzenia |
+
+`podstawa_prawna` jest tekstem do wyświetlenia, ale nie jedynym śladem
+powiązania z aktem: tabela `akt_odcinek` (migracja `0006`) wiąże odcinek
+z konkretnym wierszem `akt_prawny` przez klucz obcy, sprawdzany przez bazę —
+zamiast dopasowywać numer aktu jako podciąg tekstu w warstwie prezentacji.
+Wypełnia ją `scripts/import-uchwaly.mjs`, przy każdej zmianie kategorii albo
+zarządcy wynikającej z uchwały.
 
 `ulica_id` i `droga_id` mogą być puste jednocześnie i to jest stan poprawny:
 większość sieci w gminie to drogi polne, leśne i dojazdy do pól — bez nazwy

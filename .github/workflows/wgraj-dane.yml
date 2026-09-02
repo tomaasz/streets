@@ -24,11 +24,6 @@ on:
         required: true
         default: false
         type: boolean
-      postgis:
-        description: 'Dołożyć kolumny PostGIS (Neon i Supabase je mają)'
-        required: true
-        default: false
-        type: boolean
 
 concurrency:
   group: wgraj-dane
@@ -50,6 +45,10 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - name: Sprawdź, czy sekret jest ustawiony
         run: |
           if [ -z "$DATABASE_URL" ]; then
@@ -60,10 +59,19 @@ jobs:
       - run: npm ci
 
       - name: Migracje
-        run: |
-          node scripts/migrate.mjs \
-            ${{ inputs.reset && '--reset' || '' }} \
-            ${{ inputs.postgis && '--postgis' || '' }}
+        run: node scripts/migrate.mjs ${{ inputs.reset && '--reset' || '' }}
+
+      # Ta sama bramka, którą deploy/odswiezenie.sh stawia między pobraniem
+      # danych a wsadem — bez niej ta ścieżka (seed prosto z plików
+      # zacommitowanych w repo) mogłaby wgrać pusty albo obcięty
+      # data/odcinki.json bez żadnej kontroli. Punkt odniesienia leży
+      # w repo (deploy/punkt-odniesienia.json), więc bramka działa na
+      # runnerze bez żadnej ręcznej konfiguracji.
+      - name: Kontrola danych przed wsadem
+        env:
+          REPO: ${{ github.workspace }}
+          PUNKT_ODNIESIENIA: ${{ github.workspace }}/deploy/punkt-odniesienia.json
+        run: python3 deploy/kontrola-danych.py
 
       - name: Wsad danych
         run: npm run db:seed
