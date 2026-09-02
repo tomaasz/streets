@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { pula } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +31,16 @@ type Akt = {
   url_pdf?: string | null;
 };
 
+// Hashujemy oba stringi do stałej długości przed porównaniem: timingSafeEqual
+// rzuca wyjątkiem przy różnej długości buforów, więc samo jego użycie na
+// tekstach różnej długości zdradzałoby długość tokenu. Skrót eliminuje
+// tę różnicę, a zgodność skrótów SHA-256 implikuje zgodność wejść.
+function tokenyZgodne(a: string, b: string): boolean {
+  const ha = createHash('sha256').update(a).digest();
+  const hb = createHash('sha256').update(b).digest();
+  return timingSafeEqual(ha, hb);
+}
+
 const RODZAJE = new Set(['uchwała', 'zarządzenie', 'rozporządzenie', 'obwieszczenie']);
 const DATA = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -51,7 +62,7 @@ export async function POST(req: Request) {
     );
   }
   const podany = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  if (!podany || podany !== oczekiwany) {
+  if (!podany || !tokenyZgodne(podany, oczekiwany)) {
     return Response.json({ blad: 'Zły token.' }, { status: 401 });
   }
 
