@@ -258,11 +258,20 @@ async function main() {
   }
 
   // --- ręczna weryfikacja dróg wewnętrznych ------------------------------
+  // Jedyna dziś istniejąca droga podniesienia pewności odcinka wewnętrznego
+  // bez pełnej uchwały (patrz db/seed/weryfikacja-wewnetrznych.csv).
+  // `zrodlo` musi być kodem istniejącym w zrodlo_danych (FK) — 'reczne' nie
+  // istnieje, poprawny kod dla ustalenia z EGiB/objazdu w terenie to
+  // 'weryfikacja-terenowa' (domyslna_pewnosc=3, patrz db/seed/zrodla.csv).
+  // Bez ustawienia pewnosc/data_weryfikacji wpis nadal wyglądałby w
+  // v_braki jak surowy import maszynowy (pewnosc=1) mimo ręcznej weryfikacji.
   if (weryfikacjeCsv.length) {
     const zwroconeWeryfikacje = await wsadem(klient, weryfikacjeCsv, `
       UPDATE odcinek_drogi o
          SET zarzadca_id = z.id,
-             zrodlo = 'reczne',
+             zrodlo = 'weryfikacja-terenowa',
+             pewnosc = 3,
+             data_weryfikacji = CURRENT_DATE,
              uwagi = x.uwagi
         FROM json_to_recordset($1::json) AS x(slug text, zarzadca_kod text, uwagi text)
         JOIN ulica u ON u.slug = x.slug

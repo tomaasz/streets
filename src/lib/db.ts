@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-import { NAZWY_ZMIENNYCH, connectionString, schemat } from '../../scripts/lib/db.mjs';
+import { NAZWY_ZMIENNYCH, connectionString, sprawdzSchemat } from '../../scripts/lib/db.mjs';
 
 // Funkcje serverless na Vercelu żyją krótko i jest ich wiele naraz, więc
 // każda instancja trzyma najwyżej jedno połączenie. Na Neonie i Supabase
@@ -16,7 +16,10 @@ export function pula(): Pool {
           `postgres:// (sprawdzane: ${NAZWY_ZMIENNYCH.join(', ')} oraz dowolna *_URL)`
       );
     }
-    const nazwa = schemat();
+    // sprawdzSchemat, nie gołe schemat() — waliduje DB_SCHEMA regexem przed
+    // interpolacją do SET search_path niżej. To jedyna linia obrony: nazwy
+    // schematu nie da się w Postgresie sparametryzować przez $1.
+    const nazwa = sprawdzSchemat();
     const pool = new Pool({
       connectionString: cs,
       max: 1,
