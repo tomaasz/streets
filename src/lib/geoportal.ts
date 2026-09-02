@@ -88,6 +88,16 @@ export const PODKLADY: Podklad[] = [
     odPoziomu: 2,
     doPoziomu: 14,
   },
+  {
+    kod: 'osm',
+    nazwa: 'OpenStreetMap',
+    opis: 'Otwarta mapa społecznościowa (aktualniejsze nazwy ulic).',
+    url: '',
+    warstwa: '',
+    format: '',
+    odPoziomu: 0,
+    doPoziomu: 0,
+  },
 ];
 
 export type Siatka = {

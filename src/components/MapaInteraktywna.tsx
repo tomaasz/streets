@@ -69,7 +69,7 @@ const PUSTE_SLOWNIKI: Slowniki = { zarzadcy: [], podstawy: [], zrodla: [] };
 export function MapaInteraktywna({
   zrodloDanych,
   wysokosc = 520,
-  podkladDomyslny = 'topo',
+  podkladDomyslny = 'osm',
   legenda: zLegenda = true,
   children,
 }: {
@@ -85,7 +85,7 @@ export function MapaInteraktywna({
 
   const mapa = useRef<import('ol').Map | null>(null);
   const podklady = useRef<
-    Record<string, import('ol/layer/Tile').default<import('ol/source/WMTS').default>>
+    Record<string, import('ol/layer/Tile').default<import('ol/source/Tile').default>>
   >({});
   const nakladka = useRef<import('ol').Overlay | null>(null);
   const zasiegDanych = useRef<[number, number, number, number] | null>(null);
@@ -121,6 +121,7 @@ export function MapaInteraktywna({
           { get: projekcja },
           { register },
           { default: proj4 },
+          { default: ZrodloOSM },
         ] = await Promise.all([
           import('ol'),
           import('ol/layer/Tile'),
@@ -134,6 +135,7 @@ export function MapaInteraktywna({
           import('ol/proj'),
           import('ol/proj/proj4'),
           import('proj4'),
+          import('ol/source/OSM'),
         ] as const);
 
         if (zerwane || !kontener.current) return;
@@ -149,23 +151,30 @@ export function MapaInteraktywna({
 
         // ---- podkłady -----------------------------------------------
         for (const p of PODKLADY) {
-          const siatka = siatkaWmts(p, mnoznik);
-          podklady.current[p.kod] = new WarstwaKafli({
-            visible: p.kod === podkladDomyslny,
-            source: new ZrodloWMTS({
-              url: p.url,
-              layer: p.warstwa,
-              matrixSet: 'EPSG:2180',
-              format: p.format,
-              style: 'default',
-              requestEncoding: 'KVP',
-              projection: pl1992,
-              wrapX: false,
-              tileGrid: new SiatkaWMTS(siatka),
-              attributions:
-                '<a href="https://www.geoportal.gov.pl/" target="_blank" rel="noreferrer">Geoportal — GUGiK</a>',
-            }),
-          });
+          if (p.kod === 'osm') {
+            podklady.current[p.kod] = new WarstwaKafli({
+              visible: p.kod === podkladDomyslny,
+              source: new ZrodloOSM(),
+            });
+          } else {
+            const siatka = siatkaWmts(p, mnoznik);
+            podklady.current[p.kod] = new WarstwaKafli({
+              visible: p.kod === podkladDomyslny,
+              source: new ZrodloWMTS({
+                url: p.url,
+                layer: p.warstwa,
+                matrixSet: 'EPSG:2180',
+                format: p.format,
+                style: 'default',
+                requestEncoding: 'KVP',
+                projection: pl1992,
+                wrapX: false,
+                tileGrid: new SiatkaWMTS(siatka),
+                attributions:
+                  '<a href="https://www.geoportal.gov.pl/" target="_blank" rel="noreferrer">Geoportal — GUGiK</a>',
+              }),
+            });
+          }
         }
 
         // ---- kolory kategorii, prosto z motywu strony ----------------

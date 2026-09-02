@@ -55,7 +55,7 @@ export default async function Strona({
         */}
         <MapaInteraktywna
           zrodloDanych={`/api/mapa?slug=${encodeURIComponent(u.slug)}`}
-          podkladDomyslny="orto"
+          podkladDomyslny="osm"
           wysokosc={420}
           legenda={false}
         >
