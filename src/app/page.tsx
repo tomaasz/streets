@@ -22,6 +22,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
     miejscowosc: pierwszy(sp.miejscowosc),
     zarzadca: pierwszy(sp.zarzadca),
     limit: 300,
+    offset: Number(pierwszy(sp.offset)) || 0,
   };
 
   const wynik = await zBaza(() =>
@@ -39,10 +40,15 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
     wynik.dane;
   const slownikZrodel = new Map(listaZrodel.map((z) => [z.kod, z]));
 
+  const aktualneFiltry = {
+    ...(filtry.q && { q: filtry.q }),
+    ...(filtry.kategoria && { kategoria: filtry.kategoria }),
+    ...(filtry.miejscowosc && { miejscowosc: filtry.miejscowosc }),
+    ...(filtry.zarzadca && { zarzadca: filtry.zarzadca }),
+  };
+
   const parametryEksportu = new URLSearchParams(
-    Object.entries(filtry).flatMap(([k, v]) =>
-      v && k !== 'limit' ? [[k, String(v)]] : []
-    )
+    Object.entries(aktualneFiltry) as [string, string][]
   );
 
   return (
@@ -214,6 +220,30 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-2 text-sm">
+        {filtry.offset > 0 ? (
+          <Link
+            href={{ pathname: '/', query: { ...aktualneFiltry, offset: Math.max(0, filtry.offset - 300) || undefined } }}
+            className="rounded border border-[var(--linia)] bg-[var(--tlo)] px-4 py-2 font-medium hover:bg-[var(--tlo-2)]"
+          >
+            &larr; Poprzednia
+          </Link>
+        ) : (
+          <div />
+        )}
+        
+        {filtry.offset + wiersze.length < ile ? (
+          <Link
+            href={{ pathname: '/', query: { ...aktualneFiltry, offset: filtry.offset + 300 } }}
+            className="rounded border border-[var(--linia)] bg-[var(--tlo)] px-4 py-2 font-medium hover:bg-[var(--tlo-2)]"
+          >
+            Następna &rarr;
+          </Link>
+        ) : (
+          <div />
+        )}
       </div>
     </>
   );
