@@ -62,7 +62,7 @@ async function main() {
   process.stderr.write(`Schemat: ${nazwa}\n`);
   await klient.query('BEGIN');
 
-  const [zrodla, zarzadcy, opisy, aktyCsv, prg, odc, aktyBip, aktyEd] =
+  const [zrodla, zarzadcy, opisy, aktyCsv, prg, odc, aktyBip, aktyEd, weryfikacjeCsv] =
     await Promise.all([
     readFile(new URL('../db/seed/zrodla.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../db/seed/zarzadcy.csv', import.meta.url), 'utf8').then(czytajCsv),
@@ -70,13 +70,15 @@ async function main() {
     readFile(new URL('../db/seed/akty.csv', import.meta.url), 'utf8').then(czytajCsv),
     readFile(new URL('../data/raw/prg-ulice.json', import.meta.url), 'utf8').then(JSON.parse),
     readFile(new URL('../data/odcinki.json', import.meta.url), 'utf8').then(JSON.parse),
-    // import z BIP jest opcjonalny — bez niego wsad ma działać
     readFile(new URL('../data/raw/akty-bip.json', import.meta.url), 'utf8')
       .then(JSON.parse)
       .catch(() => ({ akty: [] })),
     readFile(new URL('../data/raw/akty-edziennik.json', import.meta.url), 'utf8')
       .then(JSON.parse)
       .catch(() => ({ akty: [] })),
+    readFile(new URL('../db/seed/weryfikacja-wewnetrznych.csv', import.meta.url), 'utf8')
+      .then(czytajCsv)
+      .catch(() => []),
   ]);
 
   // --- słowniki --------------------------------------------------------
@@ -253,6 +255,22 @@ async function main() {
         `było w bazie (${bylo}) — wygląda na pusty albo obcięty data/odcinki.json. ` +
         `Wsad wstrzymany, baza nietknięta. Sprawdź dane w data/ i uruchom ponownie ręcznie.`
     );
+  }
+
+  // --- ręczna weryfikacja dróg wewnętrznych ------------------------------
+  if (weryfikacjeCsv.length) {
+    const zwroconeWeryfikacje = await wsadem(klient, weryfikacjeCsv, `
+      UPDATE odcinek_drogi o
+         SET zarzadca_id = z.id,
+             zrodlo = 'reczne',
+             uwagi = x.uwagi
+        FROM json_to_recordset($1::json) AS x(slug text, zarzadca_kod text, uwagi text)
+        JOIN ulica u ON u.slug = x.slug
+        JOIN zarzadca z ON z.kod = x.zarzadca_kod
+       WHERE o.ulica_id = u.id AND o.kategoria = 'wewnetrzna'
+       RETURNING o.id
+    `);
+    process.stderr.write(`Ręczna weryfikacja wewn.: zaktualizowano ${zwroconeWeryfikacje.length} odcinków\n`);
   }
 
   // --- akty prawa miejscowego -------------------------------------------
