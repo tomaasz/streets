@@ -113,6 +113,25 @@ async function main() {
   );
   await klient.query("DELETE FROM odcinek_drogi WHERE zrodlo = 'uchwala'");
 
+  // Liczba odcinków każdej ulicy — jedno zapytanie zamiast pytania o COUNT(*)
+  // osobno dla każdej pozycji każdego załącznika w pętli niżej (setki pozycji,
+  // tyle samo podróży do bazy). Stan jest ustalony w tym miejscu na stałe: do
+  // końca pętli nikt nic do odcinek_drogi nie wstawia — nowe odcinki z
+  // bezOdcinkow trafiają do bazy dopiero po pętli.
+  const liczbaOdcinkow = new Map(
+    (
+      await q(
+        `SELECT ulica_id, COUNT(*)::int ile FROM odcinek_drogi
+          WHERE ulica_id IS NOT NULL GROUP BY ulica_id`
+      )
+    ).map((r) => [r.ulica_id, r.ile])
+  );
+  // Ulice już zakwalifikowane do bezOdcinkow w tym przebiegu — bez tego ta
+  // sama ulica wymieniona w dwóch pozycjach (różne akty albo różne pozycje
+  // jednego aktu) dostałaby dwa nowe odcinki, bo liczbaOdcinkow się nie
+  // zmienia aż do wsadu po pętli.
+  const juzZaplanowane = new Set();
+
   const bezDopasowania = [];
   const bezOdcinkow = [];
   // ulica_id -> { podstawa, aktId }, na podstawie ktorej wchodzi regula pierwszenstwa
@@ -193,11 +212,8 @@ async function main() {
           aktId: zapisany.id,
         });
 
-        const [{ ile }] = await q(
-          'SELECT COUNT(*)::int ile FROM odcinek_drogi WHERE ulica_id = $1',
-          [u.id]
-        );
-        if (ile === 0) {
+        if (!liczbaOdcinkow.get(u.id) && !juzZaplanowane.has(u.id)) {
+          juzZaplanowane.add(u.id);
           bezOdcinkow.push({
             ulica_id: u.id,
             miejscowosc: u.miejscowosc,
