@@ -1,9 +1,16 @@
 /** Tylko skonfigurowane oficjalne źródła; każdy redirect sprawdzany osobno. */
+import { DZIENNIKI_WOJEWODZKIE } from './dzienniki-wojewodzkie.mjs';
+import { CERTYFIKATY_DZIENNIKOW } from './certyfikaty-dziennikow.mjs';
+import { rootCertificates } from 'node:tls';
+import { Agent } from 'undici';
+const HOSTY = new Set(['bip.wyszkow.pl','wyszkow.esesja.pl',...DZIENNIKI_WOJEWODZKIE.map(d=>d.host)]);
+const agenci=new Map(Object.entries(CERTYFIKATY_DZIENNIKOW).map(([host,cert])=>
+  [host,new Agent({connect:{ca:[...rootCertificates,cert]}})]));
 /** @param {string} adres */
 export function sprawdzAdresDokumentu(adres) {
   const u = new URL(adres);
   if (u.protocol !== 'https:' || u.port || u.username || u.password ||
-    !['bip.wyszkow.pl','edziennik.mazowieckie.pl','wyszkow.esesja.pl'].includes(u.hostname))
+    !HOSTY.has(u.hostname))
     throw new Error('Adres pliku nie należy do obsługiwanego źródła urzędowego.');
   return u;
 }
@@ -13,7 +20,9 @@ export async function pobierzDokument(adres, sygnal, limit=15*1024*1024) {
   let u=sprawdzAdresDokumentu(adres);
   const signal=AbortSignal.any([sygnal,AbortSignal.timeout(8000)]);
   for(let i=0;i<5;i++) {
-    const res=await fetch(u,{signal,redirect:'manual',cache:'no-store',headers:{'User-Agent':'drogi-wyszkow/1.0 (wyszukiwanie dokumentow urzedowych)'}});
+    const opcje={signal,redirect:/** @type {const} */ ('manual'),cache:/** @type {const} */ ('no-store'),headers:{'User-Agent':'drogi-wyszkow/1.0 (wyszukiwanie dokumentow urzedowych)'},
+      ...(agenci.has(u.hostname)?{dispatcher:agenci.get(u.hostname)}:{})};
+    const res=await fetch(u,opcje);
     if([301,302,303,307,308].includes(res.status)) {
       const location=res.headers.get('location');
       await res.body?.cancel();

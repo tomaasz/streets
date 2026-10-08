@@ -1,11 +1,15 @@
-export const GMINY_DOKUMENTOW = [{ kod: '143505', nazwa: 'Wyszków', wojewodztwo: 'mazowieckie' }] as const;
+import katalog from '../../data/gminy-teryt.json';
+export { DZIENNIKI_WOJEWODZKIE } from '../../scripts/lib/dzienniki-wojewodzkie.mjs';
+export const GMINY_DOKUMENTOW = katalog.gminy;
+export type OrganDokumentow = { id:number; nazwa:string };
+export type KatalogOrganow = { organy:OrganDokumentow[]; komunikat:string; blad?:boolean };
 export const TEMATY_DOKUMENTOW = {
   drogi: 'Wszystkie dokumenty drogowe',
   kategoria: 'Zaliczenie lub pozbawienie kategorii',
   przebieg: 'Przebieg drogi',
   nazwy: 'Nazwy ulic, rond i placów',
 } as const;
-export type ParametryDokumentow = { gmina: string; od: number; do: number; temat: keyof typeof TEMATY_DOKUMENTOW; q: string };
+export type ParametryDokumentow = { gmina: string; od: number; do: number; temat: keyof typeof TEMATY_DOKUMENTOW; q: string; wydawcy?:number[] };
 export type DokumentZnaleziony = {
   klucz: string; organ: string; rodzaj: string; numer: string;
   tytul: string; data_podjecia: string | null; rok: number;
@@ -16,9 +20,9 @@ export type DokumentZnaleziony = {
   w_bazie?: boolean; w_kolejce?: boolean;
 };
 export type RaportZrodla = { nazwa: string; status: 'ok' | 'czesciowe' | 'blad' | 'nieobslugiwane'; komunikat: string; stron: number; url?: string };
-export type WynikSzukaniaDokumentow = { id?: string; wyniki: DokumentZnaleziony[]; zrodla: RaportZrodla[]; blad?: string };
+export type WynikSzukaniaDokumentow = { id?: string; gmina?:string; wyniki: DokumentZnaleziony[]; zrodla: RaportZrodla[]; blad?: string };
 export type DokumentWKolejce = {
-  id: number; status: string; blad: string | null; dolaczono: string;
+  id: number; gmina:string; status: string; blad: string | null; dolaczono: string;
   metadane: DokumentZnaleziony;
   pliki: { id: number; rola: string; typ: string; url: string; bajtow: number }[];
 };

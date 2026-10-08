@@ -1,4 +1,4 @@
-import type { DokumentWKolejce } from '@/lib/dokumenty-typy';
+import { GMINY_DOKUMENTOW, type DokumentWKolejce } from '@/lib/dokumenty-typy';
 import { PonowPobranieDokumentu } from './PonowPobranieDokumentu';
 
 const STATUSY:Record<string,string>={do_przetworzenia:'Do przetworzenia',blad_pobrania:'Niepełne pobranie',brak_pliku:'Publikacja bez pliku',przetworzony:'Przetworzony'};
@@ -10,6 +10,7 @@ export function KolejkaDokumentow({dokumenty}:{dokumenty:DokumentWKolejce[]}) {
       <p className="font-semibold">{d.metadane.rodzaj} {d.metadane.numer} · {STATUSY[d.status]}</p>
       <p className="mt-1 text-sm">{d.metadane.tytul}</p>
       <p className="tekst-pomocniczy mt-1">{d.metadane.organ} · Dołączono: {d.dolaczono}</p>
+      <p className="tekst-pomocniczy">Gmina: {GMINY_DOKUMENTOW.find(g=>g.kod===d.gmina)?.nazwa ?? d.gmina}</p>
       <a className="inline-block mt-2 text-sm" href={d.metadane.url} target="_blank" rel="noreferrer">Publikacja źródłowa ↗</a>
       <ul className="mt-2 space-y-1 text-sm">{d.pliki.map(p=><li key={p.id}>
         <a href={`/api/dokumenty/${d.id}/pliki/${p.id}`} target="_blank" rel="noreferrer">{p.rola==='metadane'?'Pobierz metadane ze źródła':p.rola==='publikacja'?'Pobierz zachowaną stronę publikacji':p.typ==='application/pdf'?'Podgląd zachowanego PDF':'Pobierz zachowany dokument'} · {Math.ceil(p.bajtow/1024)} KB</a>

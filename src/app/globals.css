@@ -64,9 +64,13 @@ table.dane .zrodla-drogi-wiersz>td { padding:16px; background:var(--tlo-2); }
 .zrodla-drogi-panel { contain:inline-size; overflow-wrap:anywhere; }
 .zrodla-drogi-sekcje { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
 .dokumenty-filtry { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
-.dokumenty-filtry label { display:flex; flex-direction:column; gap:4px; font-size:.875rem; }
+.dokumenty-filtry label { display:flex; flex-direction:column; gap:4px; font-size:.875rem; min-width:0; max-width:100%; }
 .dokumenty-filtry input[type="number"] { width:110px; }
-.dokumenty-fraza { flex:1; min-width:240px; }
+.dokumenty-filtry .dokumenty-fraza { flex:1; min-width:240px; }
+.dokumenty-filtry select { max-width:100%; }
+.dokumenty-organy { flex-basis:100%; min-width:0; }
+.dokumenty-organy-lista { display:grid; gap:6px; }
+.dokumenty-organy-lista label { flex-direction:row; font-weight:400; }
 .dokumenty-zrodla,.dokumenty-wyniki { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .dokumenty-wyniki article { min-width:0; overflow-wrap:anywhere; }
 .dokumenty-wyniki-lista { grid-template-columns:minmax(0,1fr); gap:0; }

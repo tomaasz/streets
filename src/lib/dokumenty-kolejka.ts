@@ -4,7 +4,7 @@ import { pobierzDokument } from './dokumenty-internet';
 import type { DokumentWKolejce, DokumentZnaleziony } from './dokumenty-typy';
 
 export async function kolejkaDokumentow() {
-  return zapytaj<DokumentWKolejce>(`SELECT d.id,d.status,d.blad,
+  return zapytaj<DokumentWKolejce>(`SELECT d.id,d.gmina,d.status,d.blad,
     to_char(d.dolaczono AT TIME ZONE 'Europe/Warsaw','YYYY-MM-DD HH24:MI') dolaczono,d.metadane,
     COALESCE((SELECT json_agg(json_build_object('id',p.id,'rola',p.rola,'typ',p.typ,'url',p.url,
       'bajtow',octet_length(p.tresc)) ORDER BY p.id) FROM plik_dokumentu p WHERE p.dokument_id=d.id),'[]'::json) pliki

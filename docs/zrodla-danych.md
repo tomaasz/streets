@@ -79,9 +79,10 @@ urzędowym — służy do znajdowania rozbieżności, nie do rozstrzygania.
 
 ## C. Prawda formalna
 
-Widok `/akty` umożliwia wyszukiwanie dokumentów w BIP Wyszkowa i publicznym
-API mazowieckiego dziennika oraz zachowanie plików do późniejszego
-przetworzenia. Szczegóły i ograniczenia:
+Widok `/akty` umożliwia wybór gminy z katalogu GUS i wyszukiwanie dokumentów
+w publicznych API dzienników wszystkich 16 województw. Dla Wyszkowa
+przeszukuje również BIP. Pliki można zachować do późniejszego
+przetworzenia. Szczegóły dopasowania organów i ograniczenia:
 [wyszukiwanie dokumentów](wyszukiwanie-dokumentow.md).
 
 ### Drogi krajowe
