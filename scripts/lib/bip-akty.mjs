@@ -1,6 +1,6 @@
 /** Parser archiwum BIP Wyszkowa wspólny dla importera i wyszukiwania w aplikacji. */
 const BAZA = 'https://bip.wyszkow.pl/';
-const TEMAT = /(drog|dróg|ulic|rond|skwer|plac\b|kategori)/i;
+import { TEMAT_DROGOWY as TEMAT } from './tematy-dokumentow.mjs';
 const MIESIACE = { stycznia:1,lutego:2,marca:3,kwietnia:4,maja:5,czerwca:6,lipca:7,sierpnia:8,września:9,wrzesnia:9,października:10,pazdziernika:10,listopada:11,grudnia:12 };
 
 const bezZnacznikow = (s) =>

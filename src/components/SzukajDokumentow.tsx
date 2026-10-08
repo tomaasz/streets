@@ -9,6 +9,13 @@ export function SzukajDokumentow({rok}:{rok:number}) {
   const [dolaczenie,dolacz,pobieranie]=useActionState(dolaczDokumenty,{ok:false,komunikat:''});
   const [wybrane,setWybrane]=useState(new Set<string>());
   const [filtry,setFiltry]=useState({od:String(rok),do:String(rok),temat:'drogi',q:''});
+  const [uklad,setUklad]=useState<'karty'|'lista'>('karty');
+  useEffect(()=>{
+    try {const v=localStorage.getItem('widok-wynikow-dokumentow');if(v==='karty'||v==='lista')setUklad(v);}catch{}
+  },[]);
+  const wybierzUklad=(v:'karty'|'lista')=>{
+    setUklad(v);try{localStorage.setItem('widok-wynikow-dokumentow',v);}catch{}
+  };
   useEffect(()=>{setWybrane(new Set());},[wynik.id]);
   const dolaczone=new Set(dolaczenie.dolaczone ?? []);
   const ile=wynik.wyniki.filter(a=>wybrane.has(a.klucz) && !a.w_kolejce && !dolaczone.has(a.klucz)).length;
@@ -32,22 +39,28 @@ export function SzukajDokumentow({rok}:{rok:number}) {
       {z.url?<a className="inline-block text-sm mt-2" href={z.url} target="_blank" rel="noreferrer">Otwórz rejestr źródłowy ↗</a>:null}
     </div>)}</div>:null}
     {wynik.id && !szukanie?<>
-      <p className="mt-4 font-semibold">Znalezione dokumenty: {wynik.wyniki.length}</p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="font-semibold">Znalezione dokumenty: {wynik.wyniki.length}</p>
+        {wynik.wyniki.length?<div className="flex gap-2" role="group" aria-label="Układ wyników dokumentów">
+          <button type="button" className={`przycisk${uklad==='karty'?' primary':''}`} aria-pressed={uklad==='karty'} onClick={()=>wybierzUklad('karty')}>Karty</button>
+          <button type="button" className={`przycisk${uklad==='lista'?' primary':''}`} aria-pressed={uklad==='lista'} onClick={()=>wybierzUklad('lista')}>Kompaktowa lista</button>
+        </div>:null}
+      </div>
       {!wynik.wyniki.length?<p className="tekst-pomocniczy mt-2">Nie znaleziono dokumentów pasujących do filtrów w dostępnych źródłach. Sprawdź komunikaty źródeł lub zmień zakres lat i temat.</p>:<form action={dolacz} className="mt-3" aria-busy={pobieranie}>
         <input type="hidden" name="wyszukiwanie" value={wynik.id}/>
-        <div className="dokumenty-wyniki">{wynik.wyniki.map(a=>{
+        <div className={`dokumenty-wyniki${uklad==='lista'?' dokumenty-wyniki-lista':''}`}>{wynik.wyniki.map(a=>{
           const juz=a.w_kolejce || dolaczone.has(a.klucz);
           return <article key={a.klucz} className="karta p-4">
             <label className="flex gap-3 items-start font-semibold">
               <input type="checkbox" name="dokument" value={a.klucz} checked={wybrane.has(a.klucz) && !juz}
                 disabled={pobieranie || juz || (ile>=5 && !wybrane.has(a.klucz))}
                 onChange={e=>setWybrane(prev=>{const next=new Set(prev);if(e.target.checked)next.add(a.klucz);else next.delete(a.klucz);return next;})}/>
-              <span>{a.rodzaj} {a.numer} · {a.data_podjecia ?? a.rok}<span className="block mt-1">{a.tytul}</span></span>
+              <span><span className="dokument-numer">{a.rodzaj} {a.numer} · {a.data_podjecia ?? a.rok}</span><span className="dokument-tytul block mt-1">{a.tytul}</span></span>
             </label>
-            <p className="tekst-pomocniczy mt-2">{a.organ} · {a.zrodlo}</p>
-            {a.zalaczniki?.length?<p className="tekst-pomocniczy">Dodatkowe pliki na stronie dokumentu: {a.zalaczniki.length}</p>:null}
-            <p className="text-sm mt-2">{juz?'Już w kolejce przetwarzania':a.w_bazie?'Akt jest już w aplikacji; możesz pobrać jego plik do przetworzenia.':'Nowy dokument'}</p>
-            <div className="flex flex-wrap gap-3 mt-2 text-sm">
+            <p className="dokument-zrodlo tekst-pomocniczy mt-2">{a.organ} · {a.zrodlo}</p>
+            {a.zalaczniki?.length?<p className="dokument-zalaczniki tekst-pomocniczy">Dodatkowe pliki na stronie dokumentu: {a.zalaczniki.length}</p>:null}
+            <p className="dokument-status text-sm mt-2">{juz?'Już w kolejce przetwarzania':a.w_bazie?'Akt jest już w aplikacji; możesz pobrać jego plik do przetworzenia.':'Nowy dokument'}</p>
+            <div className="dokument-linki flex flex-wrap gap-3 mt-2 text-sm">
               <a className="przycisk" href={a.url} target="_blank" rel="noreferrer">Publikacja źródłowa ↗</a>
               {a.url_pdf?<a className="przycisk" href={a.url_pdf} target="_blank" rel="noreferrer">Podgląd dokumentu ↗</a>:<span className="tekst-pomocniczy">Brak rozpoznanego odnośnika do pliku; zapiszemy stronę publikacji.</span>}
             </div>

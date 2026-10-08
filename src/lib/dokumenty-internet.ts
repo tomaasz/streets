@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { aktyZeStrony as aktyBip, podstrony, WARTO_WEJSC } from '../../scripts/lib/bip-akty.mjs';
 import { aktyZeStrony as aktyDziennika } from '../../scripts/lib/edziennik-akty.mjs';
 import { aktyZApiWydawcy } from '../../scripts/lib/edziennik-api.mjs';
+import { pasujeTematDokumentu } from '../../scripts/lib/tematy-dokumentow.mjs';
 import type { DokumentZnaleziony, ParametryDokumentow, RaportZrodla } from './dokumenty-typy';
 
 const BIP = 'https://bip.wyszkow.pl/';
@@ -17,8 +18,6 @@ const KADENCJE = [
   { id:17000, od:2018, do:2024 },
 ];
 const WYDAWCY = [1453,1222,282,163,760,448,468,246,1018,1121];
-const TEMAT = { drogi: /dr[oó]g|drodz|ulic|rond|skwer|\bplac/i,
-  kategoria: /kategori/i, przebieg: /przebieg/i, nazwy: /nazw/i };
 const normalizuj = (s:string) => s.toLocaleLowerCase('pl').normalize('NFD').replace(/\p{M}/gu,'').replaceAll('ł','l');
 export const kluczDokumentu = (a:Pick<DokumentZnaleziony,'organ'|'rodzaj'|'numer'>) =>
   createHash('sha256').update(`${a.rodzaj}|${a.organ}|${a.numer}`).digest('hex');
@@ -26,7 +25,7 @@ export const kluczDokumentu = (a:Pick<DokumentZnaleziony,'organ'|'rodzaj'|'numer
 const bladZrodla=(e:unknown) => e instanceof Error && /HTTP|limit|Adres|pust|przekier/.test(e.message)
   ? e.message : 'Nie udało się pobrać danych z tej sieci lub źródło nie odpowiedziało w terminie.';
 function pasuje(a:DokumentZnaleziony,p:ParametryDokumentow) {
-  return a.rok>=p.od && a.rok<=p.do && TEMAT[p.temat].test(a.tytul) &&
+  return a.rok>=p.od && a.rok<=p.do && pasujeTematDokumentu(a.tytul,p.temat) &&
     (!p.q || normalizuj(`${a.tytul} ${a.numer}`).includes(normalizuj(p.q)));
 }
 
@@ -53,7 +52,7 @@ async function szukajBip(p:ParametryDokumentow) {
           if(rok && (rok<p.od || rok>p.do))continue;
           // Archiwum prowadzi także do stron pojedynczych uchwał.
           if(!WARTO_WEJSC.test(t) && !/^(zarządzeni|uchwał)/i.test(t))continue;
-          if(/^(zarządzeni|uchwał)\s+nr/i.test(t) && !TEMAT.drogi.test(t))continue;
+          if(/^(zarządzeni|uchwał)\s+nr/i.test(t) && !pasujeTematDokumentu(t))continue;
           const url=new URL(link.url,BIP).href;
           if(!odwiedzone.has(url) && !kolejka.some(k=>k.url===url))kolejka.push({url,glebokosc:s.glebokosc+1});
         }

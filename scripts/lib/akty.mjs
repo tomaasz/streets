@@ -4,8 +4,7 @@
  */
 
 /** Akty o drogach, ulicach i nazewnictwie. Reszta nas nie interesuje. */
-export const TEMAT =
-  /(dr[oó]g|drodz|ulic|rond|skwer|\bplac\w*)/i;
+export { TEMAT_DROGOWY as TEMAT } from './tematy-dokumentow.mjs';
 
 /** Ta sama instytucja występuje w dzienniku pod kilkoma nazwami. */
 const KANON = [

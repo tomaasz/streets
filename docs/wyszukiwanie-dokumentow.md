@@ -6,6 +6,15 @@ i obwieszczenia. Opcjonalna fraza zawęża tytuł lub numer. Wyniki dotyczące
 powiatu pokazują właściwy organ; nie każda pozycja powiatowa dotyczy wyłącznie
 terenu gminy Wyszków.
 
+Filtr tematu rozpoznaje całe wyrazy i odmiany nazw dróg, ulic, rond, skwerów
+i placów. Nie uznaje „placówek oświatowych” za place ani samego zwrotu
+„w drodze” za temat drogowy. Dopasowanie dotyczy tytułu; treść dokumentu
+nadal wymaga sprawdzenia przed przetworzeniem.
+
+Wyniki można przełączać między kartami a **Kompaktową listą**. Przełączenie
+zachowuje zaznaczone dokumenty, a wybrany układ jest zapamiętywany
+w przeglądarce. Oba widoki udostępniają publikację źródłową i podgląd pliku.
+
 ## Źródła
 
 - BIP gminy: przegląd archiwów według lat. Parser obsługuje stare wykazy sesji
