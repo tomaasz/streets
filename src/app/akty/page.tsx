@@ -1,3 +1,7 @@
+import Link from 'next/link';
+import { SzukajDokumentow } from '@/components/SzukajDokumentow';
+import { KolejkaDokumentow } from '@/components/KolejkaDokumentow';
+import { kolejkaDokumentow } from '@/lib/dokumenty-kolejka';
 import { TekstFiltra } from '@/components/PoleFiltra';
 import { DynamiczneFiltry } from '@/components/DynamiczneFiltry';
 import { BrakBazy } from '@/components/BrakBazy';
@@ -5,6 +9,7 @@ import { zBaza } from '@/lib/stan';
 import { akty } from '@/lib/zapytania';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 type Parametry = Promise<Record<string, string | string[] | undefined>>;
 
@@ -19,6 +24,26 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
   const sp = await searchParams;
   const q = (Array.isArray(sp.q) ? sp.q[0] : sp.q) || undefined;
 
+  const internet = sp.widok === 'internet';
+  const naglowek = <>
+      <h1 className="text-xl font-bold">Akty prawa miejscowego</h1>
+      <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
+        Uchwały Rady Miejskiej i zarządzenia Burmistrza dotyczące dróg, ulic
+        i nazewnictwa. To one rozstrzygają, do jakiej kategorii droga została
+        zaliczona. Kategoria konkretnego odcinka jest potwierdzona dopiero po zweryfikowaniu jego powiązania z dokumentem.
+      </p>
+      <nav className="wybor-widoku mt-4" aria-label="Widok dokumentów">
+        <Link href="/akty" aria-current={!internet?'page':undefined}>Dokumenty w aplikacji</Link>
+        <Link href="/akty?widok=internet" aria-current={internet?'page':undefined}>Znajdź w internecie</Link>
+      </nav>
+  </>;
+  if (internet) {
+    const kolejka = await zBaza(() => kolejkaDokumentow());
+    if (!kolejka.ok) return <BrakBazy szczegoly={kolejka.blad} />;
+    const rok = Number(new Intl.DateTimeFormat('pl',{year:'numeric',timeZone:'Europe/Warsaw'}).format(new Date()));
+    return <>{naglowek}<SzukajDokumentow rok={rok}/><KolejkaDokumentow dokumenty={kolejka.dane}/></>;
+  }
+
   const wynik = await zBaza(() => akty(q));
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
   const lista = wynik.dane;
@@ -29,12 +54,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
 
   return (
     <>
-      <h1 className="text-xl font-bold">Akty prawa miejscowego</h1>
-      <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
-        Uchwały Rady Miejskiej i zarządzenia Burmistrza dotyczące dróg, ulic
-        i nazewnictwa. To one rozstrzygają, do jakiej kategorii droga została
-        zaliczona. Kategoria konkretnego odcinka jest potwierdzona dopiero po zweryfikowaniu jego powiązania z dokumentem.
-      </p>
+      {naglowek}
 
       <DynamiczneFiltry className="mt-5 flex flex-wrap items-end gap-3" action="/akty">
         <label className="flex flex-col gap-1 text-xs text-[var(--tekst-2)]">

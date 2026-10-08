@@ -63,6 +63,17 @@ table.dane tr:hover td { background:var(--tlo-2); }
 table.dane .zrodla-drogi-wiersz>td { padding:16px; background:var(--tlo-2); }
 .zrodla-drogi-panel { contain:inline-size; overflow-wrap:anywhere; }
 .zrodla-drogi-sekcje { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.dokumenty-filtry { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
+.dokumenty-filtry label { display:flex; flex-direction:column; gap:4px; font-size:.875rem; }
+.dokumenty-filtry input[type="number"] { width:110px; }
+.dokumenty-fraza { flex:1; min-width:240px; }
+.dokumenty-zrodla,.dokumenty-wyniki { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.dokumenty-wyniki article { min-width:0; overflow-wrap:anywhere; }
+@media(max-width:640px) {
+  .dokumenty-zrodla,.dokumenty-wyniki { grid-template-columns:minmax(0,1fr); }
+  .dokumenty-filtry label { width:100%; }
+  .dokumenty-filtry input[type="number"] { width:100%; }
+}
 @media(max-width:900px) { .zrodla-drogi-sekcje { grid-template-columns:minmax(0,1fr); } }
 @media(min-width:641px) { .zrodla-drogi-przycisk { min-height:32px; } }
 table.dane td>a { display:inline-flex; align-items:center; min-height:44px; }

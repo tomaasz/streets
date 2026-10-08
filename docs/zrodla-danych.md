@@ -79,6 +79,11 @@ urzędowym — służy do znajdowania rozbieżności, nie do rozstrzygania.
 
 ## C. Prawda formalna
 
+Widok `/akty` umożliwia wyszukiwanie dokumentów w BIP Wyszkowa i publicznym
+API mazowieckiego dziennika oraz zachowanie plików do późniejszego
+przetworzenia. Szczegóły i ograniczenia:
+[wyszukiwanie dokumentów](wyszukiwanie-dokumentow.md).
+
 ### Drogi krajowe
 GDDKiA Oddział w Warszawie. Przez gminę: **S8** (obwodnica Wyszkowa oddana
 w 2008 r., w BDOT oznaczona numerem szlaku **E67**) oraz **DK 62**
