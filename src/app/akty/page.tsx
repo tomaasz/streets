@@ -1,3 +1,5 @@
+import { TekstFiltra } from '@/components/PoleFiltra';
+import { DynamiczneFiltry } from '@/components/DynamiczneFiltry';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { akty } from '@/lib/zapytania';
@@ -31,13 +33,13 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
       <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
         Uchwały Rady Miejskiej i zarządzenia Burmistrza dotyczące dróg, ulic
         i nazewnictwa. To one rozstrzygają, do jakiej kategorii droga została
-        zaliczona — wpis w tej tabeli podnosi pewność rekordu do 3/3.
+        zaliczona. Kategoria konkretnego odcinka jest potwierdzona dopiero po zweryfikowaniu jego powiązania z dokumentem.
       </p>
 
-      <form className="mt-5 flex flex-wrap items-end gap-3" method="get">
+      <DynamiczneFiltry className="mt-5 flex flex-wrap items-end gap-3" action="/akty">
         <label className="flex flex-col gap-1 text-xs text-[var(--tekst-2)]">
           Szukaj w tytule lub numerze
-          <input
+          <TekstFiltra
             type="search"
             name="q"
             defaultValue={q ?? ''}
@@ -47,11 +49,11 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
         </label>
         <button
           type="submit"
-          className="rounded border border-[var(--linia)] bg-[var(--tlo-2)] px-3 py-1.5 text-sm font-medium"
+          className="przycisk primary"
         >
-          Filtruj
+          Szukaj
         </button>
-      </form>
+      </DynamiczneFiltry>
 
       <p className="mt-4 text-sm text-[var(--tekst-2)]">
         {lista.length} aktów
@@ -60,9 +62,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
 
       {lista.length === 0 ? (
         <p className="karta mt-3 p-4 text-sm text-[var(--tekst-2)]">
-          Brak aktów w bazie. Uruchom <code>npm run data:akty</code>, żeby
-          zaciągnąć je z BIP, albo dopisz je ręcznie do{' '}
-          <code>db/seed/akty.csv</code>.
+          Nie znaleziono dokumentów. Zmień wyszukiwaną nazwę lub numer. Jeśli filtr jest pusty, dokumenty wymagają uzupełnienia przez administratora.
         </p>
       ) : (
         <div className="przewijalne mt-3">
@@ -111,7 +111,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                   <td>
                     <span
                       className="plakietka"
-                      style={{ color: KOLOR_STATUSU[a.status] ?? 'var(--tekst-2)' }}
+                      style={{ borderColor: KOLOR_STATUSU[a.status] ?? 'var(--tekst-2)' }}
                     >
                       {a.status}
                     </span>

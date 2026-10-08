@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {odczytajOsm,normalizujOsm} from './lib/osm.mjs';
+const n1={type:'node',id:1,lon:21.56,lat:52.59},n2={type:'node',id:2,lon:21.57,lat:52.59};
+const w={type:'way',id:3,nodes:[1,2],tags:{name:'Przykładowa',highway:'residential'}};
+const read=(way=w,nodes=[n1,n2])=>odczytajOsm({elements:[...nodes,way]});
+assert.equal(read()[0].way,3);
+assert.equal(read()[0].geometry.coordinates.length,2);
+assert.deepEqual(read(w,[n1]),[]);
+assert.deepEqual(read(w,[n1,{...n2,lon:500000}]),[]);
+assert.deepEqual(read({...w,tags:{name:'Przykładowa'}}),[]);
+assert.deepEqual(read({...w,tags:{highway:'residential'}}),[]);
+assert.deepEqual(read({...w,nodes:[1,1]}),[]);
+assert.throws(()=>odczytajOsm({remark:'error'}));
+assert.equal(normalizujOsm('ul. Łąkowa'),'lakowa');
+assert.equal(odczytajOsm({elements:[n1,n2,w,w]}).length,1);
+console.log('OSM: pełna geometria, typ obiektu, zakres i normalizacja OK');

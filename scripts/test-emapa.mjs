@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {odczytajEmape} from './lib/emapa.mjs';
+const record='<Ulica><Miejscowosc title="Miejscowość">Skuszew</Miejscowosc><SIMC>0523270</SIMC><Cecha>ul.</Cecha><Nazwa>Malownicza</Nazwa><ULIC>12090</ULIC><Numer_drogi></Numer_drogi><Uchwala></Uchwala><Zrodlo_danych>wyszkow.e-mapa.net</Zrodlo_danych></Ulica>';
+const wrap=s=>'<GetFeatureInfo>'+s+'</GetFeatureInfo>';
+assert.equal(odczytajEmape(wrap(record))[0].ulic,'12090');
+assert.equal(odczytajEmape(wrap(record))[0].uchwala,'');
+assert.deepEqual(odczytajEmape(wrap('')),[]);
+assert.deepEqual(odczytajEmape(wrap(record.replace('wyszkow.e-mapa.net','obce.e-mapa.net'))),[]);
+assert.deepEqual(odczytajEmape(wrap(record.replace('0523270','abc'))),[]);
+assert.equal(odczytajEmape(wrap(record+record)).length,1);
+assert.equal(odczytajEmape(wrap(record.replace('Malownicza','A &amp; B')))[0].nazwa,'A & B');
+assert.throws(()=>odczytajEmape('<ServiceException>Error</ServiceException>'));
+assert.throws(()=>odczytajEmape('<!DOCTYPE xml>'+wrap(record)));
+console.log('e-mapa: źródło, identyfikatory, puste pola, duplikaty i błędy usługi OK');

@@ -1,341 +1,324 @@
 @import "tailwindcss";
-
 :root {
-  --tlo: #ffffff;
-  --tlo-2: #f6f7f9;
-  --tekst: #16181d;
-  --tekst-2: #5b6270;
-  --linia: #e2e5ea;
-  --akcent: #1f4b8e;
-
-  --kat-krajowa: #c0392b;
-  --kat-wojewodzka: #d98324;
-  --kat-powiatowa: #b08800;
-  --kat-gminna: #2f7d4f;
-  --kat-wewnetrzna: #6b7280;
-  --kat-nieustalona: #8b5cf6;
+  --tlo:#ffffff; --tlo-2:#f6f7f9; --tekst:#16181d; --tekst-2:#5b6270;
+  --linia:#e2e5ea; --pole-linia:#8792a4; --akcent:#1f4b8e;
+  --kat-krajowa:#c0392b; --kat-wojewodzka:#d98324; --kat-powiatowa:#b08800;
+  --kat-gminna:#2f7d4f; --kat-wewnetrzna:#6b7280; --kat-nieustalona:#8b5cf6;
+  color-scheme:light;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --tlo: #101216;
-    --tlo-2: #171a20;
-    --tekst: #e8eaee;
-    --tekst-2: #9aa2b1;
-    --linia: #262b34;
-    --akcent: #7aa5e8;
-
-    --kat-krajowa: #ef6b5c;
-    --kat-wojewodzka: #e9a13b;
-    --kat-powiatowa: #d9b800;
-    --kat-gminna: #4fbe80;
-    --kat-wewnetrzna: #98a1b0;
-    --kat-nieustalona: #a78bfa;
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --tlo:#101216; --tlo-2:#171a20; --tekst:#e8eaee; --tekst-2:#9aa2b1;
+    --linia:#363d49; --pole-linia:#667386; --akcent:#7aa5e8;
+    --kat-krajowa:#ef6b5c; --kat-wojewodzka:#e9a13b; --kat-powiatowa:#d9b800;
+    --kat-gminna:#4fbe80; --kat-wewnetrzna:#98a1b0; --kat-nieustalona:#a78bfa;
+    color-scheme:dark;
   }
 }
-
+:root[data-theme="dark"] {
+  --tlo:#101216; --tlo-2:#171a20; --tekst:#e8eaee; --tekst-2:#9aa2b1;
+  --linia:#363d49; --pole-linia:#667386; --akcent:#7aa5e8;
+  --kat-krajowa:#ef6b5c; --kat-wojewodzka:#e9a13b; --kat-powiatowa:#d9b800;
+  --kat-gminna:#4fbe80; --kat-wewnetrzna:#98a1b0; --kat-nieustalona:#a78bfa;
+  color-scheme:dark;
+}
 @theme inline {
-  --color-tlo: var(--tlo);
-  --color-tlo-2: var(--tlo-2);
-  --color-tekst: var(--tekst);
-  --color-tekst-2: var(--tekst-2);
-  --color-linia: var(--linia);
-  --color-akcent: var(--akcent);
+  --color-tlo:var(--tlo); --color-tlo-2:var(--tlo-2); --color-tekst:var(--tekst);
+  --color-tekst-2:var(--tekst-2); --color-linia:var(--linia); --color-akcent:var(--akcent);
+}
+body { background:var(--tlo); color:var(--tekst); font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-feature-settings:"tnum" 1; }
+a { color:var(--akcent); }
+:focus-visible { outline:3px solid var(--akcent); outline-offset:3px; }
+main:focus { outline:none; }
+button,summary,select { cursor:pointer; }
+button:disabled { cursor:default; opacity:.5; }
+input,select,textarea { min-height:44px; border:1px solid var(--pole-linia); border-radius:6px; background:var(--tlo); color:var(--tekst); padding:.5rem .65rem; font:inherit; max-width:100%; }
+textarea { resize:vertical; }
+input[type="checkbox"],input[type="radio"] { min-height:0; width:20px; height:20px; accent-color:var(--akcent); flex:none; }
+summary { min-height:44px; padding:.65rem .25rem; font-size:.875rem; font-weight:600; }
+.tekst-pomocniczy { color:var(--tekst-2); font-size:.875rem; line-height:1.6; }
+.skip-link { position:fixed; top:8px; left:8px; transform:translateY(-200%); z-index:100; background:var(--tlo); padding:12px; border:2px solid var(--akcent); }
+.skip-link:focus { transform:none; }
+.naglowek { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; padding-top:8px; }
+.naglowek>a { min-height:44px; display:flex; align-items:center; }
+.nawigacja { width:100%; display:flex; gap:4px; overflow-x:auto; padding-bottom:6px; }
+.nawigacja a { white-space:nowrap; display:flex; align-items:center; min-height:44px; padding:0 12px; border-radius:6px; font-size:.875rem; text-decoration:none; }
+.nawigacja a[aria-current="page"],.wybor-widoku a[aria-current="page"] { background:var(--akcent); color:var(--tlo); font-weight:600; }
+.wybor-motywu { display:flex; align-items:center; gap:8px; font-size:.875rem; }
+.wybor-motywu select { font-size:.875rem; }
+.przycisk { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; padding:.55rem .85rem; gap:6px; border:1px solid var(--pole-linia); border-radius:6px; background:var(--tlo); color:var(--tekst); text-decoration:none; font-size:.875rem; font-weight:500; }
+.przycisk:hover { border-color:var(--akcent); background:var(--tlo-2); }
+.przycisk.primary { background:var(--akcent); border-color:var(--akcent); color:var(--tlo); font-weight:600; }
+.karta { background:var(--tlo-2); border:1px solid var(--linia); border-radius:10px; }
+.plakietka { display:inline-flex; align-items:center; gap:.4rem; border-radius:999px; padding:.2rem .55rem; font-size:.8125rem; font-weight:600; line-height:1.5; border:1px solid var(--pole-linia); color:var(--tekst); }
+.mapa-probka { display:inline-block; flex:none; width:1.1rem; height:.25rem; border-radius:999px; }
+.status-danych { display:block; color:var(--tekst-2); }
+.przewijalne { overflow-x:auto; }
+table.dane { width:100%; border-collapse:collapse; font-size:.875rem; }
+table.dane th { text-align:left; font-weight:600; color:var(--tekst-2); border-bottom:1px solid var(--linia); padding:.7rem .6rem; white-space:nowrap; }
+table.dane td { border-bottom:1px solid var(--linia); padding:.65rem .6rem; vertical-align:top; }
+table.dane tr:hover td { background:var(--tlo-2); }
+.zrodla-drogi-przycisk { display:block; min-height:44px; margin-top:4px; padding:4px 0; text-align:left; font-size:.875rem; font-weight:600; white-space:nowrap; }
+.zrodla-drogi-przycisk:focus-visible { outline:2px solid var(--akcent); outline-offset:3px; border-radius:3px; }
+table.dane .zrodla-drogi-wiersz>td { padding:16px; background:var(--tlo-2); }
+.zrodla-drogi-panel { contain:inline-size; overflow-wrap:anywhere; }
+.zrodla-drogi-sekcje { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+@media(max-width:900px) { .zrodla-drogi-sekcje { grid-template-columns:minmax(0,1fr); } }
+@media(min-width:641px) { .zrodla-drogi-przycisk { min-height:32px; } }
+table.dane td>a { display:inline-flex; align-items:center; min-height:44px; }
+.wyszukiwanie { margin-top:20px; padding:16px; border:1px solid var(--linia); background:var(--tlo-2); border-radius:10px; }
+.filtry-drog { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
+.filtry-drog>label,.szukaj-drogi { flex:1 1 170px; min-width:0; display:flex; flex-direction:column; gap:6px; font-size:.875rem; }
+.szukaj-drogi { flex-basis:270px; position:relative; }
+.filtry-drog select,.filtry-drog input { width:100%; }
+.podpowiedzi { position:absolute; top:100%; left:0; right:0; z-index:12; background:var(--tlo); border:1px solid var(--pole-linia); border-radius:8px; box-shadow:0 6px 24px #0002; }
+.podpowiedzi li[aria-selected="true"] { background:var(--tlo-2); outline:2px solid var(--akcent); outline-offset:-2px; }
+.podpowiedzi a { display:flex; flex-direction:column; padding:10px 12px; min-height:44px; text-decoration:none; }
+.podpowiedzi a:hover { background:var(--tlo-2); }
+.podpowiedzi span,.podpowiedzi p { font-size:.8125rem; color:var(--tekst-2); }
+.podpowiedzi p { padding:10px 12px; }
+.widoki-i-eksport { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.wybor-widoku { display:flex; gap:4px; }
+.wybor-widoku a { padding:10px 20px; min-height:44px; border-radius:6px; text-decoration:none; }
+.eksport-wynikow { position:relative; }
+.eksport-wynikow>div { position:absolute; right:0; z-index:11; background:var(--tlo); border:1px solid var(--pole-linia); padding:8px; min-width:190px; }
+.eksport-wynikow a { display:block; padding:12px; }
+.podsumowanie { border:1px solid var(--linia); border-radius:8px; padding:0 12px 8px; }
+.paginacja { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:16px 0; font-size:.875rem; }
+.kolejka-podsumowanie { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.kolejka-podsumowanie a { display:flex; flex-direction:column; gap:4px; text-decoration:none; }
+.kolejka-podsumowanie strong { font-size:1.5rem; }
+.kolejka-podsumowanie span { font-size:.875rem; }
+.kolejka-lista { display:grid; gap:12px; }
+.rekord-naglowek,.rekord-akcje { display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap; }
+.rekord-akcje { justify-content:start; }
+.formularz-weryfikacji { display:grid; gap:12px; margin-top:12px; }
+.formularz-weryfikacji label { display:grid; gap:6px; font-size:.875rem; }
+.formularz-weryfikacji button { justify-self:start; }
+.blad-formularza { color:var(--tekst); font-weight:600; }
+.mapa-narzedzia { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; font-size:.875rem; }
+.ustawienia-mapy { position:relative; }
+.ustawienia-mapy>summary { border:1px solid var(--pole-linia); padding:10px 14px; border-radius:6px; }
+.mapa-panel { position:absolute; top:calc(100% + 6px); left:0; z-index:15; width:320px; max-width:calc(100vw - 40px); max-height:65vh; overflow:auto; padding:16px; background:var(--tlo); border:1px solid var(--pole-linia); border-radius:8px; box-shadow:0 4px 20px #0003; font-size:.875rem; }
+.mapa-panel label { display:flex; align-items:center; gap:10px; min-height:44px; }
+.mapa-panel-grupa { border:0; padding:0; margin:0 0 12px; }
+.mapa-panel legend { font-weight:600; }
+.mapa-targeo { margin:4px 0 8px; }
+.mapa-targeo .przycisk { min-height:44px; width:100%; justify-content:flex-start; }
+.legenda-mapy { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.mapa-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+.mapa-layout.z-szczegolami { grid-template-columns:minmax(0,1fr) 340px; }
+.mapa-plansza { position:relative; overflow:hidden; min-width:0; }
+.mapa-ol,.mapa-zapasowa { position:absolute; inset:0; background:var(--tlo-2); }
+.mapa-zapasowa { background:var(--tlo); }
+.mapa-ol .ol-control { background:transparent; padding:0; border-radius:6px; }
+.mapa-ol .ol-control button { width:44px; height:44px; margin:2px; font-size:20px; color:var(--tekst); background:var(--tlo); border:1px solid var(--pole-linia); border-radius:6px; box-shadow:0 1px 4px #0003; }
+.mapa-ol .ol-control button:hover { border-color:var(--akcent); }
+.mapa-ol .ol-zoom { top:8px; left:8px; }
+.mapa-ol .ol-full-screen { top:8px; right:8px; }
+.mapa-ol .ol-attribution { bottom:8px; right:8px; background:var(--tlo); border:1px solid var(--linia); font-size:12px; max-width:calc(100% - 16px); }
+.mapa-ol .ol-attribution ul { color:var(--tekst-2); text-shadow:none; }
+.mapa-ol .ol-scale-bar { bottom:10px; left:10px; }
+.mapa-ol .ol-scale-text,.mapa-ol .ol-scale-step-text { color:var(--tekst); text-shadow:0 0 3px var(--tlo),0 0 3px var(--tlo); font-size:12px; }
+.mapa-ol .ol-scale-singlebar { border-color:var(--tekst); }
+.mapa-szczegoly { padding:16px; max-height:620px; overflow:auto; font-size:.875rem; }
+.szczegoly-naglowek { display:flex; align-items:start; justify-content:space-between; gap:8px; }
+.szczegoly-naglowek .przycisk { flex:none; font-size:20px; }
+.szczegoly-dane { display:grid; gap:5px; margin-top:16px; }
+.szczegoly-dane dt { color:var(--tekst-2); margin-top:8px; }
+.szczegoly-dane dd { overflow-wrap:anywhere; }
+.lista-odcinkow { border:1px solid var(--linia); border-radius:8px; padding:0 12px; }
+.lista-odcinkow ul { display:grid; gap:4px; }
+.lista-odcinkow li button { text-align:left; width:100%; min-height:44px; padding:12px; border-bottom:1px solid var(--linia); }
+.lista-odcinkow li button:hover { background:var(--tlo-2); }
+.lista-odcinkow li span { display:block; color:var(--tekst-2); font-size:.875rem; }
+@media (max-width:640px) {
+  .wybor-motywu { font-size:.75rem; gap:4px; }
+  .wybor-motywu select { max-width:90px; }
+  .naglowek { gap:4px; }
+  .filtry-drog { gap:10px; }
+  .szukaj-drogi { flex-basis:100%; }
+  .filtry-drog>label { flex-basis:calc(50% - 10px); }
+  .wyszukiwanie { padding:12px; }
+  .kolejka-podsumowanie { grid-template-columns:1fr; gap:8px; }
+  .kolejka-podsumowanie a { flex-direction:row; align-items:center; gap:12px; }
+  .paginacja { flex-wrap:wrap; }
+  .mapa-layout.z-szczegolami { grid-template-columns:minmax(0,1fr); }
+  .mapa-plansza { height:min(65dvh,520px)!important; min-height:320px; }
+  .mapa-szczegoly { position:fixed; z-index:30; bottom:0; left:0; right:0; max-height:70dvh; border-radius:16px 16px 0 0; background:var(--tlo); box-shadow:0 -6px 30px #0004; padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
+  .mapa-zaslona { position:fixed; inset:0; background:#0006; z-index:29; }
+  table.dane { min-width:720px; }
+  .podsumowanie table.dane { min-width:0; }
+}
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+
+.filtry-dodatkowe { flex:1 0 100%; }
+.filtry-dodatkowe .pola-filtrow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.pola-filtrow label { display:flex; flex-direction:column; gap:6px; font-size:.875rem; min-width:0; }
+@media(max-width:640px) { .filtry-dodatkowe .pola-filtrow { grid-template-columns:1fr; } }
+
+@media(max-width:640px) {
+  table.ulice-tabela { min-width:0; }
+  .ulice-tabela thead { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); }
+  .ulice-tabela tbody { display:grid; gap:12px; }
+  .ulice-tabela tr { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--linia); border-radius:8px; padding:8px; }
+  .ulice-tabela td { border:0; min-width:0; overflow-wrap:anywhere; padding:6px; }
+  .ulice-tabela td:first-child,.ulice-tabela td[data-label="Zarządca"],.ulice-tabela td[data-label="Źródło"] { grid-column:1/-1; }
+  .ulice-tabela td::before { content:attr(data-label); display:block; font-size:12px; color:var(--tekst-2); margin-bottom:4px; }
+  .ulice-tabela td:first-child>a { font-size:16px; }
 }
 
-html { color-scheme: light dark; }
+/* Dopasowania danych i decyzje użytkownika. */
+.kolejka-podsumowanie { grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); }
+.kolejka-podsumowanie a[aria-current="page"] { border-color:var(--akcent); outline:2px solid var(--akcent); }
+.propozycja-powiazania { display:grid;gap:8px; }
+.propozycja-powiazania fieldset { min-width:0; }
+.propozycja-powiazania label:not(.wybor-kandydata) { display:grid;gap:6px; }
+.propozycja-powiazania textarea { width:100%; }
+.kandydat-powiazania { border:1px solid var(--linia);border-radius:8px;padding:12px;display:grid;gap:8px;margin-top:10px; }
+.wybor-kandydata { display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer; }
+.wybor-kandydata input { width:24px;height:24px;flex-shrink:0; }
 
-body {
-  background: var(--tlo);
-  color: var(--tekst);
-  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-feature-settings: "tnum" 1;
+.propozycje-szczegoly > summary { min-height:44px;padding:10px 12px;background:var(--tlo-2);border:1px solid var(--linia);border-radius:8px;font-weight:600; }
+@media (max-width:640px) {
+ .kolejka-podsumowanie { display:flex;overflow-x:auto;gap:10px;padding:3px 3px 10px;scroll-snap-type:x proximity; }
+ .kolejka-podsumowanie a { flex:0 0 220px;flex-direction:row;align-items:center;gap:10px;scroll-snap-align:start; }
+ .kolejka-podsumowanie strong { font-size:1.25rem; }
 }
 
-a { color: var(--akcent); }
-
-.plakietka {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  border-radius: 999px;
-  padding: 0.1rem 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.5;
-  border: 1px solid currentColor;
+/* Kompaktowy układ: liczby zawsze widoczne, krótsze formularze i tabele. */
+.statystyki-skrot { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 6px; }
+.statystyka { display:flex;align-items:baseline;gap:10px;padding:8px 12px; }
+.statystyka .text-lg { font-size:1.1rem; }
+.podsumowanie-kategorie { margin-top:6px;padding:0 10px; }
+.wyniki-licznik { margin-top:10px; }
+.status-filtrow { flex-basis:100%;font-size:.75rem;line-height:1.3; }
+@media (min-width:641px) {
+ .naglowek { padding-top:4px;gap:2px 16px; }
+ .naglowek>a { min-height:32px; }
+ .nawigacja { padding-bottom:4px; }
+ .nawigacja a { min-height:34px;padding:0 10px; }
+ .wybor-motywu select { min-height:32px;padding:4px 8px; }
+ .przycisk { min-height:34px;padding:5px 10px; }
+ input,select { min-height:34px;padding:5px 8px; }
+ summary { min-height:32px;padding:5px 2px; }
+ .tekst-pomocniczy { line-height:1.4; }
+ .wyszukiwanie { margin-top:12px;padding:10px 12px; }
+ .filtry-drog { gap:8px; }
+ .filtry-drog>label,.szukaj-drogi,.pola-filtrow label { gap:3px;font-size:.8125rem; }
+ .filtry-glowne { display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(420px,2fr) auto auto;align-items:end; }
+ .filtry-glowne>.szukaj-drogi { grid-column:1;grid-row:1; }
+ .filtry-glowne>.filtry-dodatkowe { grid-column:2;grid-row:1; }
+ .filtry-glowne>.przycisk { grid-row:1; }
+ .filtry-glowne>.filtry-dodatkowe>summary { display:none; }
+ .filtry-glowne>.filtry-dodatkowe .pola-filtrow { gap:8px; }
+ .filtry-glowne>.status-filtrow { grid-column:1/-1; }
+ .widoki-i-eksport { margin-top:6px;gap:6px; }
+ .wybor-widoku a { min-height:32px;padding:5px 12px;font-size:.875rem; }
+ .paginacja { margin:6px 0;justify-content:flex-end;gap:12px; }
+ table.dane th { padding:7px 8px; }
+ table.dane td { padding:6px 8px;vertical-align:middle; }
+ table.dane td>a { min-height:28px; }
+ .plakietka { padding:1px 7px;font-size:.75rem; }
+ .kolejka-podsumowanie { gap:8px; }
+ .kolejka-podsumowanie a { padding:8px 10px;flex-direction:row;align-items:center;gap:8px; }
+ .kolejka-podsumowanie strong { font-size:1.2rem; }
+ .kolejka-podsumowanie span { font-size:.8125rem; }
+ .kolejka-lista { gap:8px; }
+ .kolejka-lista>article { padding:12px; }
+ .propozycje-szczegoly>summary { min-height:32px;padding:6px 10px; }
+ .wybor-kandydata { min-height:36px; }
+}
+@media (min-width:641px) and (max-width:1050px) {
+ .filtry-glowne { grid-template-columns:1fr auto auto; }
+ .filtry-glowne>.filtry-dodatkowe { grid-column:1/-1;grid-row:2; }
+ .filtry-glowne>.status-filtrow { grid-row:3; }
+}
+@media (max-width:640px) {
+ .statystyki-skrot { grid-template-columns:repeat(2,minmax(0,1fr));gap:6px; }
+ .statystyka { gap:6px;padding:6px 8px;flex-wrap:wrap; }
+ .statystyka .text-lg { font-size:1rem; }
+ .wyszukiwanie { margin-top:12px; }
+ .widoki-i-eksport { margin-top:8px; }
+ .opis-strony { font-size:.8125rem; }
 }
 
-.karta {
-  background: var(--tlo-2);
-  border: 1px solid var(--linia);
-  border-radius: 0.6rem;
+@media(min-width:1051px) { .wyszukiwanie.filtry-drog .pola-filtrow { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+.podpowiedzi .numer-podpowiedzi { display:inline;color:var(--tekst);font-weight:600; }
+.podpowiedzi mark { color:var(--tlo);background:var(--akcent);border-radius:2px;padding:0 1px; }
+
+.menu-gorne { position:sticky;top:0;z-index:20;background:var(--tlo); }
+html { scroll-padding-top:120px; }
+.skip-link { z-index:100; }
+.podsumowanie-kategorie { padding:8px 10px; }
+.podsumowanie-kategorie table.dane th,.podsumowanie-kategorie table.dane td { padding:3px 8px; }
+.podsumowanie-kategorie table.dane td>a { min-height:28px; }
+@media(max-width:640px) { .podsumowanie-kategorie table.dane td>a { min-height:44px; } }
+/* Filtry i kolumny wyników używają tych samych szerokości. */
+@media(min-width:1051px) {
+ .wyniki-drog { --kolumny-wynikow:24% 13% 13% 22% 10% 12% 6%; }
+ .filtry-nad-kolumnami { padding:8px 0; }
+ .filtry-nad-kolumnami .filtry-glowne { grid-template-columns:var(--kolumny-wynikow);gap:6px 0; }
+ .filtry-nad-kolumnami .szukaj-drogi { grid-column:1;grid-row:1;padding:0 8px; }
+ .filtry-nad-kolumnami .filtry-dodatkowe,.filtry-nad-kolumnami .pola-filtrow { display:contents; }
+ .filtry-nad-kolumnami .pola-filtrow label { padding:0 8px;grid-row:1; }
+ .filtry-nad-kolumnami .filtr-miejscowosc { grid-column:2; }
+ .filtry-nad-kolumnami .filtr-kategoria { grid-column:3; }
+ .filtry-nad-kolumnami .filtr-zarzadca { grid-column:4; }
+ .filtry-nad-kolumnami .filtry-glowne>.przycisk { grid-row:1;align-self:end;margin-left:8px;justify-self:start; }
+ .filtry-nad-kolumnami .filtry-glowne>button { grid-column:5; }
+ .filtry-nad-kolumnami .filtry-glowne>a { grid-column:6; }
+ .filtry-nad-kolumnami .status-filtrow { padding:0 8px; }
+ .filtry-nad-kolumnami .widoki-i-eksport { padding:0 8px; }
+ table.ulice-tabela { table-layout:fixed; }
+ .ulice-tabela th:nth-child(1) { width:24%; }
+ .ulice-tabela th:nth-child(2),.ulice-tabela th:nth-child(3) { width:13%; }
+ .ulice-tabela th:nth-child(4) { width:22%; }
+ .ulice-tabela th:nth-child(5) { width:10%; }
+ .ulice-tabela th:nth-child(6) { width:12%; }
+ .ulice-tabela th:nth-child(7) { width:6%; }
+ .ulice-tabela td { overflow-wrap:anywhere; }
+ .ulice-tabela td[data-label="Nr drogi"] { white-space:normal; }
+}
+.ulice-tabela th a { display:flex;gap:5px;align-items:center;min-height:32px;text-decoration:none;color:inherit; }
+.ulice-tabela th[aria-sort="ascending"] a,.ulice-tabela th[aria-sort="descending"] a { color:var(--akcent); }
+@media(max-width:640px) {
+ .ulice-tabela thead { position:static;width:auto;height:auto;clip-path:none;overflow:visible;display:block;margin-bottom:8px; }
+ .ulice-tabela thead tr { display:flex;flex-wrap:wrap;gap:4px;border:0;padding:0; }
+ .ulice-tabela thead th { border:1px solid var(--linia);border-radius:6px;padding:0 8px;font-size:.75rem; }
+ .ulice-tabela th a { min-height:44px; }
 }
 
-table.dane { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-table.dane th {
-  text-align: left;
-  font-weight: 600;
-  color: var(--tekst-2);
-  border-bottom: 1px solid var(--linia);
-  padding: 0.5rem 0.6rem;
-  white-space: nowrap;
+.filtry-lista { flex:1 0 100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+.filtry-lista label { display:flex;flex-direction:column;gap:3px;font-size:.8125rem;min-width:0; }
+@media(min-width:1051px) {
+ .filtry-nad-kolumnami .filtry-lista { display:contents; }
+ .filtry-nad-kolumnami .filtry-lista label { padding:0 8px;grid-row:1; }
 }
-table.dane td {
-  border-bottom: 1px solid var(--linia);
-  padding: 0.5rem 0.6rem;
-  vertical-align: top;
-}
-table.dane tr:hover td { background: var(--tlo-2); }
+@media(min-width:641px) and (max-width:1050px) { .filtry-nad-kolumnami .filtry-lista { grid-column:1/-1;grid-row:2; } }
+@media(max-width:640px) { .filtry-lista { grid-template-columns:1fr; } }
 
-.przewijalne { overflow-x: auto; }
-
-/* ---------------------------------------------------------------- mapa --
-   OpenLayers wnosi własny arkusz (`ol/ol.css`) zbudowany pod jasny motyw
-   i pod przyciski w rozmiarze z 2012 roku. Poniżej doprowadzamy jego
-   kontrolki do tych samych zmiennych, na których stoi reszta strony, i
-   dokładamy panel warstw oraz dymek — obie rzeczy renderuje React, więc
-   z ol.css nie mają nic wspólnego poza sąsiedztwem.
-   ---------------------------------------------------------------------- */
-
-.mapa-ol {
-  background: var(--tlo-2);
-}
-
-/* płótno mapy przejmuje gesty, żeby przewijanie strony nie walczyło z zoomem */
-.mapa-ol canvas {
-  touch-action: pan-x pan-y;
-}
-
-.mapa-ol .ol-control {
-  background: transparent;
-  padding: 0;
-  border-radius: 0.4rem;
-}
-
-.mapa-ol .ol-control button {
-  width: 1.9rem;
-  height: 1.9rem;
-  margin: 0.15rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--tekst);
-  background: color-mix(in srgb, var(--tlo) 92%, transparent);
-  border: 1px solid var(--linia);
-  border-radius: 0.4rem;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
-  cursor: pointer;
-}
-
-.mapa-ol .ol-control button:hover,
-.mapa-ol .ol-control button:focus-visible {
-  background: var(--tlo);
-  border-color: var(--akcent);
-}
-
-.mapa-ol .ol-zoom {
-  top: 0.5rem;
-  left: 0.5rem;
-}
-
-.mapa-ol .ol-full-screen {
-  top: 0.5rem;
-  right: 0.5rem;
-}
-
-.mapa-ol .ol-scale-bar {
-  bottom: 0.6rem;
-  left: 0.6rem;
-}
-
-.mapa-ol .ol-scale-text,
-.mapa-ol .ol-scale-step-text {
-  color: var(--tekst);
-  text-shadow: 0 0 3px var(--tlo), 0 0 3px var(--tlo);
-  font-size: 0.7rem;
-}
-
-.mapa-ol .ol-scale-singlebar {
-  border-color: var(--tekst);
-}
-
-.mapa-ol .ol-attribution {
-  background: color-mix(in srgb, var(--tlo) 88%, transparent);
-  border: 1px solid var(--linia);
-  border-radius: 0.4rem;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  font-size: 0.7rem;
-}
-
-.mapa-ol .ol-attribution ul {
-  color: var(--tekst-2);
-  text-shadow: none;
-}
-
-/* --- panel warstw i legendy --- */
-
-.mapa-panel {
-  position: absolute;
-  top: 2.9rem;
-  right: 0.5rem;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  width: 11.5rem;
-  max-height: calc(100% - 5rem);
-  overflow: auto;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  background: color-mix(in srgb, var(--tlo) 92%, transparent);
-  border: 1px solid var(--linia);
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 6px rgb(0 0 0 / 0.18);
-}
-
-.mapa-panel-grupa {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.mapa-panel-grupa legend {
-  padding: 0;
-  font-weight: 600;
-  color: var(--tekst-2);
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  letter-spacing: 0.03em;
-}
-
-.mapa-panel label,
-.mapa-panel-wpis {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  cursor: pointer;
-}
-
-.mapa-panel-wpis {
-  cursor: default;
-}
-
-.mapa-panel-osobno {
-  margin-top: 0.3rem;
-  padding-top: 0.3rem;
-  border-top: 1px solid var(--linia);
-}
-
-.mapa-panel-przycisk {
-  padding: 0.25rem 0.4rem;
-  font: inherit;
-  color: var(--tekst);
-  background: var(--tlo-2);
-  border: 1px solid var(--linia);
-  border-radius: 0.35rem;
-  cursor: pointer;
-}
-
-.mapa-panel-przycisk:hover {
-  border-color: var(--akcent);
-}
-
-.mapa-probka {
-  flex: none;
-  width: 1.1rem;
-  height: 0.2rem;
-  border-radius: 999px;
-}
-
-/* --- dymek odcinka --- */
-
-.mapa-dymek:empty {
-  display: none;
-}
-
-.mapa-dymek {
-  position: relative;
-  min-width: 14rem;
-  max-width: 19rem;
-  padding: 0.6rem 0.7rem;
-  font-size: 0.8rem;
-  line-height: 1.5;
-  color: var(--tekst);
-  background: var(--tlo);
-  border: 1px solid var(--linia);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
-}
-
-/* dzióbek wskazujący klikniętą drogę */
-.mapa-dymek::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  translate: -50% 0;
-  border: 7px solid transparent;
-  border-top-color: var(--tlo);
-}
-
-.mapa-dymek-zamknij {
-  position: absolute;
-  top: 0.15rem;
-  right: 0.3rem;
-  padding: 0 0.2rem;
-  font-size: 1rem;
-  line-height: 1.2;
-  color: var(--tekst-2);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-
-.mapa-dymek-dane {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.1rem 0.5rem;
-  margin: 0.45rem 0 0;
-}
-
-.mapa-dymek-dane dt {
-  color: var(--tekst-2);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding-top: 0.1rem;
-}
-
-.mapa-dymek-dane dd {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.mapa-dymek-link {
+.status-nazwy-osm {
   display: inline-block;
-  margin-top: 0.5rem;
+  border: 1px solid #a16207;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1.5;
   font-weight: 600;
+  background: #fef3c7;
+  color: #713f12;
 }
-
-/* Na wąskim ekranie panel zjada mapę — zwężamy go i chowamy nazwy
-   podkładów pod skróty nie da rady, więc zostaje sam mniejszy krok. */
-@media (max-width: 640px) {
-  .mapa-panel {
-    width: 9.5rem;
-    padding: 0.4rem 0.45rem;
-    font-size: 0.7rem;
-  }
-
-  .mapa-dymek {
-    min-width: 11rem;
-    max-width: 15rem;
+[data-theme="dark"] .status-nazwy-osm {
+  background: #422b10;
+  color: #fde68a;
+  border-color: #d97706;
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) .status-nazwy-osm {
+    background: #422b10;
+    color: #fde68a;
+    border-color: #d97706;
   }
 }

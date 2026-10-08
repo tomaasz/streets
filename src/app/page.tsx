@@ -1,12 +1,18 @@
+import { WynikiUug } from '@/components/WynikiUug';
+import { NazwyDodatkowe } from '@/components/NazwyDodatkowe';
 import Link from 'next/link';
 import {
-  miejscowosci, policzUlice, statystyki, ulice, zarzadcy, zrodla,
+  opcjeFiltrow, policzUlice, statystyki, ulice, zrodla,
 } from '@/lib/zapytania';
-import { ETYKIETY_KATEGORII, KATEGORIE, metryNaKm } from '@/lib/typy';
+import { SORTOWANIE,sortowanie } from '@/lib/sortowanie';
+import { metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii } from '@/components/Plakietka';
 import { ZnacznikZrodla } from '@/components/Zrodlo';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
+import { FiltryDrog } from '@/components/FiltryDrog';
+import { Paginacja } from '@/components/Paginacja';
+import { parametryFiltrow, offsetStrony } from '@/lib/filtry';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,45 +27,38 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
     kategoria: pierwszy(sp.kategoria),
     miejscowosc: pierwszy(sp.miejscowosc),
     zarzadca: pierwszy(sp.zarzadca),
-    limit: 300,
-    offset: Number(pierwszy(sp.offset)) || 0,
+    ...sortowanie(pierwszy(sp.sort),pierwszy(sp.kierunek)),
+    limit: 50,
+    slug: pierwszy(sp.slug),
+    offset: offsetStrony(sp.offset),
   };
 
   const wynik = await zBaza(() =>
     Promise.all([
       ulice(filtry),
       policzUlice(filtry),
-      miejscowosci(),
-      zarzadcy(),
+      opcjeFiltrow(filtry),
       statystyki(),
       zrodla(),
     ])
   );
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
-  const [wiersze, ile, listaMiejscowosci, listaZarzadcow, stat, listaZrodel] =
+  const [wiersze, ile, opcje, stat, listaZrodel] =
     wynik.dane;
   const slownikZrodel = new Map(listaZrodel.map((z) => [z.kod, z]));
 
-  const aktualneFiltry = {
-    ...(filtry.q && { q: filtry.q }),
-    ...(filtry.kategoria && { kategoria: filtry.kategoria }),
-    ...(filtry.miejscowosc && { miejscowosc: filtry.miejscowosc }),
-    ...(filtry.zarzadca && { zarzadca: filtry.zarzadca }),
-  };
-
-  const parametryEksportu = new URLSearchParams(
-    Object.entries(aktualneFiltry) as [string, string][]
-  );
+  const aktualneFiltry = parametryFiltrow(sp);
+  const powrot = '/' + (new URLSearchParams({ ...aktualneFiltry, ...(filtry.offset > 0 ? { offset: String(filtry.offset) } : {}) }).size ? '?' + new URLSearchParams({ ...aktualneFiltry, ...(filtry.offset > 0 ? { offset: String(filtry.offset) } : {}) }) : '');
 
   return (
     <>
-      <h1 className="text-xl font-bold">Ulice gminy Wyszków i ich zarządcy</h1>
-      <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
+      <h1 className="text-xl font-bold">Ulice i drogi gminy Wyszków</h1>
+      <p className="opis-strony mt-1 text-sm text-[var(--tekst-2)]">
         Jedna ulica bywa podzielona na kilka odcinków o różnej kategorii i różnym
         zarządcy — dlatego w kolumnach poniżej może być więcej niż jedna wartość.
       </p>
 
-      <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="statystyki-skrot" aria-label="Podsumowanie sieci dróg">
         <Kafelek etykieta="ulic w bazie" wartosc={stat.ogol.ulic} />
         <Kafelek etykieta="odcinków dróg" wartosc={stat.ogol.odcinkow} />
         <Kafelek etykieta="dróg numerowanych" wartosc={stat.ogol.drog} />
@@ -69,7 +68,9 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
         />
       </section>
 
-      <section className="karta mt-4 p-3">
+      <section className="podsumowanie podsumowanie-kategorie" aria-labelledby="tytul-podsumowania">
+        <h2 id="tytul-podsumowania" className="text-sm font-semibold">Podsumowanie według kategorii dróg</h2>
+      <div className="mt-1">
         <div className="przewijalne">
           <table className="dane">
             <thead>
@@ -96,86 +97,30 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
             </tbody>
           </table>
         </div>
+      </div>
       </section>
 
-      <form className="mt-6 flex flex-wrap items-end gap-3" method="get">
-        <label className="flex flex-col gap-1 text-xs text-[var(--tekst-2)]">
-          Szukaj ulicy
-          <input
-            type="search"
-            name="q"
-            defaultValue={filtry.q ?? ''}
-            placeholder="np. kosciuszki"
-            className="w-56 rounded border border-[var(--linia)] bg-[var(--tlo)] px-2 py-1.5 text-sm text-[var(--tekst)]"
-          />
-        </label>
-        <Wybor nazwa="kategoria" etykieta="Kategoria" wartosc={filtry.kategoria}>
-          {KATEGORIE.map((k) => (
-            <option key={k} value={k}>
-              {ETYKIETY_KATEGORII[k]}
-            </option>
-          ))}
-        </Wybor>
-        <Wybor nazwa="miejscowosc" etykieta="Miejscowość" wartosc={filtry.miejscowosc}>
-          {listaMiejscowosci.map((m) => (
-            <option key={m.miejscowosc} value={m.miejscowosc}>
-              {m.miejscowosc} ({m.ile})
-            </option>
-          ))}
-        </Wybor>
-        <Wybor nazwa="zarzadca" etykieta="Zarządca" wartosc={filtry.zarzadca}>
-          {listaZarzadcow
-            .filter((z) => Number(z.odcinkow) > 0)
-            .map((z) => (
-              <option key={z.kod} value={z.kod}>
-                {z.nazwa}
-              </option>
-            ))}
-        </Wybor>
-        <button
-          type="submit"
-          className="rounded border border-[var(--linia)] bg-[var(--tlo-2)] px-3 py-1.5 text-sm font-medium"
-        >
-          Filtruj
-        </button>
-        <Link href="/" className="text-sm no-underline hover:underline">
-          Wyczyść
-        </Link>
-      </form>
-
-      <div className="mt-4 flex flex-wrap items-baseline justify-between gap-2 text-sm text-[var(--tekst-2)]">
-        <span>
-          Znaleziono <strong className="text-[var(--tekst)]">{ile}</strong> ulic
-          {wiersze.length < ile ? ` (pokazano ${wiersze.length})` : ''}
-        </span>
-        <span className="flex gap-3">
-          <a href={`/api/eksport?format=csv&${parametryEksportu}`} className="no-underline hover:underline">
-            CSV
-          </a>
-          <a href={`/api/eksport?format=geojson&${parametryEksportu}`} className="no-underline hover:underline">
-            GeoJSON
-          </a>
-        </span>
-      </div>
-
+      <div className="wyniki-drog">
+      <FiltryDrog p={sp} widok="lista" opcje={opcje} />
+      <p className="wyniki-licznik text-sm" role="status">Znaleziono <strong>{ile}</strong> pozycji.{filtry.q && /^\d+[a-z]?$/i.test(filtry.q.trim()) ? <span className="tekst-pomocniczy"> Szukasz fragmentu numeru „{filtry.q}”. Wyniki obejmują ulice i drogi z pasującym numerem lub opisem odcinka.</span> : null}</p>
+      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={50} ile={ile} />
       <div className="przewijalne mt-2">
-        <table className="dane">
+        <table className="dane ulice-tabela">
           <thead>
             <tr>
-              <th>Ulica</th>
-              <th>Miejscowość</th>
-              <th>Kategoria</th>
-              <th>Zarządca</th>
-              <th>Nr drogi</th>
-              <th>Źródło</th>
-              <th className="text-right">Długość</th>
+              {Object.entries(SORTOWANIE).map(([key,label])=><th key={key} scope="col" aria-sort={filtry.sort===key ? filtry.kierunek==='asc'?'ascending':'descending' : 'none'}>
+                <Link prefetch={false} href={{pathname:'/',query:{...aktualneFiltry,sort:key,kierunek:filtry.sort===key && filtry.kierunek==='asc'?'desc':'asc'}}}
+                  aria-label={`${label}: sortuj ${filtry.sort===key && filtry.kierunek==='asc'?'malejąco':'rosnąco'}`}>
+                  {label} <span aria-hidden="true">{filtry.sort===key ? filtry.kierunek==='asc'?'↑':'↓':'↕'}</span>
+                </Link>
+              </th>)}
             </tr>
           </thead>
           <tbody>
             {wiersze.map((u) => (
               <tr key={u.id}>
-                <td>
-                  <Link href={`/ulica/${u.slug}`} className="font-medium no-underline hover:underline">
+                <td data-label="Ulica / droga">
+                  <Link href={u.odcinek_id ? { pathname: "/mapa", query: { q:u.numery_drog[0], miejscowosc:u.miejscowosc ?? undefined, odcinek:`odcinek-${u.odcinek_id}`,odcinki:String(u.odcinek_id) } } : { pathname: `/ulica/${u.slug}`, query: { powrot } }} className="font-medium no-underline hover:underline">
                     {u.nazwa_pelna}
                   </Link>
                   {u.wielu_zarzadcow ? (
@@ -187,8 +132,8 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                     </span>
                   ) : null}
                 </td>
-                <td className="text-[var(--tekst-2)]">{u.miejscowosc}</td>
-                <td>
+                <td data-label="Miejscowość" className="text-[var(--tekst-2)]">{u.miejscowosc ?? "Nieustalona"}</td>
+                <td data-label="Kategoria">
                   <span className="flex flex-wrap gap-1">
                     {u.kategorie.length === 0 ? (
                       <span className="text-[var(--tekst-2)]">brak danych</span>
@@ -197,15 +142,15 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                     )}
                   </span>
                 </td>
-                <td>
+                <td data-label="Zarządca">
                   {u.zarzadcy.length === 0 ? (
                     <span className="text-[var(--tekst-2)]">—</span>
                   ) : (
                     u.zarzadcy.join(', ')
                   )}
                 </td>
-                <td className="whitespace-nowrap">{u.numery_drog.join(', ') || '—'}</td>
-                <td>
+                <td data-label="Nr drogi" className="whitespace-nowrap">{u.numery_drog.join(', ') || '—'}</td>
+                <td data-label="Źródło">
                   <ZnacznikZrodla
                     kody={u.zrodla}
                     pewnosc={u.pewnosc_min}
@@ -215,65 +160,28 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
                     url_pdf={u.url_pdf}
                   />
                 </td>
-                <td className="text-right whitespace-nowrap">{metryNaKm(u.dlugosc_m)}</td>
+                <td data-label="Długość" className="text-right whitespace-nowrap">{metryNaKm(u.dlugosc_m)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-2 text-sm">
-        {filtry.offset > 0 ? (
-          <Link
-            href={{ pathname: '/', query: { ...aktualneFiltry, offset: Math.max(0, filtry.offset - 300) || undefined } }}
-            className="rounded border border-[var(--linia)] bg-[var(--tlo)] px-4 py-2 font-medium hover:bg-[var(--tlo-2)]"
-          >
-            &larr; Poprzednia
-          </Link>
-        ) : (
-          <div />
-        )}
-        
-        {filtry.offset + wiersze.length < ile ? (
-          <Link
-            href={{ pathname: '/', query: { ...aktualneFiltry, offset: filtry.offset + 300 } }}
-            className="rounded border border-[var(--linia)] bg-[var(--tlo)] px-4 py-2 font-medium hover:bg-[var(--tlo-2)]"
-          >
-            Następna &rarr;
-          </Link>
-        ) : (
-          <div />
-        )}
+      <NazwyDodatkowe q={filtry.q} miejscowosc={filtry.miejscowosc} kategoria={filtry.kategoria} zarzadca={filtry.zarzadca}/>
+      {ile===0 && !filtry.slug && filtry.q && filtry.q.trim().length>=3 && filtry.q.length<=100 && /\p{L}/u.test(filtry.q) && !/^\d+\s*[a-z]?$/i.test(filtry.q.trim()) ? <WynikiUug key={JSON.stringify(filtry)} q={filtry.q} miejscowosc={filtry.miejscowosc} kategoria={filtry.kategoria} zarzadca={filtry.zarzadca}/> : null}
+      {wiersze.length === 0 ? <p className="karta p-4">Brak wyników w lokalnej bazie urzędowej dla wybranych filtrów.</p> : null}
+      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={50} ile={ile} />
       </div>
+
     </>
   );
 }
 
 function Kafelek({ etykieta, wartosc }: { etykieta: string; wartosc: string | number }) {
   return (
-    <div className="karta p-3">
+    <div className="karta statystyka">
       <div className="text-lg font-bold">{wartosc}</div>
       <div className="text-xs text-[var(--tekst-2)]">{etykieta}</div>
     </div>
-  );
-}
-
-function Wybor({
-  nazwa, etykieta, wartosc, children,
-}: {
-  nazwa: string; etykieta: string; wartosc?: string; children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-xs text-[var(--tekst-2)]">
-      {etykieta}
-      <select
-        name={nazwa}
-        defaultValue={wartosc ?? ''}
-        className="rounded border border-[var(--linia)] bg-[var(--tlo)] px-2 py-1.5 text-sm text-[var(--tekst)]"
-      >
-        <option value="">wszystkie</option>
-        {children}
-      </select>
-    </label>
   );
 }

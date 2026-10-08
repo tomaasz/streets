@@ -36,6 +36,12 @@ Geo-System (iMPA), prowadzony przez Urząd Miejski w Wyszkowie. Najbardziej
 aktualne źródło i dostępne „od środka": lepiej poprosić geodetę o eksport
 GML/WFS niż scrapować portal.
 
+Od 8 października 2026 aplikacja wykorzystuje publiczny WMS „Adresy i ulice”
+(`https://www.punktyadresowe.pl/cgi-bin/wms/143505`) jako dodatkową warstwę
+mapy i do porównania wpisów po SIMC/ULIC poprzez GetFeatureInfo. Nie jest
+to pełny import ewidencji; udostępniony serwer WMS odrzuca WFS. Szczegóły:
+[integracja e-mapy](integracja-emapa-2026-10-08.md).
+
 ## B. Kategoria i numer drogi
 
 ### 4. BDOT10k, paczka powiatowa ★ używane

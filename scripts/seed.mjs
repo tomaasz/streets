@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { odtworzPowiazania } from './lib/powiazania-zatwierdzone.mjs';
 /**
  * Wypełnia bazę danymi z data/ i db/seed/.
  * Skrypt jest idempotentny — można go puścić ponownie po odświeżeniu danych.
@@ -354,6 +355,7 @@ async function main() {
       `ręcznie ${aktyCsv.length})\n`
   );
 
+  await odtworzPowiazania(klient,{tylkoGeometria:true});
   await klient.query('COMMIT');
   await klient.end();
   process.stderr.write('Gotowe.\n');

@@ -1,83 +1,40 @@
 import Link from 'next/link';
 import { MapaInteraktywna } from '@/components/MapaInteraktywna';
-import { ETYKIETY_KATEGORII, KATEGORIE } from '@/lib/typy';
-
-export const metadata = {
-  title: 'Mapa dróg — gmina Wyszków',
-  description:
-    'Interaktywna mapa dróg i ulic gminy Wyszków na podkładzie z Geoportalu, ' +
-    'w układzie PL-1992. Kolor odpowiada kategorii drogi.',
-};
-
-type Parametry = {
-  kategoria?: string;
-  miejscowosc?: string;
-  zarzadca?: string;
-  q?: string;
-};
-
-export default async function Strona({
-  searchParams,
-}: {
-  searchParams: Promise<Parametry>;
-}) {
+import { FiltryDrog } from '@/components/FiltryDrog';
+import { opcjeFiltrow } from '@/lib/zapytania';
+import { parametryFiltrow, type ParametryWidoku } from '@/lib/filtry';
+import { zBaza } from '@/lib/stan';
+import { BrakBazy } from '@/components/BrakBazy';
+import { NazwyDodatkowe } from '@/components/NazwyDodatkowe';
+import {nazwaDodatkowa} from '@/lib/nazwy-dodatkowe';
+export const dynamic = 'force-dynamic';
+export const metadata = { title:'Mapa dróg — gmina Wyszków',description:'Wyszukaj drogę i sprawdź jej zarządcę oraz podstawę prawną.' };
+export default async function Strona({ searchParams }: { searchParams: Promise<ParametryWidoku> }) {
   const p = await searchParams;
-  const zapytanie = new URLSearchParams();
-  for (const k of ['kategoria', 'miejscowosc', 'zarzadca', 'q'] as const) {
-    if (p[k]) zapytanie.set(k, p[k]!);
-  }
-  // `/api/mapa`, nie `/api/eksport` — te same dane, ale odchudzone i z ETagiem;
-  // eksport zostaje tym, czym był: plikiem do pobrania
-  const zrodlo = `/api/mapa${zapytanie.size ? `?${zapytanie}` : ''}`;
-  // Next 16 typuje trasy, więc href idzie obiektem, nie sklejonym stringiem
-  const filtr = (kat?: string) =>
-    ({ pathname: '/mapa', query: kat ? { kategoria: kat } : {} }) as const;
-
-  return (
-    <>
-      <h1 className="text-xl font-bold">Mapa dróg</h1>
-      <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
-        Podkład pochodzi z Geoportalu (GUGiK), mapa pracuje w układzie PL-1992 —
-        tym samym, w którym robi się mapy urzędowe. Kliknij odcinek, żeby
-        zobaczyć kategorię, zarządcę i podstawę prawną.
-      </p>
-
-      <nav className="mt-4 flex flex-wrap gap-2 text-sm">
-        <Link
-          href={filtr()}
-          className={`karta px-3 py-1 no-underline ${p.kategoria ? '' : 'font-semibold'}`}
-        >
-          wszystkie
-        </Link>
-        {KATEGORIE.filter((k) => k !== 'nieustalona').map((k) => (
-          <Link
-            key={k}
-            href={filtr(k)}
-            className={`karta px-3 py-1 no-underline ${
-              p.kategoria === k ? 'font-semibold' : ''
-            }`}
-          >
-            <span
-              className="mr-2 inline-block h-[3px] w-4 align-middle"
-              style={{ background: `var(--kat-${k})` }}
-            />
-            {ETYKIETY_KATEGORII[k]}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="mt-4">
-        <MapaInteraktywna zrodloDanych={zrodlo} wysokosc={620} />
-      </div>
-
-      <p className="mt-3 max-w-[70ch] text-xs text-[var(--tekst-2)]">
-        Mapa pokazuje odcinki, dla których znamy geometrię ulicy z PRG. Drogi
-        polne, leśne i dojazdy do pól, które nie mają nazwy w PRG, nie mają tu
-        czego rysować — ich udział w sieci widać w{' '}
-        <Link href="/braki">Brakach</Link>. Przebieg odcinka jest z BDOT10k
-        i ma dokładność mapy 1:10&nbsp;000; nie zastępuje wypisu z ewidencji
-        dróg ani mapy do celów projektowych.
-      </p>
-    </>
-  );
+  const params = parametryFiltrow(p);
+  const propozycja=nazwaDodatkowa(params.dodatkowa);
+  const porownanie=propozycja && params.q===propozycja.kandydat_nr_drogi && params.miejscowosc===propozycja.miejscowosc ? propozycja : undefined;
+  const wynik = await zBaza(() => opcjeFiltrow(params));
+  if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
+  return <>
+    <h1 className="text-xl font-bold">Mapa dróg</h1>
+    <p className="mt-1 text-sm tekst-pomocniczy">Znajdź drogę po nazwie lub numerze. Kliknij odcinek albo wybierz go z listy, aby sprawdzić zarządcę i dokumenty.</p>
+    {params.droga ? <p className="karta p-3 mt-3 text-sm">Wybrana droga{params.q ? `: ${params.q}` : ''}. Mapa pokazuje jej odcinki w gminie, także bez przypisanej nazwy ulicy. <Link href="/drogi">Wróć do dróg numerowanych</Link></p> : null}
+    <FiltryDrog p={p} widok="mapa" opcje={wynik.dane} />
+    <NazwyDodatkowe q={params.q} miejscowosc={params.miejscowosc} kategoria={params.kategoria} zarzadca={params.zarzadca}/>
+    {porownanie ? <section className="karta p-3 mt-3" aria-label="Porównanie nazwy z innej mapy">
+      <h2 className="text-sm font-semibold">{porownanie.nazwa} · {porownanie.miejscowosc}{' '}<span className="status-nazwy-osm">{porownanie.zrodlo} · nazwa bez potwierdzenia</span></h2>
+      <p className="text-sm mt-1">Na mapie pokazujemy do porównania drogę {porownanie.kandydat_nr_drogi} z BDOT10k. Powiązanie tej nazwy z odcinkiem jest przybliżone i wymaga weryfikacji. Dokumenty dotyczące drogi nie potwierdzają nadania nazwy „{porownanie.nazwa}”.</p>
+      <a href={porownanie.url} target="_blank" rel="noreferrer" className="text-sm">Sprawdź nazwę w {porownanie.zrodlo} ↗</a>
+    </section> : null}
+    {params.prg ? <p className="karta p-3 mt-3">Porównanie przebiegu: linia przerywana „Przebieg PRG” pokazuje ulicę z rejestru nazw; pozostałe linie to wybrane odcinki BDOT. Sprawdź zgodność przebiegu i jego końców.</p> : null}
+    <div className="mt-4"><MapaInteraktywna zrodloDanych={`/api/mapa?${new URLSearchParams(params)}`} wysokosc={620} legenda={false} /></div>
+    <details className="mt-4 pomoc-mapy"><summary>Źródła mapy i zakres danych</summary>
+      <p className="mt-2 tekst-pomocniczy">Przebieg pochodzi z PRG i BDOT10k. Kategoria może być potwierdzona uchwałą; dokument jest dostępny w szczegółach odcinka. Opcjonalna warstwa pokazuje także drogi bez przypisanej ulicy. Sam wpis w BDOT10k nie potwierdza ich kategorii.</p>
+      <p className="mt-2 tekst-pomocniczy">Podkłady: OpenStreetMap i Geoportal GUGiK. Mapa pracuje w układzie PL-1992. Dokładność BDOT10k odpowiada mapie 1:10 000 i nie zastępuje wypisu z ewidencji dróg.</p>
+      <p className="mt-2 tekst-pomocniczy">Dodatkowe nazwy z OSM są oznaczone jako „nazwa bez potwierdzenia” i mają bursztynową linię przerywaną. Nazwa ze zgłoszenia Targeo może wskazywać odcinek do porównania; takie powiązanie wymaga weryfikacji dokumentów.</p>
+      <p className="mt-2 tekst-pomocniczy">Gminna e-mapa udostępnia urzędową warstwę ulic i adresów. Włącz ją w panelu, przybliż widok i kliknij ulicę. Odczyt nazwy, SIMC i ULIC służy do porównania z naszą bazą; kategoria oraz zarządca wymagają osobnego potwierdzenia.</p>
+      <Link className="przycisk mt-2" href="/braki">Przejdź do weryfikacji danych</Link>
+    </details>
+  </>;
 }

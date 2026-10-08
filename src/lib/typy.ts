@@ -6,6 +6,7 @@ export type GeoJSONLinie = {
 export type WierszUlicy = {
   id: number;
   slug: string;
+  odcinek_id?: number | null;
   simc: string;
   sym_ul: string;
   miejscowosc: string;

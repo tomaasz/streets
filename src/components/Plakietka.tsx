@@ -4,9 +4,10 @@ export function PlakietkaKategorii({ kategoria }: { kategoria: string }) {
   return (
     <span
       className="plakietka"
-      style={{ color: KOLORY_KATEGORII[kategoria] ?? 'var(--tekst-2)' }}
+      style={{ borderColor: KOLORY_KATEGORII[kategoria] ?? 'var(--tekst-2)' }}
       title={`Kategoria drogi: ${ETYKIETY_KATEGORII[kategoria] ?? kategoria}`}
     >
+      <span className="mapa-probka" style={{ background: KOLORY_KATEGORII[kategoria] }} />
       {ETYKIETY_KATEGORII[kategoria] ?? kategoria}
     </span>
   );
@@ -20,8 +21,8 @@ export function PlakietkaPewnosci({ pewnosc }: { pewnosc: number }) {
   };
   const kolor = pewnosc >= 3 ? 'var(--kat-gminna)' : pewnosc === 2 ? 'var(--kat-powiatowa)' : 'var(--kat-krajowa)';
   return (
-    <span className="plakietka" style={{ color: kolor }} title={opis[pewnosc]}>
-      pewność {pewnosc}/3
+    <span className="plakietka" style={{ borderColor: kolor }} title={opis[pewnosc]}>
+      {pewnosc >= 3 ? 'Potwierdzone dokumentem' : pewnosc === 2 ? 'Źródło urzędowe' : 'Do weryfikacji'}
     </span>
   );
 }

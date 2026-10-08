@@ -7,11 +7,6 @@ const OPIS_PEWNOSCI: Record<number, string> = {
   3: 'akt prawa miejscowego / ewidencja dróg',
 };
 
-const KOLOR_PEWNOSCI: Record<number, string> = {
-  1: 'var(--kat-krajowa)',
-  2: 'var(--kat-powiatowa)',
-  3: 'var(--kat-gminna)',
-};
 
 /**
  * Skąd wiadomo i na ile pewnie. Bez tego wiersz zaimportowany hurtem
@@ -65,11 +60,10 @@ export function ZnacznikZrodla({
       })}
       {pewnosc ? (
         <span
-          className="text-xs font-semibold"
-          style={{ color: KOLOR_PEWNOSCI[pewnosc] ?? 'var(--tekst-2)' }}
+          className="text-xs font-semibold status-danych"
           title={`Pewność ${pewnosc}/3 — ${OPIS_PEWNOSCI[pewnosc]}`}
         >
-          {pewnosc}/3
+          {pewnosc >= 3 ? 'Potwierdzone dokumentem' : pewnosc === 2 ? 'Źródło urzędowe' : 'Do weryfikacji'}
         </span>
       ) : null}
     </span>

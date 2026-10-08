@@ -1,20 +1,23 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import {SprawdzEmape} from '@/components/SprawdzEmape';
 import { odcinkiUlicy, ulica } from '@/lib/zapytania';
 import { metryNaKm } from '@/lib/typy';
 import { bdot10kUrl } from '@/lib/zrodlo';
 import { Mapa } from '@/components/Mapa';
 import { MapaInteraktywna } from '@/components/MapaInteraktywna';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
+import { bezpiecznyPowrot, pierwszy } from '@/lib/filtry';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Strona({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ powrot?: string | string[] }>;
 }) {
   const { slug } = await params;
+  const powrot = bezpiecznyPowrot(pierwszy((await searchParams).powrot));
   const u = await ulica(slug);
   if (!u) notFound();
 
@@ -23,17 +26,18 @@ export default async function Strona({
   return (
     <>
       <p className="text-sm">
-        <Link href="/" className="no-underline hover:underline">
-          ← Wszystkie ulice
-        </Link>
+        <a href={powrot} className="przycisk">
+          ← Powrót do wyników
+        </a>
       </p>
 
       <h1 className="mt-2 text-xl font-bold">{u.nazwa_pelna}</h1>
       <p className="text-sm text-[var(--tekst-2)]">
-        {u.miejscowosc} · SIMC {u.simc} · SYM_UL {u.sym_ul} ·{' '}
-        {metryNaKm(u.dlugosc_m)}
+        {u.miejscowosc} · {metryNaKm(u.dlugosc_m)}
       </p>
 
+      <details className="mt-2 text-sm"><summary>Identyfikatory w rejestrze ulic</summary><p>SIMC: {u.simc} · SYM_UL: {u.sym_ul}</p></details>
+      <SprawdzEmape key={u.slug} slug={u.slug}/>
       {u.wielu_zarzadcow ? (
         <p className="karta mt-4 border-l-4 p-3 text-sm"
            style={{ borderLeftColor: 'var(--kat-nieustalona)' }}>
@@ -89,8 +93,7 @@ export default async function Strona({
         {odcinki.length === 0 ? (
           <p className="karta p-4 text-sm text-[var(--tekst-2)]">
             Do tej ulicy nie przypisano żadnego odcinka drogi. Zwykle znaczy to,
-            że oś z BDOT10k nie trafiła w oś ulicy z PRG — sprawdź w terenie albo
-            zwiększ tolerancję dopasowania w <code>scripts/build-odcinki.mjs</code>.
+            że oś z BDOT10k nie została dopasowana do przebiegu ulicy. Sprawdź dokumentację drogi lub zgłoś ten rekord do weryfikacji.
           </p>
         ) : (
           <div className="grid gap-3">
@@ -134,7 +137,9 @@ export default async function Strona({
                   ) : null}
                   {o.przebieg ? <Pole etykieta="Przebieg drogi">{o.przebieg}</Pole> : null}
                   <Pole etykieta="Kontakt">
-                    {[o.telefon, o.email].filter(Boolean).join(' · ') || '—'}
+                    {o.telefon ? <a className="block" href={`tel:${o.telefon.replace(/[^+\d]/g, '')}`}>{o.telefon}</a> : null}
+                    {o.email ? <a className="block" href={`mailto:${o.email}`}>{o.email}</a> : null}
+                    {!o.telefon && !o.email ? '—' : null}
                     {o.www ? (
                       <a className="block" href={o.www} rel="noreferrer">
                         {o.www}

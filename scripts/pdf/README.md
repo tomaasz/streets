@@ -26,6 +26,10 @@ python3 -m venv .venv && .venv/bin/pip install pypdf
   > data/raw/uchwaly-kategorie.json
 
 npm run data:uchwaly     # dopasowanie do ulic z PRG i wsad do bazy
+
+# Lokalnie, z konfiguracją z .env, raport bez zapisu do bazy:
+node --env-file=.env scripts/import-uchwaly.mjs --na-sucho \
+  --raport-json=/tmp/raport-uchwaly.json
 ```
 
 ## Co skrypt rozpoznaje
@@ -51,7 +55,11 @@ PDF-y bywają niechlujne i skrypt to zakłada:
   w ciągu, więc numery działek z opisu odcinka nie rozwalają listy;
 - pozycja bywa **bez nazwy** (XXVII/264/16, zał. 2 poz. 16: jest opis odcinka
   i długość, nazwy nie ma) — taka pozycja dostaje `watpliwa: true` i nie
-  wchodzi do bazy;
+  jest automatycznie dopasowywana do ulicy. Wyjątek: poz. 16 uchwały
+  XXVII/264/16 jest ręcznie powiązana w `db/seed/powiazania-odcinkow.json` z
+  nienazwanym odcinkiem BDOT10k nr 440768W; geometria tej drogi trafia na mapę
+  jako „Droga gminna bez nazwy” z podstawą prawną, a BDOT pozostaje źródłem
+  geometrii;
 - w nazwach zdarzają się literówki („Monte Casino” zamiast „Monte Cassino”,
   „Tadeusz Strusia” zamiast „Tadeusza Strusia”). **Nie poprawiamy ich
   automatycznie** — to treść aktu prawnego. Importer je raportuje jako
@@ -59,3 +67,8 @@ PDF-y bywają niechlujne i skrypt to zakłada:
 - starsze uchwały wymieniają ulice, których dziś nie ma w PRG, bo zmieniły
   nazwę (XXVII/264/16 jest z września 2016 r., sprzed dekomunizacji nazw —
   „Gwardii Ludowej” i „Hanki Sawickiej” już nie istnieją).
+
+Zatwierdzone powiązania pozycji bez nazwy zapisujemy w
+`db/seed/powiazania-odcinkow.json`, razem z uzasadnieniem. Kolejka 16
+niedopasowanych pozycji i propozycja dalszej organizacji są w
+`docs/przeglad-zmian-2026-10-07.md`.

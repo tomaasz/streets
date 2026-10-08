@@ -1,0 +1,13 @@
+[
+  {
+    "akt": "XXVII/264/16",
+    "zalacznik": 2,
+    "lp": 16,
+    "numer_bdot": "440768W",
+    "miejscowosc": "Kamieńczyk",
+    "dlugosc_uchwala_m": 563,
+    "tolerancja_dlugosci": 0.2,
+    "opis": "Kamieńczyk: od drogi powiatowej nr 4406W do granic sołectwa (przez most)",
+    "uzasadnienie": "Geometria BDOT10k ma 641 m i styka się z Jadowską oraz Królewską. Uchwała podaje 563 m; różnica długości wymaga zachowania obu wartości. Numer pochodzi z BDOT10k, nie z tej pozycji uchwały."
+  }
+]

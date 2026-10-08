@@ -1,0 +1,12 @@
+[
+  {
+    "id": "targeo-mostowa-kamienczyk",
+    "nazwa": "Mostowa",
+    "miejscowosc": "Kamieńczyk",
+    "zrodlo": "Targeo",
+    "url": "https://mapa.targeo.pl/kamienczyk%20mostowa,19,21.563925,52.5943165?data=eyJmdHMiOnsicSI6ImthbWllbmN6eWsgbW9zdG93YSJ9LCJ3aW4iOiJzZWFyY2gtZm9ybSJ9",
+    "data_sprawdzenia": "2026-10-07",
+    "uwagi": "Nazwa widoczna w wyniku wyszukiwania Targeo przekazanym przez użytkownika. Brak potwierdzenia nazwy w dokumentach aplikacji. Przebieg na zrzucie odpowiada w przybliżeniu odcinkowi BDOT10k nr 440768W; powiązanie nazwy z numerem wymaga weryfikacji. Nie pobrano geometrii z Targeo.",
+    "kandydat_nr_drogi": "440768W"
+  }
+]

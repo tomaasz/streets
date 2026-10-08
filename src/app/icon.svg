@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Tło: Ciemny asfalt drogowy -->
+    <linearGradient id="roadBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <!-- Złoto-pomarańczowy akcent drogowy -->
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <!-- Nawierzchnia drogi -->
+    <linearGradient id="asphaltGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Kształt tła: Squircle systemowy -->
+  <rect width="64" height="64" rx="14" fill="url(#roadBgGrad)"/>
+
+  <!-- Pomarańczowo-złota ramka drogowa -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="url(#amberGrad)" stroke-width="1.8" opacity="0.85"/>
+
+  <!-- Perspektywa jezdni asfaltowej (trapez zbiegający się ku horyzontowi) -->
+  <polygon points="26,16 38,16 49,52 15,52" fill="url(#asphaltGrad)" stroke="#475569" stroke-width="1"/>
+
+  <!-- Białe linie krawędziowe jezdni -->
+  <line x1="26" y1="16" x2="15" y2="52" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="38" y1="16" x2="49" y2="52" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Żółta przerywana linia osiowa (oznakowanie poziome P-1) -->
+  <line x1="32" y1="46" x2="32" y2="52" stroke="#facc15" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="32" y1="36" x2="32" y2="42" stroke="#facc15" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="32" y1="27" x2="32" y2="32" stroke="#facc15" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="32" y1="19" x2="32" y2="23" stroke="#facc15" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Znacznik węzła / pinezka lokalizacji na horyzoncie -->
+  <circle cx="32" cy="14" r="3.5" fill="#ef4444"/>
+  <circle cx="32" cy="14" r="1.5" fill="#ffffff"/>
+</svg>
