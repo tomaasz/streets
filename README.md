@@ -242,3 +242,48 @@ Drogi i ulice domyślnie otwierają się w ciemnym motywie. Ręczny wybór
 jasnego lub ciemnego motywu jest zapamiętywany i ma pierwszeństwo, również
 przy przenoszeniu wcześniejszego ustawienia `drogi-motyw`. Inicjalizację
 wykonuje `public/streets-ui.js` przed skryptem wspólnego UI.
+
+<!-- VERIFIED-PROJECT-OVERVIEW:BEGIN -->
+## Opis projektu i technologii
+
+**Cel:** Wyszukiwanie ulic gminy Wyszków i ustalanie zarządcy drogi na podstawie danych GUGiK i wykazów BIP.
+
+**Sprawdzono:** 2026-10-11, na podstawie plików repozytorium z [commitu `9dbc18846d`](https://github.com/tomaasz/streets/commit/9dbc18846d4715d5a81184a044bff2c486cab54a).
+Opis plików nie potwierdza, że aplikacja jest wdrożona, działa bez błędów ani że wszystkie zadeklarowane narzędzia są używane.
+
+### Technologie i narzędzia
+
+- Główny język według GitHuba: **TypeScript**.
+- Rozpoznane technologie w wybranych manifestach: JavaScript / Node.js, Next.js, React, TypeScript.
+- Narzędzia zadeklarowane w wybranych plikach: GitHub Actions, npm script:build, npm script:dev, npm script:lint, npm script:raport, npm script:start, npm script:test, npm script:typecheck.
+
+### Wybrane pakiety
+
+| Pakiet | Wymaganie z manifestu | Plik |
+|---|---|---|
+| next | ^16.3.8 | package.json |
+| ol | ^10.11.0 | package.json |
+| pg | ^8.23.1 | package.json |
+| proj4 | ^2.21.0 | package.json |
+| react | ^19.3.0 | package.json |
+| react-dom | ^19.3.0 | package.json |
+| undici | 7.30.0 | package.json |
+| node | >=20.18.1 | package.json |
+
+To wybrane deklaracje, nie pełna lista i nie wynik pomiaru wersji uruchomionej aplikacji. Pełny wykaz zależności oraz lockfile, jeżeli istnieje, pozostają w repozytorium.
+
+### Skąd pochodzą informacje
+
+- [`README.md`](README.md).
+- [`package.json`](package.json).
+- [`tsconfig.json`](tsconfig.json).
+- [`deploy/README.md`](deploy/README.md).
+- [`.github/workflows/wgraj-dane.yml`](.github/workflows/wgraj-dane.yml).
+- [`data/edziennik/README.md`](data/edziennik/README.md).
+- [`scripts/pdf/README.md`](scripts/pdf/README.md).
+- [`package-lock.json`](package-lock.json).
+
+### Zakres sprawdzenia
+
+Przegląd obejmuje wybrane pliki gałęzi domyślnej. Nie uruchamiano aplikacji ani nie zmieniano wdrożeń. Limity przeglądu mogą pomijać część modułów; brak pozycji w tym opisie nie dowodzi braku funkcji lub narzędzia.
+<!-- VERIFIED-PROJECT-OVERVIEW:END -->
