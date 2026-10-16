@@ -8,6 +8,8 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { akty } from '@/lib/zapytania';
 
+export const metadata = { title: 'Akty prawne' };
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 

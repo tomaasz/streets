@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "legend": [
+    {
+      "id": "MIT",
+      "title": "MIT",
+      "summary": "Swobodne używanie, modyfikowanie i rozpowszechnianie, także komercyjnie. Nie wymaga publikacji zmian; przy rozpowszechnianiu trzeba zachować informację o prawach autorskich i tekst licencji.",
+      "match": [
+        "MIT"
+      ]
+    },
+    {
+      "id": "BSD",
+      "title": "BSD-2-Clause / BSD-3-Clause",
+      "summary": "Podobne do MIT: można tworzyć zamknięte modyfikacje, zachowując wymagane informacje i wyłączenie odpowiedzialności. BSD-3-Clause dodatkowo zabrania promowania produktów nazwami autorów bez ich zgody.",
+      "match": [
+        "BSD"
+      ]
+    },
+    {
+      "id": "0BSD",
+      "title": "0BSD",
+      "summary": "Pozwala używać, zmieniać i rozpowszechniać kod, także komercyjnie, bez obowiązku zachowania informacji o autorze ani publikacji zmian.",
+      "match": [
+        "0BSD"
+      ]
+    },
+    {
+      "id": "Apache",
+      "title": "Apache-2.0",
+      "summary": "Pozwala na użycie komercyjne i zamknięte modyfikacje; zawiera udzielenie praw patentowych przez współtwórców. Przy rozpowszechnianiu wymaga zachowania licencji, wymaganych informacji (w tym NOTICE, jeśli występuje) i oznaczenia zmian.",
+      "match": [
+        "Apache"
+      ]
+    },
+    {
+      "id": "PSF",
+      "title": "PSF-2.0 / PostgreSQL License",
+      "summary": "Licencje liberalne: pozwalają na użycie komercyjne i nie wymagają otwierania własnego kodu. Trzeba zachować wymagane informacje o prawach i licencji; PSF wymaga też krótkiego opisu zmian w rozpowszechnianych wersjach pochodnych.",
+      "match": [
+        "PSF",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "id": "MIT-CMU",
+      "title": "MIT-CMU / HPND",
+      "summary": "Licencje liberalne używane m.in. w Pillow: pozwalają na używanie, zmiany i rozpowszechnianie bez obowiązku publikacji zmian. Wymagają zachowania wskazanych informacji o prawach i warunków licencji; warianty mogą ograniczać użycie nazw autorów w reklamie.",
+      "match": [
+        "MIT-CMU",
+        "HPND"
+      ]
+    },
+    {
+      "id": "LGPL",
+      "title": "LGPL",
+      "summary": "Pozwala łączyć bibliotekę z aplikacją na innej licencji. Przy rozpowszechnianiu trzeba udostępnić kod biblioteki i jej zmian oraz umożliwić użytkownikowi zastąpienie jej własną wersją, zgodnie z warunkami danej wersji LGPL.",
+      "match": [
+        "LGPL",
+        "LGPLv2+",
+        "LGPLv2",
+        "LGPLv3"
+      ]
+    },
+    {
+      "id": "MPL",
+      "title": "MPL-2.0",
+      "summary": "Obowiązek udostępnienia kodu obejmuje rozpowszechniane pliki objęte MPL i ich modyfikacje. Pozostałe pliki aplikacji mogą mieć inną licencję; można używać komercyjnie.",
+      "match": [
+        "MPL"
+      ]
+    },
+    {
+      "id": "GPL",
+      "title": "GPL-2.0 / GPL-3.0",
+      "summary": "Przy przekazywaniu programu innym trzeba zapewnić dostęp do odpowiadającego mu kodu źródłowego, a objęte licencją modyfikacje udostępniać na GPL. Samo wewnętrzne używanie programu nie wymaga publikacji kodu; użycie komercyjne jest dozwolone.",
+      "match": [
+        "GPL"
+      ]
+    },
+    {
+      "id": "AGPL",
+      "title": "AGPL-3.0",
+      "summary": "Obowiązki podobne do GPL. Dodatkowo zmodyfikowany program używany przez sieć musi oferować swój kod źródłowy użytkownikom, którzy korzystają z niego zdalnie.",
+      "match": [
+        "AGPL"
+      ]
+    },
+    {
+      "id": "OFL",
+      "title": "SIL OFL 1.1",
+      "summary": "Pozwala używać, osadzać, zmieniać i rozpowszechniać fonty, także komercyjnie. Fontu nie wolno sprzedawać samodzielnie; jego pochodne pozostają na OFL i mogą wymagać zmiany zastrzeżonej nazwy. Dokument napisany tym fontem nie przechodzi na OFL.",
+      "match": [
+        "OFL",
+        "Open Font"
+      ]
+    },
+    {
+      "id": "PHP",
+      "title": "PHP License",
+      "summary": "Pozwala używać, zmieniać i rozpowszechniać kod, także komercyjnie, przy zachowaniu wymaganych informacji. Ogranicza używanie nazwy PHP do promowania i nazywania produktów pochodnych.",
+      "match": [
+        "PHP License"
+      ]
+    },
+    {
+      "id": "CC-BY-SA",
+      "title": "CC BY-SA 4.0",
+      "summary": "Licencja treści: można kopiować i adaptować, także komercyjnie, wskazując autora, źródło, licencję i zmiany. Udostępniane adaptacje muszą zachować tę samą lub zgodną licencję.",
+      "match": [
+        "CC BY-SA",
+        "CC-BY-SA"
+      ]
+    },
+    {
+      "id": "akty",
+      "title": "Akty normatywne",
+      "summary": "W Polsce akty normatywne nie są przedmiotem prawa autorskiego (art. 4 pkt 1 ustawy o prawie autorskim). To status materiału, a nie licencja oprogramowania.",
+      "match": [
+        "Akt normatywny",
+        "Akty normatywne"
+      ]
+    },
+    {
+      "id": "wewnetrzne",
+      "title": "Własne / wewnętrzne / licencja systemu / dane urzędu",
+      "summary": "Warunki określa właściciel praw lub licencja danego produktu. Samo takie oznaczenie nie daje uprawnień open source; fonty systemowe i dane urzędu nie stają się przez to wolne do rozpowszechniania.",
+      "match": [
+        "Własny",
+        "Wewnętrzne",
+        "Licencja systemu",
+        "Dane urzędu",
+        "Warunki dostawcy"
+      ]
+    },
+    {
+      "id": "ISC",
+      "title": "ISC",
+      "summary": "Licencja liberalna, podobna do MIT. Pozwala na użycie komercyjne i zamknięte modyfikacje; przy rozpowszechnianiu trzeba zachować informację o prawach i warunki licencji.",
+      "match": [
+        "ISC"
+      ]
+    },
+    {
+      "id": "Zlib",
+      "title": "Zlib",
+      "summary": "Pozwala używać, zmieniać i rozpowszechniać kod, także komercyjnie. Nie wolno przypisywać sobie autorstwa oryginału; trzeba oznaczać zmienione wersje źródeł i zachować informację o licencji.",
+      "match": [
+        "Zlib"
+      ]
+    },
+    {
+      "id": "ODbL",
+      "title": "ODbL 1.0",
+      "summary": "Licencja baz danych, używana przez OpenStreetMap. Wymaga wskazania źródła; przy publicznym używaniu zmodyfikowanej bazy obowiązuje udostępnienie jej na ODbL zgodnie z warunkami licencji. Zasady dotyczą bazy danych i odróżniają ją od utworzonych z niej map.",
+      "match": [
+        "ODbL"
+      ]
+    },
+    {
+      "id": "Public-Domain",
+      "title": "Domena publiczna (Public Domain)",
+      "summary": "Części kodu oznaczone jako domena publiczna nie wymagają zgody z tytułu praw autorskich. Jeśli pakiet zawiera też kod na BSD lub innych licencjach, ich warunki obowiązują dla odpowiednich części.",
+      "match": [
+        "Public Domain"
+      ]
+    },
+    {
+      "id": "unknown",
+      "title": "Nieustalona / „Open Source” / brak dokładnej licencji",
+      "summary": "To brak konkretnej informacji o licencji. Uprawnienia i obowiązki trzeba sprawdzić w pliku licencji lub dokumentacji autorów; ogólne oznaczenie „Open Source” nie określa warunków użycia.",
+      "match": [
+        "nieustalona",
+        "Open Source",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "Bitstream-Vera",
+      "title": "Bitstream Vera / DejaVu",
+      "summary": "Pozwala używać i osadzać fonty oraz rozpowszechniać je z zachowaniem informacji o prawach i tekstu licencji. Zmienionych fontów nie wolno nazywać Bitstream lub Vera; fonty nie mogą być sprzedawane samodzielnie. Modyfikacje DejaVu udostępniono jako public domain.",
+      "match": [
+        "Bitstream Vera"
+      ]
+    }
+  ],
+  "packages": {
+    "django": {
+      "license": "BSD-3-Clause",
+      "purpose": "Framework aplikacji: widoki, formularze, ORM, uwierzytelnianie, panel administracyjny."
+    },
+    "psycopg": {
+      "license": "LGPL-3.0-only",
+      "purpose": "Sterownik bazy PostgreSQL. Używany bez modyfikacji jako biblioteka."
+    },
+    "psycopg-binary": {
+      "license": "LGPL-3.0-only",
+      "purpose": "Skompilowana część sterownika psycopg (libpq)."
+    },
+    "openpyxl": {
+      "license": "MIT",
+      "purpose": "Odczyt i zapis arkuszy XLSX."
+    },
+    "python-docx": {
+      "license": "MIT",
+      "purpose": "Parsowanie kluczy przejścia MF w formacie DOCX."
+    },
+    "python-dotenv": {
+      "license": "BSD-3-Clause",
+      "purpose": "Wczytywanie konfiguracji z pliku .env."
+    },
+    "lxml": {
+      "license": "BSD-3-Clause",
+      "purpose": "Szybki parser XML i HTML oparty o libxml2/libxslt"
+    },
+    "et-xmlfile": {
+      "license": "MIT",
+      "purpose": "Zapis XML używany przez openpyxl."
+    },
+    "asgiref": {
+      "license": "BSD-3-Clause",
+      "purpose": "Warstwa ASGI/WSGI wymagana przez Django."
+    },
+    "sqlparse": {
+      "license": "BSD-3-Clause",
+      "purpose": "Formatowanie SQL wymagane przez Django."
+    },
+    "typing-extensions": {
+      "license": "PSF-2.0",
+      "purpose": "Typowanie statyczne Pythona dla nowszych wersji standardu"
+    },
+    "pytest": {
+      "license": "MIT",
+      "purpose": "Testy automatyczne (tylko środowisko deweloperskie)."
+    },
+    "pytest-django": {
+      "license": "BSD-3-Clause",
+      "purpose": "Integracja testów z Django (tylko środowisko deweloperskie)."
+    },
+    "ruff": {
+      "license": "MIT",
+      "purpose": "Narzędzie deweloperskie do statycznej analizy jakości kodu Python"
+    },
+    "pip": {
+      "license": "MIT",
+      "purpose": "Menedżer instalacji i zarządzania pakietami Python"
+    },
+    "iniconfig": {
+      "license": "MIT",
+      "purpose": "Parser plików konfiguracyjnych INI używany przez pytest."
+    },
+    "packaging": {
+      "license": "Apache-2.0 / BSD-2-Clause",
+      "purpose": "Weryfikacja i semantyczne porównywanie wersji oprogramowania"
+    },
+    "pluggy": {
+      "license": "MIT",
+      "purpose": "Mechanizm wtyczek i haków używany przez pytest."
+    },
+    "pygments": {
+      "license": "BSD-2-Clause",
+      "purpose": "Kolorowanie składni kodu w panelu i narzędziach."
+    },
+    "beautifulsoup4": {
+      "license": "MIT",
+      "purpose": "Parsowanie i analiza struktury HTML (tagi img, a)"
+    },
+    "blinker": {
+      "license": "MIT",
+      "purpose": "Emisja sygnałów i zdarzeń wewnątrz aplikacji Flask"
+    },
+    "certifi": {
+      "license": "MPL-2.0",
+      "purpose": "Zestaw zaufanych certyfikatów CA dla bezpiecznych połączeń TLS"
+    },
+    "charset-normalizer": {
+      "license": "MIT",
+      "purpose": "Automatyczne wykrywanie kodowania znaków w plikach i odpowiedziach HTTP"
+    },
+    "click": {
+      "license": "BSD-3-Clause",
+      "purpose": "Obsługa interfejsów wiersza poleceń CLI frameworka Flask"
+    },
+    "flask": {
+      "license": "BSD-3-Clause",
+      "purpose": "Serwer aplikacji webowej i obsługa zapytań HTTP."
+    },
+    "greenlet": {
+      "license": "MIT & PSF-2.0",
+      "purpose": "Lekkie wątki wewnątrzprocesowe (korutyny)"
+    },
+    "idna": {
+      "license": "BSD-3-Clause",
+      "purpose": "Wsparcie dla międzynarodowych nazw domenowych (IDNA/Punycode)"
+    },
+    "itsdangerous": {
+      "license": "BSD-3-Clause",
+      "purpose": "Kryptograficzne podpisywanie ciasteczek i danych sesji użytkowników"
+    },
+    "jinja2": {
+      "license": "BSD-3-Clause",
+      "purpose": "Wydajny silnik szablonów HTML używany w panelu"
+    },
+    "markupsafe": {
+      "license": "BSD-3-Clause",
+      "purpose": "Ochrona przed atakami XSS poprzez bezpieczne uciekanie znaków HTML"
+    },
+    "pillow": {
+      "license": "MIT-CMU",
+      "purpose": "Przetwarzanie grafiki, optymalizacja JPEG/PNG, miniatury"
+    },
+    "playwright": {
+      "license": "Apache-2.0",
+      "purpose": "Automatyzacja silników przeglądarek do audytu wizualnego stron"
+    },
+    "psycopg2-binary": {
+      "license": "LGPL-3.0 with exceptions",
+      "purpose": "Sterownik bazy danych PostgreSQL (rejestry, audyt, sesje)"
+    },
+    "pyee": {
+      "license": "MIT",
+      "purpose": "Emiter zdarzeń asynchronicznych (komponent Playwright)"
+    },
+    "pymysql": {
+      "license": "MIT",
+      "purpose": "Czysto pythonowy sterownik połączenia z bazą MySQL"
+    },
+    "pypdf": {
+      "license": "BSD-3-Clause",
+      "purpose": "Odczyt i edycja stron dokumentów PDF."
+    },
+    "requests": {
+      "license": "Apache-2.0",
+      "purpose": "Klient sieciowy HTTP do audytu stron i pobierania załączników"
+    },
+    "soupsieve": {
+      "license": "MIT",
+      "purpose": "Silnik zaawansowanych selektorów CSS dla BeautifulSoup4"
+    },
+    "urllib3": {
+      "license": "MIT",
+      "purpose": "Biblioteka bazowa dla zapytań sieciowych i puli połączeń HTTP"
+    },
+    "werkzeug": {
+      "license": "BSD-3-Clause",
+      "purpose": "Zestaw narzędzi WSGI, routing URL i bezpieczeństwo HTTP"
+    },
+    "gunicorn": {
+      "license": "MIT",
+      "purpose": "Serwer HTTP aplikacji."
+    },
+    "reportlab": {
+      "license": "BSD-3-Clause",
+      "purpose": "Tworzenie numeracji, znaków wodnych i oznaczeń PDF."
+    }
+  },
+  "repositories": {
+    "beautifulsoup4": "https://code.launchpad.net/beautifulsoup",
+    "pluggy": "https://github.com/pytest-dev/pluggy",
+    "htmx": "https://github.com/bigskysoftware/htmx",
+    "bootstrap": "https://github.com/twbs/bootstrap",
+    "reportlab": "https://hg.reportlab.com/hg-public/reportlab"
+  },
+  "notation": "„OR” oznacza wybór jednej licencji, „AND” lub „&” — spełnienie obu. „only” wskazuje konkretną wersję; „or-later” lub „+” pozwala także na późniejsze wersje. „With exceptions” oznacza dodatkowe wyjątki, których zakres określa tekst licencji. Warunki poszczególnych składników obrazu kontenera obowiązują osobno; Debian DFSG to kryteria wolnego oprogramowania, a nie jedna licencja."
+}

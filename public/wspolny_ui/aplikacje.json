@@ -1,0 +1,46 @@
+{
+  "_opis": "Lista aplikacji do launchera do czasu katalogu w portalu. Adresy IP i porty sprawdzone 15.10.2026 — bez zależności od lokalnego DNS. admin=true: tylko dla administratorów; aplikacje bez logowania pomijają te wpisy.",
+  "aplikacje": [
+    {
+      "name": "Panel administratora",
+      "short": "A",
+      "url": "http://192.168.0.12/",
+      "admin": true
+    },
+    {
+      "name": "AKB",
+      "short": "AK",
+      "url": "http://192.168.0.12:3030/"
+    },
+    {
+      "name": "Edytor PDF",
+      "short": "PDF",
+      "url": "http://192.168.0.12:5055/"
+    },
+    {
+      "name": "Książka Adresowa",
+      "short": "KA",
+      "url": "http://192.168.0.12:8000/"
+    },
+    {
+      "name": "Redakcja",
+      "short": "R",
+      "url": "http://192.168.0.12:5050/"
+    },
+    {
+      "name": "Drogi i ulice",
+      "short": "D",
+      "url": "http://192.168.0.12:3000/"
+    },
+    {
+      "name": "Katalog winget",
+      "short": "W",
+      "url": "http://192.168.0.12:5057/"
+    },
+    {
+      "name": "Konta",
+      "short": "K",
+      "url": "http://192.168.0.12:5058/haslo"
+    }
+  ]
+}

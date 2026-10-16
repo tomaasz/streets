@@ -2,6 +2,8 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { zrodla } from '@/lib/zapytania';
 
+export const metadata = { title: 'Źródła danych' };
+
 export const dynamic = 'force-dynamic';
 
 export default async function Strona() {

@@ -229,3 +229,16 @@ nie mają nazwy ulicy.
 Serwis informacyjny. Nie zastępuje zaświadczenia, wypisu z ewidencji dróg ani
 uzgodnienia z zarządcą. Dane BDOT10k są aktualizowane powiatami i mogą być
 opóźnione względem stanu faktycznego.
+
+## Licencje i komponenty
+
+Widok licencji zawiera repozytoria oraz krótką legendę, korzystając ze wspólnego
+katalogu standardu utrzymywanego w `../admin_serwer/wspolne_licencje/README.md`.
+Lokalne kopie synchronizuje `sync.py`; kontrola `sync.py --check` wykrywa rozbieżności.
+
+### Domyślny motyw
+
+Drogi i ulice domyślnie otwierają się w ciemnym motywie. Ręczny wybór
+jasnego lub ciemnego motywu jest zapamiętywany i ma pierwszeństwo, również
+przy przenoszeniu wcześniejszego ustawienia `drogi-motyw`. Inicjalizację
+wykonuje `public/streets-ui.js` przed skryptem wspólnego UI.

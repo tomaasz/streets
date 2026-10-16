@@ -54,3 +54,21 @@ Kompilacja produkcyjna i kontrola typów zakończyły się powodzeniem.
 Wdrożono do `streets.service` na porcie 3000 i powtórzono scenariusze
 Chromium e-mapy oraz odnośnika Targeo bez błędów JavaScript. Kontrola
 wyrównania filtrów i sortowania przeszła przed wdrożeniem.
+
+## Czytelny stan warstwy — 9 października 2026
+
+Widok całej gminy bywa poza zakresem warstwy (`maxResolution: 20.48`).
+Wcześniej zaznaczony checkbox nie zmieniał wtedy obrazu i nie było komunikatu
+poza dymkiem pomocy. Teraz pasek pokazuje jawnie „E-mapa włączona, ale ukryta
+przy tym oddaleniu” i przycisk „Przybliż do ulic i adresów”. Przycisk zachowuje
+środek widoku i wybiera rozdzielczość z drabinki nie większą niż 5,3 m/piksel.
+Zmiana rozdzielczości aktualizuje komunikat, również po ponownym oddaleniu.
+Podczas pobierania kafli pojawia się komunikat wczytywania; błędy są osobno
+sygnalizowane. Po wczytaniu opis wskazuje żółte przebiegi ulic i punkty
+adresowe oraz możliwość pokrywania się linii z odcinkami aplikacji.
+Wyłączenie e-mapy usuwa jej komunikat i odczyt danych po kliknięciu.
+
+Sprawdzenie żywej warstwy potwierdziło HTTP 200 image/png i zmianę obrazu
+mapy po przełączeniu: ponad 132 tys. pikseli różniło się o więcej niż 20/255
+w co najmniej jednym kanale koloru. Sprawdzono także przybliżenie, oddalenie,
+brak pobierania kafli poza zakresem, układ mobilny i dymki pomocy.

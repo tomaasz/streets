@@ -6,6 +6,8 @@ import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
 
+export const metadata = { title: 'Drogi' };
+
 export const dynamic = 'force-dynamic';
 
 export default async function Strona() {

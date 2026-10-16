@@ -4,6 +4,8 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 
+export const metadata = { title: 'Zarządcy' };
+
 export const dynamic = 'force-dynamic';
 
 const TYPY: Record<string, string> = {

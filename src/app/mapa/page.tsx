@@ -8,7 +8,7 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { NazwyDodatkowe } from '@/components/NazwyDodatkowe';
 import {nazwaDodatkowa} from '@/lib/nazwy-dodatkowe';
 export const dynamic = 'force-dynamic';
-export const metadata = { title:'Mapa dróg — gmina Wyszków',description:'Wyszukaj drogę i sprawdź jej zarządcę oraz podstawę prawną.' };
+export const metadata = { title:'Mapa dróg',description:'Wyszukaj drogę i sprawdź jej zarządcę oraz podstawę prawną.' };
 export default async function Strona({ searchParams }: { searchParams: Promise<ParametryWidoku> }) {
   const p = await searchParams;
   const params = parametryFiltrow(p);
@@ -28,7 +28,7 @@ export default async function Strona({ searchParams }: { searchParams: Promise<P
       <a href={porownanie.url} target="_blank" rel="noreferrer" className="text-sm">Sprawdź nazwę w {porownanie.zrodlo} ↗</a>
     </section> : null}
     {params.prg ? <p className="karta p-3 mt-3">Porównanie przebiegu: linia przerywana „Przebieg PRG” pokazuje ulicę z rejestru nazw; pozostałe linie to wybrane odcinki BDOT. Sprawdź zgodność przebiegu i jego końców.</p> : null}
-    <div className="mt-4"><MapaInteraktywna zrodloDanych={`/api/mapa?${new URLSearchParams(params)}`} wysokosc={620} legenda={false} /></div>
+    <div className="mt-4"><MapaInteraktywna zrodloDanych={`/api/mapa?${new URLSearchParams(params)}`} wysokosc={620} /></div>
     <details className="mt-4 pomoc-mapy"><summary>Źródła mapy i zakres danych</summary>
       <p className="mt-2 tekst-pomocniczy">Przebieg pochodzi z PRG i BDOT10k. Kategoria może być potwierdzona uchwałą; dokument jest dostępny w szczegółach odcinka. Opcjonalna warstwa pokazuje także drogi bez przypisanej ulicy. Sam wpis w BDOT10k nie potwierdza ich kategorii.</p>
       <p className="mt-2 tekst-pomocniczy">Podkłady: OpenStreetMap i Geoportal GUGiK. Mapa pracuje w układzie PL-1992. Dokładność BDOT10k odpowiada mapie 1:10 000 i nie zastępuje wypisu z ewidencji dróg.</p>

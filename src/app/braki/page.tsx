@@ -14,6 +14,8 @@ import { Paginacja } from '@/components/Paginacja';
 import { WeryfikacjaForm } from '@/components/WeryfikacjaForm';
 import { normalizuj } from '../../../scripts/lib/nazwy-ulic.mjs';
 
+export const metadata = { title: 'Braki danych' };
+
 export const dynamic = 'force-dynamic';
 const NASTEPNY_KROK: Record<string, string> = {
   'brak odcinków': 'Sprawdź przebieg w dokumentacji drogi i porównaj go z mapą. Ulica może być projektowana lub wymagać dopasowania geometrii.',

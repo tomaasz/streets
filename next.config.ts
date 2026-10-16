@@ -21,6 +21,7 @@ const CSP = [
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  distDir: process.env.STREETS_BUILD_DIR || '.next',
   async headers() {
     return [
       {

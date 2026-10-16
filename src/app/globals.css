@@ -1,23 +1,17 @@
 @import "tailwindcss";
 :root {
-  --tlo:#ffffff; --tlo-2:#f6f7f9; --tekst:#16181d; --tekst-2:#5b6270;
-  --linia:#e2e5ea; --pole-linia:#8792a4; --akcent:#1f4b8e;
+  --streets-height-sm:32px; --streets-height:36px; --streets-height-touch:44px;
+  --streets-font:14px; --streets-line:20px; --streets-radius:6px;
+  --streets-gap:8px; --streets-padding-x:8px; --streets-padding-y:4px;
+  --tlo:var(--ui-canvas); --tlo-2:var(--ui-surface); --tekst:var(--ui-text); --tekst-2:var(--ui-text-muted);
+  --linia:var(--ui-line); --pole-linia:var(--ui-line-input); --akcent:var(--ui-brand-text);
   --kat-krajowa:#c0392b; --kat-wojewodzka:#d98324; --kat-powiatowa:#b08800;
   --kat-gminna:#2f7d4f; --kat-wewnetrzna:#6b7280; --kat-nieustalona:#8b5cf6;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark) {
-  :root:not([data-theme="light"]) {
-    --tlo:#101216; --tlo-2:#171a20; --tekst:#e8eaee; --tekst-2:#9aa2b1;
-    --linia:#363d49; --pole-linia:#667386; --akcent:#7aa5e8;
-    --kat-krajowa:#ef6b5c; --kat-wojewodzka:#e9a13b; --kat-powiatowa:#d9b800;
-    --kat-gminna:#4fbe80; --kat-wewnetrzna:#98a1b0; --kat-nieustalona:#a78bfa;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"] {
-  --tlo:#101216; --tlo-2:#171a20; --tekst:#e8eaee; --tekst-2:#9aa2b1;
-  --linia:#363d49; --pole-linia:#667386; --akcent:#7aa5e8;
+:root[data-ui-theme="dark"] {
+  --tlo:var(--ui-canvas); --tlo-2:var(--ui-surface); --tekst:var(--ui-text); --tekst-2:var(--ui-text-muted);
+  --linia:var(--ui-line); --pole-linia:var(--ui-line-input); --akcent:var(--ui-brand-text);
   --kat-krajowa:#ef6b5c; --kat-wojewodzka:#e9a13b; --kat-powiatowa:#d9b800;
   --kat-gminna:#4fbe80; --kat-wewnetrzna:#98a1b0; --kat-nieustalona:#a78bfa;
   color-scheme:dark;
@@ -124,16 +118,38 @@ table.dane td>a { display:inline-flex; align-items:center; min-height:44px; }
 .formularz-weryfikacji label { display:grid; gap:6px; font-size:.875rem; }
 .formularz-weryfikacji button { justify-self:start; }
 .blad-formularza { color:var(--tekst); font-weight:600; }
-.mapa-narzedzia { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; font-size:.875rem; }
-.ustawienia-mapy { position:relative; }
-.ustawienia-mapy>summary { border:1px solid var(--pole-linia); padding:10px 14px; border-radius:6px; }
-.mapa-panel { position:absolute; top:calc(100% + 6px); left:0; z-index:15; width:320px; max-width:calc(100vw - 40px); max-height:65vh; overflow:auto; padding:16px; background:var(--tlo); border:1px solid var(--pole-linia); border-radius:8px; box-shadow:0 4px 20px #0003; font-size:.875rem; }
-.mapa-panel label { display:flex; align-items:center; gap:10px; min-height:44px; }
-.mapa-panel-grupa { border:0; padding:0; margin:0 0 12px; }
-.mapa-panel legend { font-weight:600; }
-.mapa-targeo { margin:4px 0 8px; }
-.mapa-targeo .przycisk { min-height:44px; width:100%; justify-content:flex-start; }
-.legenda-mapy { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+/* Stały pasek opcji zajmuje miejsce w układzie i nie zasłania mapy. */
+.mapa-narzedzia { margin-bottom:var(--streets-gap); padding:6px 10px; font-size:var(--streets-font); line-height:var(--streets-line); }
+.mapa-pasek-glowny,.mapa-pasek-warstw { display:flex; flex-wrap:wrap; align-items:center; gap:4px var(--streets-gap); }
+.mapa-pasek-warstw { border-top:1px solid var(--linia); margin-top:4px; padding-top:4px; }
+.mapa-wybor-podkladu { display:flex; align-items:center; gap:8px; font-weight:600; }
+.mapa-wybor-podkladu select { width:220px; min-height:var(--streets-height); height:var(--streets-height); padding:var(--streets-padding-y) var(--streets-padding-x); font-size:var(--streets-font); line-height:var(--streets-line); border-radius:var(--streets-radius); font-weight:400; }
+.mapa-przelacznik { display:inline-flex; align-items:center; gap:var(--streets-gap); min-height:var(--streets-height); cursor:pointer; }
+.mapa-przelacznik input { min-height:0; width:16px; height:16px; flex:none; padding:0; }
+.mapa-akcje { display:flex; gap:8px; margin-left:auto; }
+.mapa-akcje .przycisk { min-height:var(--streets-height); font-size:var(--streets-font); line-height:var(--streets-line); padding:var(--streets-padding-y) var(--streets-padding-x); border-radius:var(--streets-radius); }
+.mapa-etykieta-warstw { font-weight:600; }
+.mapa-licznik { margin-left:auto; }
+.mapa-pomoc { display:contents; }
+.mapa-pomoc summary { min-height:var(--streets-height); display:flex; align-items:center; cursor:pointer; color:var(--akcent); text-decoration:underline; }
+.mapa-pomoc summary::before { content:'▸'; margin-right:5px; }
+.mapa-pomoc[open] summary::before { content:'▾'; }
+.mapa-pomoc>div { flex-basis:100%; padding:4px 0; }
+.mapa-pomoc p+p { margin-top:4px; }
+.mapa-status-emapy { display:flex; flex-wrap:wrap; align-items:center; gap:var(--streets-gap); margin-top:4px; padding-top:4px; border-top:1px solid var(--linia); }
+.mapa-status-emapy p { flex:1 1 260px; }
+.mapa-status-emapy .przycisk { min-height:var(--streets-height); padding:var(--streets-padding-y) var(--streets-padding-x); font-size:var(--streets-font); line-height:var(--streets-line); }
+@media(max-width:640px) {
+ .mapa-wybor-podkladu { flex:1 1 100%; }
+ .mapa-wybor-podkladu select { flex:1; width:auto; min-width:0; }
+ .mapa-pasek-glowny,.mapa-pasek-warstw { gap:2px 8px; }
+ .mapa-etykieta-warstw { display:none; }
+ .mapa-pasek-warstw>.mapa-opcja { flex-basis:100%; }
+ .mapa-licznik { margin-left:0; margin-right:auto; }
+}
+
+.legenda-mapy { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; margin-top:4px; padding-top:4px; border-top:1px solid var(--linia); font-size:12px; line-height:20px; }
+.legenda-mapy .plakietka { border:0; border-radius:0; padding:0; font-size:12px; line-height:20px; font-weight:400; white-space:nowrap; }
 .mapa-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 .mapa-layout.z-szczegolami { grid-template-columns:minmax(0,1fr) 340px; }
 .mapa-plansza { position:relative; overflow:hidden; min-width:0; }
@@ -338,15 +354,35 @@ html { scroll-padding-top:120px; }
   background: #fef3c7;
   color: #713f12;
 }
-[data-theme="dark"] .status-nazwy-osm {
+[data-ui-theme="dark"] .status-nazwy-osm {
   background: #422b10;
   color: #fde68a;
   border-color: #d97706;
 }
-@media (prefers-color-scheme:dark) {
-  :root:not([data-theme="light"]) .status-nazwy-osm {
-    background: #422b10;
-    color: #fde68a;
-    border-color: #d97706;
-  }
+
+
+.mapa-opcja { position:relative; display:inline-flex; align-items:center; gap:2px; }
+.mapa-info { display:inline-flex; align-items:center; justify-content:center; width:var(--streets-height-sm); min-height:var(--streets-height); flex:none; border:0; border-radius:var(--streets-radius); background:transparent; color:var(--akcent); cursor:pointer; font-size:16px; line-height:var(--streets-line); }
+/* Wspólna skala wyszukiwarki na liście i mapie. Szerokości kolumn pozostają w siatce wyników. */
+.filtry-glowne input:not([type="checkbox"]):not([type="radio"]),
+.filtry-glowne select,.filtry-glowne .przycisk {
+ min-height:var(--streets-height); font-size:var(--streets-font); line-height:var(--streets-line);
+ padding:var(--streets-padding-y) var(--streets-padding-x); border-radius:var(--streets-radius);
 }
+.filtry-glowne input:not([type="checkbox"]):not([type="radio"]),.filtry-glowne select { height:var(--streets-height); }
+.filtry-glowne .szukaj-drogi,.filtry-glowne .pola-filtrow label,.filtry-glowne .filtry-lista label { gap:4px; }
+.filtry-glowne .pola-filtrow,.filtry-glowne .filtry-lista { gap:var(--streets-gap); }
+@media(max-width:640px),(any-pointer:coarse) {
+ .filtry-glowne input:not([type="checkbox"]):not([type="radio"]),
+ .filtry-glowne select,.filtry-glowne .przycisk,
+ .mapa-wybor-podkladu select,.mapa-akcje .przycisk,.mapa-przelacznik,.mapa-info,.mapa-pomoc summary,.mapa-status-emapy .przycisk {
+  min-height:var(--streets-height-touch);
+ }
+ .filtry-glowne input:not([type="checkbox"]):not([type="radio"]),.filtry-glowne select,.mapa-wybor-podkladu select { height:var(--streets-height-touch); }
+ .mapa-info { min-width:var(--streets-height-touch); }
+ .mapa-przelacznik input { width:20px; height:20px; }
+ .wybor-motywu select { min-height:var(--streets-height-touch); }
+}
+
+/* Dane mapy zachowują kolory kategorii; powierzchnie i formularze używają wspólnej palety. */
+.ui-body .streets-informacje { background: var(--ui-surface); border-top: 1px solid var(--ui-line); }

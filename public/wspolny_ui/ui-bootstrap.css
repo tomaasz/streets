@@ -1,0 +1,363 @@
+/*
+ * Wspólny UI aplikacji Urzędu Miejskiego w Wyszkowie: most dla Bootstrapa 5.3
+ * i arkusza akb.css (AKB, Edytor PDF, Książka Adresowa).
+ *
+ * Kolejność w <head>:
+ *   bootstrap.min.css → akb.css → arkusz aplikacji → ui.css → ui-bootstrap.css → ui.js
+ *
+ * Część 1 i 2 (zmienne) działa niezależnie od kolejności dzięki wyższej
+ * specyficzności (:root:root). Część 3 (komponenty) działa pod <body class="ui-body">.
+ * Ciemny motyw: ui.js ustawia równolegle data-ui-theme i data-bs-theme.
+ */
+
+/* ══ 1. akb.css → wspólne tokeny ═════════════════════════════════════
+ * Cały akb.css jest zbudowany na zmiennych --akb-*, więc ich przestawienie
+ * zmienia markę z zieleni na granat bez przepisywania komponentów.
+ * Paleta danych --pbi-* (wykresy AKB) pozostaje bez zmian.
+ */
+:root:root {
+  --akb-brand: var(--ui-primary);
+  --akb-brand-hover: var(--ui-primary-hover);
+  --akb-brand-pressed: var(--ui-primary-hover);
+  --akb-brand-dark: var(--ui-brand-text);
+  --akb-brand-tint: var(--ui-brand-soft);
+  --akb-brand-tint-2: color-mix(in srgb, var(--ui-brand-soft), var(--ui-brand-text) 14%);
+
+  --akb-canvas: var(--ui-canvas);
+  --akb-surface: var(--ui-surface);
+  --akb-surface-2: var(--ui-surface-muted);
+  --akb-surface-3: var(--ui-surface-muted);
+  --akb-stroke: var(--ui-line);
+  --akb-stroke-strong: var(--ui-line-strong);
+  --akb-stroke-accessible: var(--ui-line-input);
+  --akb-grid: var(--ui-line);
+  --akb-text: var(--ui-text);
+  --akb-text-2: var(--ui-text);
+  --akb-text-3: var(--ui-text-muted);
+  --akb-text-4: var(--ui-text-muted);
+  --akb-link: var(--ui-link);
+  --akb-link-hover: var(--ui-link-hover);
+
+  --akb-success: var(--ui-success);
+  --akb-success-bg: var(--ui-success-bg);
+  --akb-success-border: var(--ui-success-border);
+  --akb-warning: var(--ui-warning);
+  --akb-warning-bg: var(--ui-warning-bg);
+  --akb-warning-border: var(--ui-warning-border);
+  --akb-danger: var(--ui-danger);
+  --akb-danger-bg: var(--ui-danger-bg);
+  --akb-danger-border: var(--ui-danger-border);
+  --akb-info: var(--ui-info);
+  --akb-info-bg: var(--ui-info-bg);
+  --akb-info-border: var(--ui-info-border);
+
+  --akb-radius-sm: var(--ui-radius-sm);
+  --akb-radius: var(--ui-radius);
+  --akb-radius-lg: var(--ui-radius-lg);
+
+/* ══ 2. Bootstrap → wspólne tokeny ═══════════════════════════════════ */
+
+  --bs-body-bg: var(--ui-canvas);
+  --bs-body-color: var(--ui-text);
+  --bs-emphasis-color: var(--ui-text);
+  --bs-heading-color: inherit;
+  --bs-secondary-color: var(--ui-text-muted);
+  --bs-secondary-bg: var(--ui-surface-muted);
+  --bs-tertiary-color: var(--ui-text-muted);
+  --bs-tertiary-bg: var(--ui-surface-muted);
+  --bs-border-color: var(--ui-line);
+  --bs-border-color-translucent: var(--ui-line);
+  --bs-border-radius-sm: var(--ui-radius-sm);
+  --bs-border-radius: var(--ui-radius);
+  --bs-border-radius-lg: var(--ui-radius-lg);
+  --bs-link-color: var(--ui-link);
+  --bs-link-hover-color: var(--ui-link-hover);
+  --bs-code-color: var(--ui-warning);
+  --bs-focus-ring-color: color-mix(in srgb, var(--ui-focus) 40%, transparent);
+
+  --bs-primary: var(--ui-primary);
+  --bs-success: var(--ui-success);
+  --bs-warning: var(--ui-warning);
+  --bs-danger: var(--ui-danger);
+  --bs-info: var(--ui-info);
+
+  --bs-primary-text-emphasis: var(--ui-brand-text);
+  --bs-primary-bg-subtle: var(--ui-brand-soft);
+  --bs-primary-border-subtle: var(--ui-line-strong);
+  --bs-success-text-emphasis: var(--ui-success);
+  --bs-success-bg-subtle: var(--ui-success-bg);
+  --bs-success-border-subtle: var(--ui-success-border);
+  --bs-warning-text-emphasis: var(--ui-warning);
+  --bs-warning-bg-subtle: var(--ui-warning-bg);
+  --bs-warning-border-subtle: var(--ui-warning-border);
+  --bs-danger-text-emphasis: var(--ui-danger);
+  --bs-danger-bg-subtle: var(--ui-danger-bg);
+  --bs-danger-border-subtle: var(--ui-danger-border);
+  --bs-info-text-emphasis: var(--ui-info);
+  --bs-info-bg-subtle: var(--ui-info-bg);
+  --bs-info-border-subtle: var(--ui-info-border);
+  --bs-secondary-text-emphasis: var(--ui-text);
+  --bs-secondary-bg-subtle: var(--ui-surface-muted);
+  --bs-secondary-border-subtle: var(--ui-line);
+  --bs-light-text-emphasis: var(--ui-text);
+  --bs-light-bg-subtle: var(--ui-surface-muted);
+  --bs-light-border-subtle: var(--ui-line);
+
+  /* Bootstrap wymaga składowych RGB jako liczb — utrzymywać zgodnie z ui.css */
+  --bs-body-color-rgb: 36, 36, 36;
+  --bs-body-bg-rgb: 243, 244, 246;
+  --bs-emphasis-color-rgb: 36, 36, 36;
+  --bs-secondary-color-rgb: 97, 97, 97;
+  --bs-secondary-rgb: 97, 97, 97;
+  --bs-link-color-rgb: 26, 51, 75;
+  --bs-link-hover-color-rgb: 36, 73, 104;
+  --bs-primary-rgb: 26, 51, 75;
+  --bs-success-rgb: 16, 124, 65;
+  --bs-warning-rgb: 138, 55, 7;
+  --bs-danger-rgb: 177, 14, 28;
+  --bs-info-rgb: 15, 84, 140;
+}
+
+:root:root[data-ui-theme="dark"] {
+  --bs-body-color-rgb: 240, 242, 244;
+  --bs-body-bg-rgb: 23, 26, 30;
+  --bs-emphasis-color-rgb: 240, 242, 244;
+  --bs-secondary-color-rgb: 178, 186, 195;
+  --bs-secondary-rgb: 178, 186, 195;
+  --bs-link-color-rgb: 168, 201, 230;
+  --bs-link-hover-color-rgb: 210, 229, 245;
+  --bs-primary-rgb: 168, 201, 230;
+  --bs-success-rgb: 112, 211, 154;
+  --bs-warning-rgb: 243, 179, 127;
+  --bs-danger-rgb: 255, 155, 155;
+  --bs-info-rgb: 156, 200, 245;
+}
+
+/* ══ 3. Komponenty z kolorami wpisanymi na sztywno ═══════════════════ */
+
+/* przyciski */
+/* Linki-przyciski muszą używać kolorów stanów Bootstrapa także pod .ui-body a. */
+.ui-body a.btn { color: var(--bs-btn-color); }
+.ui-body a.btn:hover,
+.ui-body a.btn:focus-visible { color: var(--bs-btn-hover-color); }
+.ui-body a.btn:active,
+.ui-body a.btn.active,
+.ui-body a.btn.show { color: var(--bs-btn-active-color); }
+.ui-body a.btn.disabled { color: var(--bs-btn-disabled-color); }
+.ui-body .btn-primary,
+.ui-body .btn-success {
+  --bs-btn-color: var(--ui-on-primary);
+  --bs-btn-bg: var(--ui-primary);
+  --bs-btn-border-color: var(--ui-primary);
+  --bs-btn-hover-color: var(--ui-on-primary);
+  --bs-btn-hover-bg: var(--ui-primary-hover);
+  --bs-btn-hover-border-color: var(--ui-primary-hover);
+  --bs-btn-active-color: var(--ui-on-primary);
+  --bs-btn-active-bg: var(--ui-primary-hover);
+  --bs-btn-active-border-color: var(--ui-primary-hover);
+  --bs-btn-disabled-color: var(--ui-on-primary);
+  --bs-btn-disabled-bg: var(--ui-primary);
+  --bs-btn-disabled-border-color: var(--ui-primary);
+  --bs-btn-disabled-opacity: .5;
+}
+.ui-body .btn-outline-primary,
+.ui-body .btn-outline-secondary,
+.ui-body .btn-secondary,
+.ui-body .btn-light,
+.ui-body .btn-outline-dark {
+  --bs-btn-color: var(--ui-text);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-line-input);
+  --bs-btn-hover-color: var(--ui-text);
+  --bs-btn-hover-bg: var(--ui-surface-muted);
+  --bs-btn-hover-border-color: var(--ui-line-input);
+  --bs-btn-active-color: var(--ui-text);
+  --bs-btn-active-bg: var(--ui-surface-muted);
+  --bs-btn-active-border-color: var(--ui-line-input);
+  --bs-btn-disabled-color: var(--ui-text-muted);
+  --bs-btn-disabled-bg: var(--ui-surface);
+  --bs-btn-disabled-border-color: var(--ui-line);
+}
+.ui-body .btn-outline-primary { --bs-btn-color: var(--ui-brand-text); --bs-btn-hover-color: var(--ui-brand-text); }
+.ui-body .btn-outline-primary:hover { color: var(--ui-brand-text); }
+/* jak .ui-button-danger: obrys, wypełnienie przy wskazaniu — nie myli się z granatowym przyciskiem głównym */
+.ui-body .btn-danger {
+  --bs-btn-color: var(--ui-danger);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-danger);
+  --bs-btn-hover-color: var(--ui-on-danger);
+  --bs-btn-hover-bg: var(--ui-danger-solid);
+  --bs-btn-hover-border-color: var(--ui-danger-solid);
+  --bs-btn-active-color: var(--ui-on-danger);
+  --bs-btn-active-bg: var(--ui-danger-solid);
+  --bs-btn-active-border-color: var(--ui-danger-solid);
+}
+.ui-body .btn-danger:active { filter: brightness(.92); }
+.ui-body .btn-outline-danger {
+  --bs-btn-color: var(--ui-danger);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-line-input);
+  --bs-btn-hover-color: var(--ui-danger);
+  --bs-btn-hover-bg: var(--ui-danger-bg);
+  --bs-btn-hover-border-color: var(--ui-danger-border);
+  --bs-btn-active-color: var(--ui-danger);
+  --bs-btn-active-bg: var(--ui-danger-bg);
+  --bs-btn-active-border-color: var(--ui-danger-border);
+}
+.ui-body .btn-subtle,
+.ui-body .btn-link {
+  --bs-btn-hover-bg: var(--ui-surface-muted);
+  --bs-btn-active-bg: var(--ui-surface-muted);
+}
+.ui-body .btn-link { --bs-btn-color: var(--ui-link); --bs-btn-hover-color: var(--ui-link-hover); }
+.ui-body .btn:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; box-shadow: none; }
+
+/* pola formularzy: widoczny fokus zamiast samej dolnej kreski */
+.ui-body .form-control,
+.ui-body .form-select {
+  border-color: var(--ui-line-input);
+  background-color: var(--ui-surface);
+  color: var(--ui-text);
+}
+.ui-body .form-control:hover,
+.ui-body .form-select:hover { border-color: var(--ui-line-input); }
+.ui-body .form-control:focus,
+.ui-body .form-select:focus {
+  border-color: var(--ui-focus);
+  box-shadow: none;
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 0;
+}
+.ui-body .form-control::placeholder { color: var(--ui-text-muted); }
+.ui-body .form-control:disabled,
+.ui-body .form-select:disabled { background-color: var(--ui-surface-muted); color: var(--ui-text-muted); }
+.ui-body .form-control.is-invalid,
+.ui-body .form-select.is-invalid { border-color: var(--ui-danger); }
+.ui-body .invalid-feedback { color: var(--ui-danger); }
+.ui-body .form-label { color: var(--ui-text); }
+.ui-body .form-text { color: var(--ui-text-muted); }
+.ui-body .req { color: var(--ui-danger); }
+.ui-body .input-group-text { border-color: var(--ui-line-input); background: var(--ui-surface-muted); color: var(--ui-text-muted); }
+.ui-body .form-check-input { border-color: var(--ui-line-input); background-color: var(--ui-surface); }
+.ui-body .form-check-input:checked { border-color: var(--ui-primary); background-color: var(--ui-primary); }
+.ui-body .form-check-input:focus { box-shadow: none; }
+.ui-body .form-check-input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+/* w ciemnym motywie główny kolor jest jasny, więc znacznik musi być ciemny */
+:root[data-ui-theme="dark"] .ui-body .form-check-input:checked[type="checkbox"] {
+  --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%2310202e' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+:root[data-ui-theme="dark"] .ui-body .form-check-input:checked[type="radio"] {
+  --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%2310202e'/%3e%3c/svg%3e");
+}
+:root[data-ui-theme="dark"] .ui-body .form-switch .form-check-input:checked {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2310202e'/%3e%3c/svg%3e");
+}
+
+/* komunikaty: jak ui-alert, z grubszą lewą krawędzią */
+.ui-body .alert { border-left-width: 4px; color: var(--ui-text); }
+.ui-body .alert-secondary,
+.ui-body .alert-light { background: var(--ui-surface-muted); border-color: var(--ui-line); }
+
+/* odznaki: akb.css ustawia jasne kolory z !important */
+.ui-body .badge.bg-success, .ui-body .text-bg-success { background: var(--ui-success-bg) !important; color: var(--ui-success) !important; box-shadow: inset 0 0 0 1px var(--ui-success-border); }
+.ui-body .badge.bg-danger, .ui-body .text-bg-danger { background: var(--ui-danger-bg) !important; color: var(--ui-danger) !important; box-shadow: inset 0 0 0 1px var(--ui-danger-border); }
+.ui-body .badge.bg-warning, .ui-body .text-bg-warning { background: var(--ui-warning-bg) !important; color: var(--ui-warning) !important; box-shadow: inset 0 0 0 1px var(--ui-warning-border); }
+.ui-body .badge.bg-info, .ui-body .text-bg-info { background: var(--ui-info-bg) !important; color: var(--ui-info) !important; box-shadow: inset 0 0 0 1px var(--ui-info-border); }
+.ui-body .badge.bg-primary, .ui-body .text-bg-primary { background: var(--ui-brand-soft) !important; color: var(--ui-brand-text) !important; box-shadow: inset 0 0 0 1px var(--ui-line-strong); }
+.ui-body .badge.bg-secondary, .ui-body .badge.bg-light, .ui-body .text-bg-secondary, .ui-body .text-bg-light { background: var(--ui-surface-muted) !important; color: var(--ui-text-muted) !important; box-shadow: inset 0 0 0 1px var(--ui-line-strong); }
+
+/* tabele */
+.ui-body .table {
+  --bs-table-color: var(--ui-text);
+  --bs-table-bg: var(--ui-surface);
+  --bs-table-border-color: var(--ui-line);
+  --bs-table-striped-color: var(--ui-text);
+  --bs-table-striped-bg: var(--ui-surface-muted);
+  --bs-table-hover-color: var(--ui-text);
+  --bs-table-hover-bg: var(--ui-surface-muted);
+  --bs-table-active-color: var(--ui-text);
+  --bs-table-active-bg: var(--ui-brand-soft);
+}
+/* warianty wierszy: Bootstrap wpisuje im na sztywno czarny tekst i jasne tło */
+.ui-body .table-primary, .ui-body .table-secondary, .ui-body .table-light, .ui-body .table-active,
+.ui-body .table-success, .ui-body .table-info, .ui-body .table-warning, .ui-body .table-danger {
+  --bs-table-color: var(--ui-text);
+  --bs-table-striped-color: var(--ui-text);
+  --bs-table-hover-color: var(--ui-text);
+  --bs-table-active-color: var(--ui-text);
+  --bs-table-border-color: var(--ui-line);
+}
+.ui-body .table-primary, .ui-body .table-active { --bs-table-bg: var(--ui-brand-soft); }
+.ui-body .table-secondary, .ui-body .table-light { --bs-table-bg: var(--ui-surface-muted); }
+.ui-body .table-success { --bs-table-bg: var(--ui-success-bg); }
+.ui-body .table-info { --bs-table-bg: var(--ui-info-bg); }
+.ui-body .table-warning { --bs-table-bg: var(--ui-warning-bg); }
+.ui-body .table-danger { --bs-table-bg: var(--ui-danger-bg); }
+.ui-body .table-akb { --bs-table-bg: transparent; }
+.ui-body .table-akb tbody tr:hover > * { background-color: var(--ui-surface-muted); }
+.ui-body .table-akb tr.table-warning > *, .ui-body .table-akb tr.table-warning-subtle > *, .ui-body .table-akb tr.row-warning > * { background-color: var(--ui-warning-bg); }
+.ui-body .table-akb tr.table-danger > *, .ui-body .table-akb tr.table-danger-subtle > *, .ui-body .table-akb tr.row-danger > * { background-color: var(--ui-danger-bg); }
+
+/* karty, menu, dialogi, listy, zakładki, stronicowanie */
+.ui-body .card { --bs-card-bg: var(--ui-surface); --bs-card-color: var(--ui-text); color: var(--ui-text); }
+.ui-body .dropdown-menu {
+  --bs-dropdown-bg: var(--ui-surface);
+  --bs-dropdown-color: var(--ui-text);
+  --bs-dropdown-border-color: var(--ui-line);
+  --bs-dropdown-divider-bg: var(--ui-line);
+  --bs-dropdown-link-color: var(--ui-text);
+  --bs-dropdown-link-hover-color: var(--ui-text);
+  --bs-dropdown-link-hover-bg: var(--ui-surface-muted);
+  --bs-dropdown-link-active-color: var(--ui-text);
+  --bs-dropdown-link-active-bg: var(--ui-brand-soft);
+  --bs-dropdown-header-color: var(--ui-text-muted);
+}
+.ui-body .modal {
+  --bs-modal-bg: var(--ui-surface);
+  --bs-modal-color: var(--ui-text);
+  --bs-modal-border-color: var(--ui-line);
+  --bs-modal-header-border-color: var(--ui-line);
+  --bs-modal-footer-border-color: var(--ui-line);
+}
+.ui-body .list-group {
+  --bs-list-group-bg: var(--ui-surface);
+  --bs-list-group-color: var(--ui-text);
+  --bs-list-group-border-color: var(--ui-line);
+  --bs-list-group-action-color: var(--ui-text);
+  --bs-list-group-action-hover-bg: var(--ui-surface-muted);
+  --bs-list-group-action-hover-color: var(--ui-text);
+  --bs-list-group-active-bg: var(--ui-brand-soft);
+  --bs-list-group-active-color: var(--ui-text);
+  --bs-list-group-active-border-color: var(--ui-line);
+}
+.ui-body .nav {
+  --bs-nav-link-color: var(--ui-text-muted);
+  --bs-nav-link-hover-color: var(--ui-text);
+}
+.ui-body .nav-tabs {
+  --bs-nav-tabs-border-color: var(--ui-line);
+  --bs-nav-tabs-link-hover-border-color: var(--ui-line);
+  --bs-nav-tabs-link-active-color: var(--ui-text);
+  --bs-nav-tabs-link-active-bg: var(--ui-surface);
+  --bs-nav-tabs-link-active-border-color: var(--ui-line) var(--ui-line) var(--ui-surface);
+}
+.ui-body .pagination {
+  --bs-pagination-bg: transparent;
+  --bs-pagination-color: var(--ui-text);
+  --bs-pagination-hover-bg: var(--ui-surface-muted);
+  --bs-pagination-hover-color: var(--ui-text);
+  --bs-pagination-active-bg: var(--ui-primary);
+  --bs-pagination-active-color: var(--ui-on-primary);
+  --bs-pagination-active-border-color: var(--ui-primary);
+  --bs-pagination-disabled-bg: transparent;
+  --bs-pagination-disabled-color: var(--ui-text-muted);
+}
+
+/* przypięty spis treści Pomocy (akb.css) pod przypiętą belką */
+.ui-body .help-sidebar { top: calc(var(--ui-sticky-top) + 12px); max-height: calc(100vh - var(--ui-sticky-top) - 24px); }
+
+/* pomocnicze klasy kolorów, które w ciemnym motywie zostałyby jasne */
+.ui-body .text-muted, .ui-body .text-body-secondary { color: var(--ui-text-muted) !important; }
+.ui-body .text-dark, .ui-body .text-body { color: var(--ui-text) !important; }
+.ui-body .bg-white, .ui-body .bg-body { background-color: var(--ui-surface) !important; }
+.ui-body .bg-light, .ui-body .bg-body-tertiary { background-color: var(--ui-surface-muted) !important; }

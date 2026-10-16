@@ -1,0 +1,13 @@
+{
+  "version": "0.11.2",
+  "files": {
+    "public/wspolny_ui/aplikacje.json": "30385b7b2d819726a5312ae521895d9cfe50cd5aba6c8dd69854a21ae5a51334",
+    "public/wspolny_ui/herb_wyszkowa.png": "6b68586a8edba07c843ece628bd469165597c664dfc18b14946ab4c55be8b798",
+    "public/wspolny_ui/ui-bootstrap.css": "f815e192f1280304123fbffd159599e6b112a6e26f5929f0100f978144fe1697",
+    "public/wspolny_ui/ui.css": "015e3add94e9454c5bbc8ffad15b993f04bb2f587993584a8efc5827ee2e341e",
+    "public/wspolny_ui/ui.js": "d0d0ffccb756a8ab94b1ec68ab26324650a03008cf537a553e7acc707082217f",
+    "public/wspolny_ui/VERSION": "be904fd6626f304ea2dd11524bfc70f77348a90d5163118bf9e92b71d3c9a35f",
+    "src/components/UiHelpInit.tsx": "9306628fd262d3112a51edfe650de8f1a7a7439baf7e2cc3d8150b876ddcb87a",
+    "src/components/WspolnyUi.tsx": "f20bc47a6b2ea7a9c946d070a3e265639e068904ce22efd397588325ab2c1cac"
+  }
+}

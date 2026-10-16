@@ -1,3 +1,4 @@
+import { UiKpi } from '@/components/WspolnyUi';
 import { WynikiUug } from '@/components/WynikiUug';
 import { NazwyDodatkowe } from '@/components/NazwyDodatkowe';
 import Link from 'next/link';
@@ -58,7 +59,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
         zarządcy — dlatego w kolumnach poniżej może być więcej niż jedna wartość.
       </p>
 
-      <section className="statystyki-skrot" aria-label="Podsumowanie sieci dróg">
+      <section className="ui-kpis statystyki-skrot" aria-label="Podsumowanie sieci dróg">
         <Kafelek etykieta="ulic w bazie" wartosc={stat.ogol.ulic} />
         <Kafelek etykieta="odcinków dróg" wartosc={stat.ogol.odcinkow} />
         <Kafelek etykieta="dróg numerowanych" wartosc={stat.ogol.drog} />
@@ -178,10 +179,5 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
 }
 
 function Kafelek({ etykieta, wartosc }: { etykieta: string; wartosc: string | number }) {
-  return (
-    <div className="karta statystyka">
-      <div className="text-lg font-bold">{wartosc}</div>
-      <div className="text-xs text-[var(--tekst-2)]">{etykieta}</div>
-    </div>
-  );
+  return <UiKpi item={{ label: etykieta, value: wartosc }} />;
 }

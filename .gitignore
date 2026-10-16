@@ -1,5 +1,7 @@
 node_modules/
 .next/
+.next-*/
+.next-licencje/
 out/
 .vercel/
 *.tsbuildinfo
@@ -23,3 +25,6 @@ data/uchwaly/
 # Python — tylko scripts/pdf/ i deploy/ maja skrypty pythonowe
 __pycache__/
 *.pyc
+
+# Lokalne kompilacje wdrożenia centrum pomocy
+.next-ui-pomoc-*/

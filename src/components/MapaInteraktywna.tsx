@@ -5,6 +5,7 @@ import { PlakietkaKategorii } from './Plakietka';
 import {StatusNazwyOsm} from './StatusNazwyOsm';
 import {linkTargeo} from '@/lib/targeo';
 import {SprawdzEmape} from './SprawdzEmape';
+import {PrzelacznikMapy} from './PrzelacznikMapy';
 import 'ol/ol.css';
 import {
   DEF_2180,
@@ -30,6 +31,10 @@ const ZASIEG_POLSKI: [number, number, number, number] = [
 
 /** Środek gminy Wyszków w PL-1992 — punkt startowy, zanim wejdą dane. */
 const SRODEK_GMINY: [number, number] = [666580, 527978];
+// OpenLayers ukrywa warstwę przy rozdzielczości równej tej granicy lub większej.
+const EMAPA_MAX_RESOLUTION = 20.48;
+const KLUCZ_PREFERENCJI_MAPY = 'drogi-mapa-preferencje';
+const INTENSYWNOSC_PRZYGASZONEGO_TLA = 0.8;
 
 type Slowniki = {
   zarzadcy: string[];
@@ -102,11 +107,14 @@ export function MapaInteraktywna({
   const slowniki = useRef<Slowniki>(PUSTE_SLOWNIKI);
 
   const [gotowa, setGotowa] = useState(false);
+  const [bledyPodkladow,setBledyPodkladow]=useState<Record<string,boolean>>({});
   const [emapa,setEmapa]=useState(false);
   const emapaAktywna=useRef(false);
   const emapaWarstwa=useRef<import('ol/layer/Tile').default | null>(null);
   const [emapaPunkt,setEmapaPunkt]=useState<number[]>();
   const [emapaBlad,setEmapaBlad]=useState(false);
+  const [emapaWZasiegu,setEmapaWZasiegu]=useState(false);
+  const [emapaKafle,setEmapaKafle]=useState(0);
   const [targeoHref,setTargeoHref]=useState<string>();
   const [blad, setBlad] = useState<string | null>(null);
   const [uugStatus,setUugStatus]=useState<string>();
@@ -132,19 +140,41 @@ export function MapaInteraktywna({
     return () => media.removeEventListener('change', zmien);
   }, []);
   const [podklad, setPodklad] = useState(podkladDomyslny);
-  const [przygaszony, setPrzygaszony] = useState(false);
+  const [przygaszony, setPrzygaszony] = useState(true);
+  const [preferencjeGotowe,setPreferencjeGotowe]=useState(false);
   // Wybrany odcinek jest wspólny dla kliknięcia mapy i listy dostępnej z klawiatury.
   const [wybrany, setWybrany] = useState<{
     w: Wlasciwosci;
     wsp: number[];
   } | null>(null);
 
+  useEffect(()=>{
+    try {
+      const zapis=localStorage.getItem(KLUCZ_PREFERENCJI_MAPY);
+      const p=zapis ? JSON.parse(zapis) : null;
+      if(p && typeof p==='object' && !Array.isArray(p)) {
+        if(typeof p.podklad==='string' && PODKLADY.some(k=>k.kod===p.podklad))setPodklad(p.podklad);
+        if(typeof p.przygaszony==='boolean')setPrzygaszony(p.przygaszony);
+        if(typeof p.emapa==='boolean')setEmapa(p.emapa);
+      }
+    } catch { /* Brak pamięci lub uszkodzony zapis: użyj ustawień domyślnych. */ }
+    setPreferencjeGotowe(true);
+  },[]);
+
+  useEffect(()=>{
+    if(!preferencjeGotowe)return;
+    try {
+      localStorage.setItem(KLUCZ_PREFERENCJI_MAPY,JSON.stringify({podklad,przygaszony,emapa}));
+    } catch { /* Zmiany działają w bieżącym widoku również bez dostępu do pamięci. */ }
+  },[podklad,przygaszony,emapa,preferencjeGotowe]);
+
   useEffect(() => {
+    if(!preferencjeGotowe)return;
     let zerwane = false;
     let sprzataj: (() => void) | undefined;
     const kontroler = new AbortController();
-    setGotowa(false);
-    setEmapaPunkt(undefined);setEmapaBlad(false);
+    setGotowa(false);setBledyPodkladow({});
+    setEmapaPunkt(undefined);setEmapaBlad(false);setEmapaKafle(0);setEmapaWZasiegu(false);
     setTargeoHref(undefined);
     setBlad(null);
     setUugStatus(undefined);
@@ -229,6 +259,12 @@ export function MapaInteraktywna({
               }),
             });
           }
+        }
+
+        for(const [kod,layer] of Object.entries(podklady.current)) {
+          if(kod==='osm')continue;
+          layer.getSource()?.on('tileloaderror',()=>{if(!zerwane)setBledyPodkladow(old=>({...old,[kod]:true}));});
+          layer.getSource()?.on('tileloadend',()=>{if(!zerwane)setBledyPodkladow(old=>old[kod]?{...old,[kod]:false}:old);});
         }
 
         // ---- kolory kategorii, prosto z motywu strony ----------------
@@ -355,8 +391,12 @@ export function MapaInteraktywna({
         });
 
         const gminneZrodlo=new ZrodloWMS({url:'https://www.punktyadresowe.pl/cgi-bin/wms/143505',params:{LAYERS:'ulice,punkty',VERSION:'1.1.1',FORMAT:'image/png',TRANSPARENT:true},projection:pl1992,attributions:'<a href="https://wyszkow.e-mapa.net/" target="_blank" rel="noreferrer">Adresy i ulice — Urząd Miejski w Wyszkowie / GEO-SYSTEM</a>'});
-        gminneZrodlo.on('tileloaderror',()=>{if(!zerwane)setEmapaBlad(true);});
-        emapaWarstwa.current=new WarstwaKafli({source:gminneZrodlo,visible:emapaAktywna.current,maxResolution:20.48,opacity:.85});
+        let kafleEmapy=0;
+        gminneZrodlo.on('tileloadstart',()=>{if(!zerwane)setEmapaKafle(++kafleEmapy);});
+        const zakonczKafelEmapy=()=>{if(!zerwane)setEmapaKafle(kafleEmapy=Math.max(0,kafleEmapy-1));};
+        gminneZrodlo.on('tileloadend',zakonczKafelEmapy);
+        gminneZrodlo.on('tileloaderror',()=>{zakonczKafelEmapy();if(!zerwane)setEmapaBlad(true);});
+        emapaWarstwa.current=new WarstwaKafli({source:gminneZrodlo,visible:emapaAktywna.current,maxResolution:EMAPA_MAX_RESOLUTION,opacity:.85});
         // ---- mapa ----------------------------------------------------
         const widok = new View({
           projection: pl1992,
@@ -373,7 +413,8 @@ export function MapaInteraktywna({
           target: kontener.current,
           view: widok,
           layers: [
-            ...PODKLADY.map((p) => podklady.current[p.kod]),
+            podklady.current.osm,
+            ...PODKLADY.filter(p=>p.kod!=='osm').map(p=>podklady.current[p.kod]),
             emapaWarstwa.current,
             warstwaPodswietlenia,
             warstwaObwodek,
@@ -386,6 +427,10 @@ export function MapaInteraktywna({
           ]),
         });
         mapa.current = m;
+        const aktualizujZasiegEmapy=()=>{
+          if(!zerwane)setEmapaWZasiegu((widok.getResolution()??Infinity)<EMAPA_MAX_RESOLUTION);
+        };
+        widok.on('change:resolution',aktualizujZasiegEmapy);
         const aktualizujTargeo=()=>{
           const center=widok.getCenter(),resolution=widok.getResolution();
           if(!center || !resolution) return;
@@ -467,14 +512,16 @@ export function MapaInteraktywna({
         };
         motyw.addEventListener('change', naZmianeMotywu);
         const obserwatorMotywu = new MutationObserver(naZmianeMotywu);
-        obserwatorMotywu.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        obserwatorMotywu.observe(document.documentElement, { attributes: true, attributeFilter: ['data-ui-theme'] });
 
         setGotowa(true);
+        aktualizujZasiegEmapy();
         aktualizujTargeo();
         const initial = new URLSearchParams(window.location.search).get('odcinek');
         if (initial && zrodlo.getFeatureById(initial)) wybierz.current(initial);
 
         sprzataj = () => {
+          widok.un('change:resolution',aktualizujZasiegEmapy);
           motyw.removeEventListener('change', naZmianeMotywu);
           obserwatorMotywu.disconnect();
           m.setTarget(undefined);
@@ -499,20 +546,28 @@ export function MapaInteraktywna({
       emapaWarstwa.current=null;
       wybierz.current = () => {};
     };
-  }, [urlDanych, podkladDomyslny, proba]);
+  }, [urlDanych, podkladDomyslny, proba, preferencjeGotowe]);
   useEffect(()=>{emapaAktywna.current=emapa;emapaWarstwa.current?.setVisible(emapa);if(!emapa)setEmapaPunkt(undefined);},[emapa,gotowa]);
+
+  const przyblizEmape=()=>{
+    const widok=mapa.current?.getView();
+    if(!widok)return;
+    // Zachowaj środek oglądanego obszaru; wybierz stopień drabinki czytelny dla adresów.
+    const resolution=widok.getResolutions()?.find(r=>r<=5.3)??2.645839;
+    widok.animate({resolution,duration:250});
+  };
 
   // przełączenie podkładu to sama widoczność warstw — mapa nie jest budowana
   // od nowa, więc nie gubi ani pozycji, ani wczytanych kafli
   useEffect(() => {
     for (const [kod, warstwa] of Object.entries(podklady.current)) {
-      warstwa?.setVisible(kod === podklad);
+      warstwa?.setVisible(kod === podklad || kod === 'osm');
     }
   }, [podklad, gotowa]);
 
   useEffect(() => {
     for (const warstwa of Object.values(podklady.current)) {
-      warstwa?.setOpacity(przygaszony ? 0.45 : 1);
+      warstwa?.setOpacity(przygaszony ? INTENSYWNOSC_PRZYGASZONEGO_TLA : 1);
     }
   }, [przygaszony, gotowa]);
 
@@ -551,36 +606,50 @@ export function MapaInteraktywna({
 
   return (
     <div className="mapa-aplikacja">
-      {gotowa ? <div className="mapa-narzedzia">
-        <details className="ustawienia-mapy"><summary>Warstwy i podkład</summary>
-          <div className="mapa-panel">
-            <fieldset className="mapa-panel-grupa"><legend>Podkład mapy</legend>
-              {PODKLADY.map((p) => <label key={p.kod} title={p.opis}>
-                <input type="radio" name={`podklad-${idPanelu}`} checked={podklad===p.kod} onChange={() => setPodklad(p.kod)} />{p.nazwa}
-              </label>)}
-              {targeoHref ? <div className="mapa-targeo">
-                <a href={targeoHref} target="_blank" rel="noreferrer" className="przycisk">Targeo — otwórz ten obszar ↗</a>
-                <p className="tekst-pomocniczy text-xs mt-1">Osobna mapa w nowej karcie, z aktualnym środkiem i podobnym zbliżeniem.</p>
-              </div> : null}
-              <label><input type="checkbox" checked={przygaszony} onChange={(e) => setPrzygaszony(e.target.checked)} />Przygaś podkład</label>
-            </fieldset>
-            <label><input type="checkbox" checked={emapa} onChange={e=>{setEmapa(e.target.checked);setEmapaBlad(false);}}/>Gminna e-mapa — adresy i ulice</label>
-            <p className="tekst-pomocniczy text-xs">Dodatkowa warstwa urzędowa. Przybliż mapę i kliknij ulicę, aby odczytać nazwę, SIMC i ULIC.</p>
-            {emapa && emapaBlad?<p role="status" className="text-sm">Nie udało się pobrać części warstwy e-mapy. Pozostałe warstwy mapy są dostępne.</p>:null}
-            <label><input type="checkbox" checked={bezNazwy} onChange={(e) => {
-              const on = e.target.checked; setBezNazwy(on);
-              const url = new URL(window.location.href);
-              if (on) url.searchParams.set('bez_nazwy','1'); else url.searchParams.delete('bez_nazwy');
-              window.history.replaceState(null,'',url.pathname+url.search);
-            }} />Drogi bez przypisanej ulicy</label>
-            <p className="tekst-pomocniczy">Przerywana linia oznacza dodatkowe odcinki bez potwierdzenia dokumentem lub samą oś ulicy. Przy filtrze miejscowości pokazujemy też odcinki w jej pobliżu.</p>
-            {zLegenda ? <div className="legenda-mapy" aria-label="Legenda kategorii">{KATEGORIE.map((k) => <PlakietkaKategorii key={k} kategoria={k} />)}</div> : null}
+      {gotowa ? <section className="mapa-narzedzia karta" aria-label="Podkład i warstwy mapy">
+        <div className="mapa-pasek-glowny">
+          <label className="mapa-wybor-podkladu">Podkład
+            <select aria-label="Podkład mapy" value={podklad} onChange={e=>setPodklad(e.target.value)}>
+              {PODKLADY.map(p=><option key={p.kod} value={p.kod}>{p.nazwa}</option>)}
+            </select>
+          </label>
+          <PrzelacznikMapy nazwa="Przygaś podkład" opis="Delikatnie zmniejsza intensywność tła, aby łatwiej zobaczyć kolorowe odcinki dróg. Wybór jest zapamiętywany w tej przeglądarce." wlaczone="Podkład zachowuje 80% intensywności; przebiegi dróg pozostają wyraźne." wylaczone="Podkład ma pełną intensywność." checked={przygaszony} onChange={setPrzygaszony}/>
+          <div className="mapa-akcje">
+            {targeoHref ? <a href={targeoHref} target="_blank" rel="noreferrer" className="przycisk" title="Otwórz ten obszar w osobnej mapie Targeo, w nowej karcie">Targeo ↗</a> : null}
+            <button type="button" className="przycisk" onClick={dopasuj}>Dopasuj widok</button>
           </div>
-        </details>
-        <button type="button" className="przycisk" onClick={dopasuj}>Dopasuj widok</button>
-        <span role="status">{odcinki.length} odcinków na mapie</span>
-        {emapa ? <span className="tekst-pomocniczy text-sm">e-mapa włączona · kliknij ulicę po przybliżeniu</span> : null}
-      </div> : null}
+        </div>
+        <div className="mapa-pasek-warstw">
+          <span className="mapa-etykieta-warstw">Warstwy</span>
+          <PrzelacznikMapy nazwa="Gminna e-mapa — adresy i ulice" opis="Urzędowa warstwa nazw ulic i punktów adresowych gminy Wyszków. Jest widoczna po przybliżeniu; nie potwierdza kategorii ani zarządcy drogi." wlaczone="Po przybliżeniu nakłada żółte przebiegi ulic i punkty adresowe. Przy widoku całej gminy pozostaje ukryta — użyj przycisku przybliżenia w komunikacie. Kliknięcie mapy odczytuje nazwę, SIMC i ULIC." wylaczone="Ukrywa gminną warstwę i wyłącza odczyt jej danych po kliknięciu. Nasze odcinki pozostają na mapie." checked={emapa} onChange={on=>{setEmapa(on);setEmapaBlad(false);}}/>
+          <PrzelacznikMapy nazwa="Drogi bez przypisanej ulicy" opis="Dodatkowe odcinki BDOT10k, których nie połączono z ulicą w rejestrze. Nie oznacza to braku oficjalnej nazwy drogi." wlaczone="Dodaje odcinki bez przypisanej ulicy spełniające filtry, także pobliskie przy wybranej miejscowości. Licznik i lista mogą się zwiększyć." wylaczone="Pomija dodatkowe odcinki bez przypisania. Odcinki bez nazwy powiązane z dokumentami nadal mogą być widoczne." checked={bezNazwy} onChange={on=>{
+            setBezNazwy(on);
+            const url=new URL(window.location.href);
+            if(on)url.searchParams.set('bez_nazwy','1');else url.searchParams.delete('bez_nazwy');
+            window.history.replaceState(null,'',url.pathname+url.search);
+          }}/>
+          <span role="status" className="tekst-pomocniczy mapa-licznik">{odcinki.length} odcinków na mapie</span>
+          <details className="mapa-pomoc"><summary>Pomoc</summary>
+            <div className="tekst-pomocniczy">
+              <p>Gminna e-mapa: przybliż mapę i kliknij ulicę, aby odczytać nazwę, SIMC i ULIC.</p>
+              <p>Przerywana linia oznacza dodatkowe odcinki bez potwierdzenia dokumentem lub samą oś ulicy. Przy filtrze miejscowości pokazujemy też odcinki w jej pobliżu.</p>
+              <p>Targeo otwiera osobną mapę w nowej karcie, z aktualnym środkiem i podobnym zbliżeniem.</p>
+            </div>
+          </details>
+        </div>
+        {bledyPodkladow[podklad] ? <p role="status" className="tekst-pomocniczy">Nie udało się pobrać części podkładu {PODKLADY.find(p=>p.kod===podklad)?.nazwa}. W brakujących miejscach pokazujemy OpenStreetMap. Spróbuj zmienić zbliżenie lub podkład.</p> : null}
+        {emapa ? <div className="mapa-status-emapy">
+          <p role="status" className="tekst-pomocniczy">{!emapaWZasiegu
+            ? 'E-mapa włączona, ale ukryta przy tym oddaleniu. Przybliż mapę, aby zobaczyć ulice i adresy.'
+            : emapaBlad
+              ? 'Nie udało się pobrać części warstwy e-mapy. Spróbuj zmienić przybliżenie. Pozostałe warstwy mapy są dostępne.'
+              : emapaKafle>0
+                ? 'Wczytywanie warstwy e-mapy…'
+                : 'E-mapa włączona: żółte przebiegi ulic i punkty adresowe. Linie mogą pokrywać się z naszymi odcinkami. Kliknij mapę, aby sprawdzić dane e-mapy.'}</p>
+          {!emapaWZasiegu ? <button type="button" className="przycisk" onClick={przyblizEmape}>Przybliż do ulic i adresów</button> : null}
+        </div> : null}
+        {zLegenda ? <div className="legenda-mapy" role="group" aria-label="Legenda kategorii"><span className="font-semibold">Kategorie:</span>{KATEGORIE.map(k=><PlakietkaKategorii key={k} kategoria={k}/>)}</div> : null}
+      </section> : null}
       <div className={`mapa-layout ${d ? 'z-szczegolami' : ''}`}>
         <div className="mapa-plansza karta" style={{ height: wysokosc }}>
           <div ref={kontener} className="mapa-ol" tabIndex={0} role="region" aria-label="Mapa dróg. Strzałki przesuwają mapę, plus i minus zmieniają przybliżenie. Odcinek można wybrać z listy poniżej." />

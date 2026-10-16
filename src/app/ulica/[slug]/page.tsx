@@ -8,6 +8,8 @@ import { MapaInteraktywna } from '@/components/MapaInteraktywna';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
 import { bezpiecznyPowrot, pierwszy } from '@/lib/filtry';
 
+export const metadata = { title: 'Szczegóły ulicy' };
+
 export const dynamic = 'force-dynamic';
 
 export default async function Strona({
