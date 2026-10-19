@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit && node scripts/validate-data.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs scripts/test-emapa.mjs scripts/test-osm.mjs scripts/test-uug.mjs",
     "test:powiazania": "node scripts/test-powiazania.mjs",
