@@ -5,16 +5,24 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
 import { PlakietkaKategorii, PlakietkaPewnosci } from '@/components/Plakietka';
+import { Paginacja } from '@/components/Paginacja';
+import { limitStrony, offsetStrony, type ParametryWidoku } from '@/lib/filtry';
 
 export const metadata = { title: 'Drogi' };
 
 export const dynamic = 'force-dynamic';
 
-export default async function Strona() {
+export default async function Strona({ searchParams }: { searchParams?: Promise<ParametryWidoku> }) {
+  const sp = (await searchParams) ?? {};
   const wynik = await zBaza(() => drogi());
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
   const lista = wynik.dane;
   const publiczne = lista.filter((d) => d.kategoria !== 'wewnetrzna');
+  const limit = limitStrony(sp.limit);
+  const rawOffset = offsetStrony(sp.offset, limit);
+  const offset = Math.min(rawOffset, Math.max(0, Math.ceil(publiczne.length / limit) - 1) * limit);
+  const widoczneDrogi = publiczne.slice(offset, offset + limit);
+  const queryDrog: Record<string, string> = sp.limit ? { limit: String(limit) } : {};
 
   return (
     <>
@@ -26,6 +34,8 @@ export default async function Strona() {
         jest uchwała Rady Miejskiej o zaliczeniu drogi do kategorii.
       </p>
       <p className="mt-2 text-sm tekst-pomocniczy">Wybierz „Pokaż na mapie”, aby zobaczyć odcinki drogi w gminie, lub rozwiń „Źródła i dokumenty”, aby sprawdzić pochodzenie danych.</p>
+
+      <Paginacja pathname="/drogi" query={queryDrog} offset={offset} limit={limit} ile={publiczne.length} />
 
       <div className="przewijalne mt-5">
         <table className="dane">
@@ -43,7 +53,7 @@ export default async function Strona() {
             </tr>
           </thead>
           <tbody>
-            {publiczne.map((d) => (
+            {widoczneDrogi.map((d) => (
               <WierszDrogi key={d.id} id={d.id} numer={d.numer}
                 mapa={d.ma_geometrie ? <Link
                     href={{ pathname: '/mapa', query: { droga: String(d.id), q: d.numer } }}
@@ -97,6 +107,7 @@ export default async function Strona() {
           </tbody>
         </table>
       </div>
+      <Paginacja pathname="/drogi" query={queryDrog} offset={offset} limit={limit} ile={publiczne.length} />
     </>
   );
 }

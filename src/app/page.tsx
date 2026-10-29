@@ -13,7 +13,7 @@ import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { FiltryDrog } from '@/components/FiltryDrog';
 import { Paginacja } from '@/components/Paginacja';
-import { parametryFiltrow, offsetStrony } from '@/lib/filtry';
+import { parametryFiltrow, offsetStrony, limitStrony } from '@/lib/filtry';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,15 +23,16 @@ const pierwszy = (v: string | string[] | undefined) =>
 
 export default async function Strona({ searchParams }: { searchParams: Parametry }) {
   const sp = await searchParams;
+  const limit = limitStrony(sp.limit);
   const filtry = {
     q: pierwszy(sp.q),
     kategoria: pierwszy(sp.kategoria),
     miejscowosc: pierwszy(sp.miejscowosc),
     zarzadca: pierwszy(sp.zarzadca),
     ...sortowanie(pierwszy(sp.sort),pierwszy(sp.kierunek)),
-    limit: 50,
+    limit,
     slug: pierwszy(sp.slug),
-    offset: offsetStrony(sp.offset),
+    offset: offsetStrony(sp.offset, limit),
   };
 
   const wynik = await zBaza(() =>
@@ -104,7 +105,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
       <div className="wyniki-drog">
       <FiltryDrog p={sp} widok="lista" opcje={opcje} />
       <p className="wyniki-licznik text-sm" role="status">Znaleziono <strong>{ile}</strong> pozycji.{filtry.q && /^\d+[a-z]?$/i.test(filtry.q.trim()) ? <span className="tekst-pomocniczy"> Szukasz fragmentu numeru „{filtry.q}”. Wyniki obejmują ulice i drogi z pasującym numerem lub opisem odcinka.</span> : null}</p>
-      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={50} ile={ile} />
+      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={filtry.limit} ile={ile} />
       <div className="przewijalne mt-2">
         <table className="dane ulice-tabela">
           <thead>
@@ -171,7 +172,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
       <NazwyDodatkowe q={filtry.q} miejscowosc={filtry.miejscowosc} kategoria={filtry.kategoria} zarzadca={filtry.zarzadca}/>
       {ile===0 && !filtry.slug && filtry.q && filtry.q.trim().length>=3 && filtry.q.length<=100 && /\p{L}/u.test(filtry.q) && !/^\d+\s*[a-z]?$/i.test(filtry.q.trim()) ? <WynikiUug key={JSON.stringify(filtry)} q={filtry.q} miejscowosc={filtry.miejscowosc} kategoria={filtry.kategoria} zarzadca={filtry.zarzadca}/> : null}
       {wiersze.length === 0 ? <p className="karta p-4">Brak wyników w lokalnej bazie urzędowej dla wybranych filtrów.</p> : null}
-      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={50} ile={ile} />
+      <Paginacja pathname="/" query={aktualneFiltry} offset={filtry.offset} limit={filtry.limit} ile={ile} />
       </div>
 
     </>

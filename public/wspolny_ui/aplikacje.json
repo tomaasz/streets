@@ -35,12 +35,26 @@
     {
       "name": "Katalog winget",
       "short": "W",
-      "url": "http://192.168.0.12:5057/"
+      "url": "http://192.168.0.12:5057/",
+      "admin": true
     },
     {
       "name": "Konta",
       "short": "K",
-      "url": "http://192.168.0.12:5058/haslo"
+      "url": "http://192.168.0.12:5058/haslo",
+      "admin": true
+    },
+    {
+      "name": "Ruch (Umami)",
+      "short": "U",
+      "url": "http://192.168.0.12:3005/",
+      "admin": true
+    },
+    {
+      "name": "Błędy (Bugsink)",
+      "short": "B",
+      "url": "http://192.168.0.12:8005/",
+      "admin": true
     }
   ]
 }

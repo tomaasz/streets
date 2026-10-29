@@ -639,9 +639,173 @@
       open.open = false;
       open.querySelector('summary').focus();
     });
+
+    initTelemetry();
   }
 
-  window.ui = { toast: toast, confirm: confirmDialog };
+  // ── Telemetria lokalna (Umami: ruch + Bugsink: błędy JS) ───────────
+  var TELEMETRY_BY_PORT = {
+    '80':   { w: '7abe8216-9eff-43ff-9fc9-0afd4588aeec', p: '1', k: '05c633736b0049dfbadf0b01872a3e8a' },
+    '8080': { w: '7abe8216-9eff-43ff-9fc9-0afd4588aeec', p: '1', k: '05c633736b0049dfbadf0b01872a3e8a' },
+    '3030': { w: 'c5254b1c-6c03-4515-a59a-39f8fbe0ca82', p: '2', k: 'bc67c242ea1a4a048a33166f7e1e4e54' },
+    '5055': { w: 'a1a6bc6b-aa31-4e55-90d0-ae17c5992c7b', p: '3', k: '2ab77b414d49444489b46bb3762ebb4a' },
+    '8060': { w: 'a1a6bc6b-aa31-4e55-90d0-ae17c5992c7b', p: '3', k: '2ab77b414d49444489b46bb3762ebb4a' },
+    '8000': { w: '04613c57-d7af-4e6d-81d8-846171767875', p: '4', k: '0380eb87667f4e34a36a39313114a994' },
+    '5050': { w: '4af47975-503a-444b-bff3-2a7b227e9148', p: '5', k: 'd7b4df4f0bc943e8a5deb0c2f1cc80a3' },
+    '3000': { w: 'a75f7644-5178-4dd2-a21f-a0ef29ea3030', p: '6', k: '6b69a4b58d1840088f95fc93cf821691' },
+    '5057': { w: '0e3b5957-81b3-475e-beeb-c3cb06f9c765', p: '7', k: '37bb247ef58f448a98ec920255e45841' },
+    '8090': { w: '0e3b5957-81b3-475e-beeb-c3cb06f9c765', p: '7', k: '37bb247ef58f448a98ec920255e45841' },
+    '5058': { w: 'f3000447-845d-44f6-81ee-88b4ee9b1bb5', p: '8', k: 'd6fb172c6b5d45b8b4e20ce258b14808' },
+    '8095': { w: 'f3000447-845d-44f6-81ee-88b4ee9b1bb5', p: '8', k: 'd6fb172c6b5d45b8b4e20ce258b14808' }
+  };
+  var TELEMETRY_BY_HOST = {
+    'admin.umw': TELEMETRY_BY_PORT['8080'],
+    'akb.umw': TELEMETRY_BY_PORT['3030'],
+    'pdf.umw': TELEMETRY_BY_PORT['5055'],
+    'ksiazka.umw': TELEMETRY_BY_PORT['8000'],
+    'redakcja.umw': TELEMETRY_BY_PORT['5050'],
+    'streets.umw': TELEMETRY_BY_PORT['3000']
+  };
+
+  function getTelemetryConfig() {
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') return null;
+    if (navigator.webdriver) return null;
+    var host = location.hostname;
+    if (TELEMETRY_BY_HOST[host]) return TELEMETRY_BY_HOST[host];
+    var port = location.port || (location.protocol === 'https:' ? '443' : '80');
+    return TELEMETRY_BY_PORT[port] || null;
+  }
+
+  function hex32() {
+    var out = '';
+    for (var i = 0; i < 32; i++) out += Math.floor(Math.random() * 16).toString(16);
+    return out;
+  }
+
+  function parseStack(stack) {
+    if (!stack || typeof stack !== 'string') return [];
+    var lines = stack.split('\n');
+    var frames = [];
+    for (var i = 0; i < lines.length; i++) {
+      var m = lines[i].match(/(?:at\s+(?:([^\s(]+)\s+\()?|@)(https?:\/\/[^:\s)]+):(\d+):(\d+)/);
+      if (m) {
+        frames.unshift({
+          function: m[1] || '<anonymous>',
+          filename: m[2],
+          lineno: parseInt(m[3], 10),
+          colno: parseInt(m[4], 10)
+        });
+      }
+    }
+    return frames;
+  }
+
+  function reportBugsink(errType, errMsg, stackFrames) {
+    var cfg = getTelemetryConfig();
+    if (!cfg || !window.fetch) return;
+    var host = location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? location.hostname : '192.168.0.12';
+    var url = 'http://' + host + ':8005/api/' + cfg.p + '/store/?sentry_key=' + cfg.k + '&sentry_version=7';
+    var userEl = document.querySelector('.ui-user-name');
+    var payload = {
+      event_id: hex32(),
+      timestamp: new Date().toISOString(),
+      platform: 'javascript',
+      level: 'error',
+      logger: 'wspolny_ui',
+      request: {
+        url: location.href,
+        headers: { 'User-Agent': navigator.userAgent }
+      },
+      exception: {
+        values: [{
+          type: String(errType || 'Error'),
+          value: String(errMsg || 'Nieznany błąd przeglądarki'),
+          stacktrace: { frames: stackFrames && stackFrames.length ? stackFrames : [{ filename: location.href, function: '<global>', lineno: 1, colno: 1 }] }
+        }]
+      }
+    };
+    if (userEl && userEl.textContent) {
+      payload.user = { username: userEl.textContent.trim() };
+    }
+    try {
+      fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload)
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function trackPageview(customName, customData) {
+    var cfg = getTelemetryConfig();
+    if (!cfg || !window.fetch) return;
+    var host = location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? location.hostname : '192.168.0.12';
+    var payload = {
+      website: cfg.w,
+      hostname: location.hostname,
+      screen: (window.screen ? window.screen.width + 'x' + window.screen.height : '1920x1080'),
+      language: navigator.language || 'pl-PL',
+      title: document.title || '',
+      url: location.pathname + location.search,
+      referrer: document.referrer || ''
+    };
+    if (customName) {
+      payload.name = String(customName);
+      if (customData) payload.data = customData;
+    }
+    try {
+      fetch('http://' + host + ':3005/api/send', {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'event', payload: payload })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function initTelemetry() {
+    var cfg = getTelemetryConfig();
+    if (!cfg) return;
+    trackPageview();
+    if (window.history && history.pushState) {
+      var origPush = history.pushState;
+      var lastPath = location.pathname + location.search;
+      history.pushState = function () {
+        var ret = origPush.apply(this, arguments);
+        setTimeout(function () {
+          var cur = location.pathname + location.search;
+          if (cur !== lastPath) {
+            lastPath = cur;
+            trackPageview();
+          }
+        }, 200);
+        return ret;
+      };
+    }
+    window.addEventListener('error', function (event) {
+      if (!event) return;
+      var err = event.error;
+      var type = (err && err.name) || 'Error';
+      var msg = (err && err.message) || event.message || 'Błąd skryptu';
+      var frames = err && err.stack ? parseStack(err.stack) : [];
+      if (!frames.length && event.filename) {
+        frames = [{ filename: event.filename, function: '<anonymous>', lineno: event.lineno || 1, colno: event.colno || 1 }];
+      }
+      reportBugsink(type, msg, frames);
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      var reason = event && event.reason;
+      var type = (reason && reason.name) || 'UnhandledRejection';
+      var msg = (reason && reason.message) || String(reason || 'Nieobsłużona obietnica Promise');
+      var frames = reason && reason.stack ? parseStack(reason.stack) : [];
+      reportBugsink(type, msg, frames);
+    });
+  }
+
+  window.ui = { toast: toast, confirm: confirmDialog, track: trackPageview, reportError: reportBugsink };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

@@ -386,3 +386,5 @@ html { scroll-padding-top:120px; }
 
 /* Dane mapy zachowują kolory kategorii; powierzchnie i formularze używają wspólnej palety. */
 .ui-body .streets-informacje { background: var(--ui-surface); border-top: 1px solid var(--ui-line); }
+.ui-body .ui-main > .ui-workspace { margin: calc(-1 * var(--ui-gutter)); min-height: calc(100dvh - var(--ui-appbar-h) - var(--ui-tabs-h) - 52px); }
+.ui-body .ui-main > .ui-workspace > .ui-subview { padding: var(--ui-gutter); min-width: 0; }

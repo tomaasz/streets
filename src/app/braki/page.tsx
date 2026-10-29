@@ -9,9 +9,10 @@ import { STATUSY, GRUPY } from '@/lib/kolejka-typy';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { metryNaKm } from '@/lib/typy';
-import { pierwszy, type ParametryWidoku } from '@/lib/filtry';
+import { pierwszy, limitStrony, type ParametryWidoku } from '@/lib/filtry';
 import { Paginacja } from '@/components/Paginacja';
 import { WeryfikacjaForm } from '@/components/WeryfikacjaForm';
+import { UiWorkspace } from '@/components/WspolnyUi';
 import { normalizuj } from '../../../scripts/lib/nazwy-ulic.mjs';
 
 export const metadata = { title: 'Braki danych' };
@@ -29,7 +30,8 @@ const NASTEPNY_KROK: Record<string, string> = {
 
 export default async function Strona({ searchParams }: { searchParams: Promise<ParametryWidoku> }) {
   const sp = await searchParams;
-  const params = Object.fromEntries(['q','miejscowosc','problem','status','typ','grupa'].flatMap((k) => pierwszy(sp[k]) ? [[k,pierwszy(sp[k])!]] : []));
+  const limit = limitStrony(sp.limit);
+  const params = Object.fromEntries(['q','miejscowosc','problem','status','typ','grupa','limit'].flatMap((k) => pierwszy(sp[k]) ? [[k,pierwszy(sp[k])!]] : []));
   const rawOffset = Number(pierwszy(sp.offset));
   const requestedOffset = Number.isFinite(rawOffset) ? Math.max(0,Math.trunc(rawOffset)) : 0;
   const wynik = await zBaza(()=>Promise.all([kolejkaWeryfikacji(),zapytaj<{klucz:string;rodzaj:string;uzasadnienie:string;nazwa:string;data:string}>(`SELECT klucz,rodzaj,uzasadnienie,cel->>'nazwa' nazwa,to_char(utworzono,'YYYY-MM-DD HH24:MI') data FROM powiazanie_zatwierdzone ORDER BY utworzono DESC LIMIT 10`)]));
@@ -48,20 +50,27 @@ export default async function Strona({ searchParams }: { searchParams: Promise<P
     (!params.status || r.status === params.status) &&
     (!params.typ || (params.typ === 'uchwaly' ? !!r.akt : !!r.slug))
   ).sort((a,b) => a.waga-b.waga || (b.dlugosc_m ?? 0)-(a.dlugosc_m ?? 0) || a.klucz.localeCompare(b.klucz));
-  const offset = Math.min(requestedOffset, Math.max(0,Math.ceil(przefiltrowane.length/50)-1)*50);
-  const lista = przefiltrowane.slice(offset,offset+50);
+  const offset = Math.min(requestedOffset, Math.max(0,Math.ceil(przefiltrowane.length/limit)-1)*limit);
+  const lista = przefiltrowane.slice(offset,offset+limit);
   const powrot = `/braki?${new URLSearchParams({ ...params,offset:String(offset) })}`;
-  return <>
+  const groups = [{
+    label: 'Rodzaje spraw',
+    links: Object.entries(etykiety).map(([g, n]) => ({
+      label: n,
+      url: `/braki?grupa=${encodeURIComponent(g)}`,
+      icon: 'file' as const,
+      current: grupa === g,
+      count: wszystkie.filter((r) => pasujeGrupa(r, g)).length,
+    })),
+  }];
+  return <UiWorkspace groups={groups} label="Rodzaje spraw">
+    <div className="ui-subview">
     <h1 className="text-xl font-bold">Uzupełnianie danych</h1>
     <p className="mt-1 max-w-[75ch] text-sm tekst-pomocniczy">Aplikacja szuka dopasowań ulic, odcinków i uchwał. Zacznij od propozycji: porównaj przebieg na mapie, sprawdź dokument i zatwierdź właściwe odcinki. Zatwierdzenie uzupełni dane i rozwiąże konkretny brak.</p>
-    <div className="kolejka-podsumowanie mt-4" aria-label="Rodzaje spraw">
-      {Object.entries(etykiety).map(([g,n])=><Link key={g} className="karta p-3" aria-current={grupa===g?'page':undefined} href={{pathname:'/braki',query:{grupa:g}}}>
-        <strong>{wszystkie.filter(r=>pasujeGrupa(r,g)).length}</strong><span>{n}</span>
-      </Link>)}
-    </div>
     <details className="mt-3"><summary>Co oznaczają grupy spraw?</summary><p className="tekst-pomocniczy mt-2">Propozycja jest wynikiem porównania danych. W grupie „Wymagają danych o zarządcy” brakuje dokumentu o właścicielu lub zarządzaniu drogą wewnętrzną; sama nazwa ulicy nie wskazuje zarządcy. Ronda i skwery mają osobną grupę.</p></details>
     <DynamiczneFiltry className="filtry-drog wyszukiwanie" action="/braki">
       <input type="hidden" name="grupa" value={grupa}/>
+      {params.limit ? <input type="hidden" name="limit" value={params.limit}/> : null}
       <label>Szukaj pozycji<TekstFiltra type="search" name="q" defaultValue={params.q} placeholder="Nazwa, numer uchwały lub opis" /></label>
       <FiltryDodatkowe desktopOpen={false} aktywne={[params.miejscowosc,params.problem,params.status,params.typ].filter(Boolean).length}>
       <label>Miejscowość<WyborFiltra aria-label="Miejscowość" name="miejscowosc" defaultValue={params.miejscowosc ?? ''}><option value="">Wszystkie miejscowości</option>{miejscowosci.map((m) => <option key={m}>{m}</option>)}</WyborFiltra></label>
@@ -72,7 +81,7 @@ export default async function Strona({ searchParams }: { searchParams: Promise<P
       <button className="przycisk primary" type="submit">Szukaj</button><Link className="przycisk" href="/braki">Wyczyść</Link>
     </DynamiczneFiltry>
     <p className="mt-4" role="status">{etykiety[grupa as keyof typeof etykiety] ?? "Wszystkie sprawy"}: <strong>{przefiltrowane.length}</strong> pozycji.</p>
-    <Paginacja pathname="/braki" query={{...params,grupa}} offset={offset} limit={50} ile={przefiltrowane.length} />
+    <Paginacja pathname="/braki" query={{...params,grupa}} offset={offset} limit={limit} ile={przefiltrowane.length} />
     <div className="kolejka-lista">
       {lista.map((r) => <article className="karta p-4" key={r.klucz}>
         <header className="rekord-naglowek"><div><h2 className="font-semibold">{r.nazwa}</h2><p className="tekst-pomocniczy">{r.miejscowosc} · {metryNaKm(r.dlugosc_m)}</p></div><span className="plakietka">{STATUSY[r.status]}</span></header>
@@ -93,10 +102,11 @@ export default async function Strona({ searchParams }: { searchParams: Promise<P
       </article>)}
     </div>
     {lista.length===0 ? <p className="karta p-4 mt-4">Brak pozycji spełniających filtry. Zmień wyszukiwanie lub wyczyść filtry.</p> : null}
-    <Paginacja pathname="/braki" query={{...params,grupa}} offset={offset} limit={50} ile={przefiltrowane.length} />
+    <Paginacja pathname="/braki" query={{...params,grupa}} offset={offset} limit={limit} ile={przefiltrowane.length} />
     <details className="karta p-4 mt-4"><summary>Ostatnio zatwierdzone powiązania ({historia.length})</summary>
       <p className="tekst-pomocniczy mt-2">Decyzje są zachowywane przy ponownym imporcie. Gdy zmieni się geometria lub treść źródła, aplikacja wymaga ponownego porównania.</p>
       {historia.length ? <ul className="mt-3">{historia.map(h=><li className="mt-3" key={h.klucz}><strong>{h.nazwa || h.klucz}</strong> · {h.rodzaj==='uchwala'?'powiązanie uchwały':'przypisanie przebiegu'}<p>{h.uzasadnienie}</p></li>)}</ul> : <p className="mt-2">Nie zatwierdzono jeszcze powiązań.</p>}
     </details>
-  </>;
+    </div>
+  </UiWorkspace>;
 }

@@ -18,10 +18,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl" suppressHydrationWarning>
-      <head><link rel="stylesheet" href="/wspolny_ui/ui.css?v=0.11.2" /></head>
+      <head><link rel="stylesheet" href="/wspolny_ui/ui.css?v=0.11.4" /></head>
       <body className="ui-body" data-ui-access="public">
         <Script src="/streets-ui.js" strategy="beforeInteractive" />
-        <Script src="/wspolny_ui/ui.js?v=0.11.2" strategy="beforeInteractive" />
+        <Script src="/wspolny_ui/ui.js?v=0.11.4" strategy="beforeInteractive" />
         <UiAppBar appName="Drogi i ulice" apps={katalog.aplikacje.filter(app => !('admin' in app && app.admin))} />
         <Nawigacja />
 

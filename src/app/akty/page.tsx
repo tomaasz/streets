@@ -7,6 +7,9 @@ import { DynamiczneFiltry } from '@/components/DynamiczneFiltry';
 import { BrakBazy } from '@/components/BrakBazy';
 import { zBaza } from '@/lib/stan';
 import { akty } from '@/lib/zapytania';
+import { Paginacja } from '@/components/Paginacja';
+import { limitStrony, offsetStrony } from '@/lib/filtry';
+import { UiWorkspace } from '@/components/WspolnyUi';
 
 export const metadata = { title: 'Akty prawne' };
 
@@ -27,6 +30,13 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
   const q = (Array.isArray(sp.q) ? sp.q[0] : sp.q) || undefined;
 
   const internet = sp.widok === 'internet';
+  const groups = [{
+    label: 'Akty prawne',
+    links: [
+      { label: 'Dokumenty w aplikacji', url: '/akty', icon: 'file' as const, current: !internet },
+      { label: 'Znajdź w internecie', url: '/akty?widok=internet', icon: 'grid' as const, current: internet },
+    ],
+  }];
   const naglowek = <>
       <h1 className="text-xl font-bold">Akty prawa miejscowego</h1>
       <p className="mt-1 max-w-[70ch] text-sm text-[var(--tekst-2)]">
@@ -34,31 +44,41 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
         i nazewnictwa. To one rozstrzygają, do jakiej kategorii droga została
         zaliczona. Kategoria konkretnego odcinka jest potwierdzona dopiero po zweryfikowaniu jego powiązania z dokumentem.
       </p>
-      <nav className="wybor-widoku mt-4" aria-label="Widok dokumentów">
-        <Link href="/akty" aria-current={!internet?'page':undefined}>Dokumenty w aplikacji</Link>
-        <Link href="/akty?widok=internet" aria-current={internet?'page':undefined}>Znajdź w internecie</Link>
-      </nav>
   </>;
   if (internet) {
     const kolejka = await zBaza(() => kolejkaDokumentow());
     if (!kolejka.ok) return <BrakBazy szczegoly={kolejka.blad} />;
     const rok = Number(new Intl.DateTimeFormat('pl',{year:'numeric',timeZone:'Europe/Warsaw'}).format(new Date()));
-    return <>{naglowek}<SzukajDokumentow rok={rok}/><KolejkaDokumentow dokumenty={kolejka.dane}/></>;
+    return (
+      <UiWorkspace groups={groups} label="Widok dokumentów">
+        <div className="ui-subview">{naglowek}<SzukajDokumentow rok={rok}/><KolejkaDokumentow dokumenty={kolejka.dane}/></div>
+      </UiWorkspace>
+    );
   }
 
   const wynik = await zBaza(() => akty(q));
   if (!wynik.ok) return <BrakBazy szczegoly={wynik.blad} />;
   const lista = wynik.dane;
+  const limit = limitStrony(sp.limit);
+  const rawOffset = offsetStrony(sp.offset, limit);
+  const offset = Math.min(rawOffset, Math.max(0, Math.ceil(lista.length / limit) - 1) * limit);
+  const widoczneAkty = lista.slice(offset, offset + limit);
+  const queryAktow: Record<string, string> = {
+    ...(q ? { q } : {}),
+    ...(sp.limit ? { limit: String(limit) } : {}),
+  };
 
   const lata = new Set(
     lista.map((a) => a.data_podjecia?.slice(0, 4)).filter(Boolean)
   );
 
   return (
-    <>
+    <UiWorkspace groups={groups} label="Widok dokumentów">
+      <div className="ui-subview">
       {naglowek}
 
       <DynamiczneFiltry className="mt-5 flex flex-wrap items-end gap-3" action="/akty">
+        {sp.limit ? <input type="hidden" name="limit" value={String(limit)} /> : null}
         <label className="flex flex-col gap-1 text-xs text-[var(--tekst-2)]">
           Szukaj w tytule lub numerze
           <TekstFiltra
@@ -82,6 +102,8 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
         {lata.size ? ` z lat ${[...lata].sort()[0]}–${[...lata].sort().at(-1)}` : ''}
       </p>
 
+      <Paginacja pathname="/akty" query={queryAktow} offset={offset} limit={limit} ile={lista.length} />
+
       {lista.length === 0 ? (
         <p className="karta mt-3 p-4 text-sm text-[var(--tekst-2)]">
           Nie znaleziono dokumentów. Zmień wyszukiwaną nazwę lub numer. Jeśli filtr jest pusty, dokumenty wymagają uzupełnienia przez administratora.
@@ -101,7 +123,7 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
               </tr>
             </thead>
             <tbody>
-              {lista.map((a) => (
+              {widoczneAkty.map((a) => (
                 <tr key={a.id}>
                   <td className="whitespace-nowrap font-semibold">
                     {a.url_pdf ? (
@@ -147,6 +169,8 @@ export default async function Strona({ searchParams }: { searchParams: Parametry
           </table>
         </div>
       )}
-    </>
+      <Paginacja pathname="/akty" query={queryAktow} offset={offset} limit={limit} ile={lista.length} />
+      </div>
+    </UiWorkspace>
   );
 }

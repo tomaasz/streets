@@ -38,6 +38,7 @@ export function FiltryDrog({ p, widok, opcje }: {
       {params.sort ? <input type="hidden" name="sort" value={params.sort}/> : null}
       {params.kierunek ? <input type="hidden" name="kierunek" value={params.kierunek}/> : null}
       {params.bez_nazwy ? <input type="hidden" name="bez_nazwy" value={params.bez_nazwy} /> : null}
+      {params.limit ? <input type="hidden" name="limit" value={params.limit} /> : null}
     </DynamiczneFiltry>
     <Suspense fallback={<p>Widok wyników</p>}><WidokiEksport widok={widok} /></Suspense>
   </section>;

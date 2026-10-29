@@ -194,6 +194,10 @@
   background: var(--ui-brand);
   color: #fff;
 }
+.ui-appbar:has(.ui-dropdown[open]),
+.ui-appbar:has([open]) {
+  z-index: var(--ui-z-dropdown);
+}
 .ui-brand {
   display: inline-flex;
   min-width: 0;
@@ -247,9 +251,10 @@
 .ui-dropdown > summary::-webkit-details-marker { display: none; }
 .ui-dropdown > summary:hover, .ui-icon-button:hover { border-color: rgb(255 255 255 / 30%); background: rgb(255 255 255 / 14%); }
 .ui-dropdown[open] > summary { border-color: rgb(255 255 255 / 40%); background: rgb(255 255 255 / 20%); }
+.ui-dropdown[open] { z-index: var(--ui-z-dropdown); }
 .ui-dropdown-menu {
   position: absolute;
-  z-index: 5;
+  z-index: var(--ui-z-dropdown);
   top: calc(100% + 8px);
   right: 0;
   width: 248px;
@@ -543,7 +548,8 @@
 /* zwinięty panel: szyna z ikonami; nazwa zostaje w DOM dla czytników ekranu */
 .ui-workspace[data-ui-collapsed] { --ui-sidenav-w: 52px; }
 .ui-workspace[data-ui-collapsed] .ui-sidenav { padding: 8px 6px; }
-.ui-workspace[data-ui-collapsed] .ui-sidenav a { justify-content: center; gap: 0; padding: 0; font-size: 0; }
+.ui-workspace[data-ui-collapsed] .ui-sidenav a,
+.ui-workspace[data-ui-collapsed] .ui-sidenav > button:not(.ui-sidenav-toggle) { justify-content: center; gap: 0; padding: 0; font-size: 0; }
 .ui-workspace[data-ui-collapsed] .ui-sidenav-label,
 .ui-workspace[data-ui-collapsed] .ui-sidenav-count { display: none; }
 .ui-workspace[data-ui-collapsed] .ui-sidenav-toggle { justify-content: center; }
@@ -558,24 +564,45 @@
   text-transform: uppercase;
 }
 .ui-sidenav-label:first-child { padding-top: 2px; }
-.ui-sidenav a {
+.ui-sidenav a,
+.ui-sidenav > button:not(.ui-sidenav-toggle) {
   position: relative;
   display: flex;
+  width: 100%;
   min-height: 32px;
   align-items: center;
   gap: 8px;
   padding: 0 8px 0 10px;
+  border: 0;
   border-radius: var(--ui-radius);
+  background: transparent;
   color: var(--ui-text);
+  font: inherit;
   font-size: 13px;
+  text-align: left;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
   transition: background-color var(--ui-ease);
 }
-.ui-body .ui-sidenav a { color: var(--ui-text); }
-.ui-sidenav a:hover { background: var(--ui-surface-muted); }
-.ui-body .ui-sidenav a[aria-current="page"] { background: var(--ui-brand-soft); color: var(--ui-brand-text); font-weight: 600; }
-.ui-sidenav a[aria-current="page"]::before {
+.ui-body .ui-sidenav a,
+.ui-body .ui-sidenav > button:not(.ui-sidenav-toggle) { color: var(--ui-text); }
+.ui-sidenav a:hover,
+.ui-sidenav > button:not(.ui-sidenav-toggle):hover { background: var(--ui-surface-muted); }
+.ui-body .ui-sidenav a[aria-current="page"],
+.ui-body .ui-sidenav a[aria-current="step"],
+.ui-body .ui-sidenav a[aria-current="true"],
+.ui-body .ui-sidenav a.active,
+.ui-body .ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="page"],
+.ui-body .ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="true"],
+.ui-body .ui-sidenav > button:not(.ui-sidenav-toggle).active { background: var(--ui-brand-soft); color: var(--ui-brand-text); font-weight: 600; }
+.ui-sidenav a[aria-current="page"]::before,
+.ui-sidenav a[aria-current="step"]::before,
+.ui-sidenav a[aria-current="true"]::before,
+.ui-sidenav a.active::before,
+.ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="page"]::before,
+.ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="true"]::before,
+.ui-sidenav > button:not(.ui-sidenav-toggle).active::before {
   position: absolute;
   top: 7px;
   bottom: 7px;
@@ -586,7 +613,12 @@
   content: "";
 }
 .ui-sidenav svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--ui-text-muted); }
-.ui-sidenav a[aria-current="page"] svg { color: inherit; }
+.ui-sidenav a[aria-current="page"] svg,
+.ui-sidenav a[aria-current="true"] svg,
+.ui-sidenav a.active svg,
+.ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="page"] svg,
+.ui-sidenav > button:not(.ui-sidenav-toggle)[aria-current="true"] svg,
+.ui-sidenav > button:not(.ui-sidenav-toggle).active svg { color: inherit; }
 .ui-sidenav-count {
   margin-left: auto;
   padding: 0 6px;
@@ -596,6 +628,16 @@
   font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+@media (min-width: 901px) {
+  .ui-workspace:not([data-ui-collapsed]) .ui-sidenav { overflow-x: hidden; }
+  .ui-workspace:not([data-ui-collapsed]) .ui-sidenav a,
+  .ui-workspace:not([data-ui-collapsed]) .ui-sidenav > button:not(.ui-sidenav-toggle) {
+    white-space: normal;
+    line-height: 1.25;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
 }
 
 /* ── Małe ekrany ──────────────────────────────────────────────────── */
@@ -614,7 +656,9 @@
     scrollbar-width: thin;
   }
   .ui-sidenav-label, .ui-sidenav-toggle { display: none; }
-  .ui-workspace[data-ui-collapsed] .ui-sidenav a { gap: 8px; padding: 0 8px 0 10px; font-size: 13px; }
+  .ui-sidenav > button:not(.ui-sidenav-toggle) { width: auto; }
+  .ui-workspace[data-ui-collapsed] .ui-sidenav a,
+  .ui-workspace[data-ui-collapsed] .ui-sidenav > button:not(.ui-sidenav-toggle) { gap: 8px; padding: 0 8px 0 10px; font-size: 13px; }
   .ui-workspace[data-ui-collapsed] .ui-sidenav-count { display: inline; }
 }
 @media (max-width: 700px) {
@@ -970,18 +1014,40 @@ a.ui-kpi:hover { transform: translateY(-1px); }
   gap: 2px;
   font-size: 13px;
 }
-.ui-pagination a, .ui-pagination span {
+.ui-pagination a, .ui-pagination span, .ui-pagination button {
   min-width: 28px;
   min-height: 28px;
   display: inline-grid;
   place-items: center;
   padding: 0 7px;
+  border: 0;
   border-radius: var(--ui-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
   text-decoration: none;
   font-variant-numeric: tabular-nums;
 }
-.ui-pagination a:hover { background: var(--ui-surface-muted); }
-.ui-body .ui-pagination a[aria-current="page"] { background: var(--ui-primary); color: var(--ui-on-primary); font-weight: 600; }
+.ui-pagination button { cursor: pointer; }
+.ui-pagination button:disabled { opacity: .45; cursor: not-allowed; }
+.ui-pagination a:hover, .ui-pagination button:not(:disabled):hover { background: var(--ui-surface-muted); }
+.ui-body .ui-pagination a[aria-current="page"],
+.ui-body .ui-pagination button[aria-current="page"] { background: var(--ui-primary); color: var(--ui-on-primary); font-weight: 600; }
+.ui-per-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ui-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ui-per-page .ui-select {
+  width: auto;
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── Stany: pusty, ładowanie, błąd ────────────────────────────────── */
 

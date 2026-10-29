@@ -13,7 +13,7 @@ const CSP = [
   "img-src 'self' data: https://mapy.geoportal.gov.pl https://*.tile.openstreetmap.org",
   "style-src 'self' 'unsafe-inline'", // komponenty ustawiają kolory kategorii przez style={{...}}
   "script-src 'self'",
-  "connect-src 'self' https://mapy.geoportal.gov.pl https://*.tile.openstreetmap.org",
+  "connect-src 'self' https://mapy.geoportal.gov.pl https://*.tile.openstreetmap.org http://192.168.0.12:3005 http://192.168.0.12:8005 http://localhost:3005 http://localhost:8005 http://127.0.0.1:3005 http://127.0.0.1:8005",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
