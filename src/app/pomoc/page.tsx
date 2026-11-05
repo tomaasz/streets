@@ -4,10 +4,8 @@ import { UiHelp, UiPageHeading } from '@/components/WspolnyUi';
 export const metadata = { title: 'Pomoc' };
 export default function Pomoc() {
   return <>
-    <div className="ui-help">
-      <UiPageHeading title="Centrum pomocy — Drogi i ulice" level="public" lede="Wyszukiwanie ulic, mapa, zarządcy i weryfikacja źródeł." />
-      <p className="mb-4"><Link className="ui-button ui-button-primary" href="/">Przejdź do wyszukiwarki dróg</Link></p>
-    </div>
+    <UiPageHeading title="Centrum pomocy — Drogi i ulice" level="public" lede="Wyszukiwanie ulic, mapa, zarządcy i weryfikacja źródeł." />
+    <p className="mb-4"><Link className="ui-button ui-button-primary" href="/">Przejdź do wyszukiwarki dróg</Link></p>
     <UiHelp>
       <section className="ui-help-section" id="pomoc-start">
         <h2>Szybki start w 3 krokach</h2>

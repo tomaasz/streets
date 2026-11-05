@@ -204,6 +204,41 @@
   --bs-btn-active-bg: var(--ui-danger-bg);
   --bs-btn-active-border-color: var(--ui-danger-border);
 }
+.ui-body .btn-warning,
+.ui-body .btn-outline-warning {
+  --bs-btn-color: var(--ui-warning);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-line-input);
+  --bs-btn-hover-color: var(--ui-warning);
+  --bs-btn-hover-bg: var(--ui-warning-bg);
+  --bs-btn-hover-border-color: var(--ui-warning-border);
+  --bs-btn-active-color: var(--ui-warning);
+  --bs-btn-active-bg: var(--ui-warning-bg);
+  --bs-btn-active-border-color: var(--ui-warning-border);
+}
+.ui-body .btn-outline-success {
+  --bs-btn-color: var(--ui-success);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-line-input);
+  --bs-btn-hover-color: var(--ui-success);
+  --bs-btn-hover-bg: var(--ui-success-bg);
+  --bs-btn-hover-border-color: var(--ui-success-border);
+  --bs-btn-active-color: var(--ui-success);
+  --bs-btn-active-bg: var(--ui-success-bg);
+  --bs-btn-active-border-color: var(--ui-success-border);
+}
+.ui-body .btn-info,
+.ui-body .btn-outline-info {
+  --bs-btn-color: var(--ui-info);
+  --bs-btn-bg: var(--ui-surface);
+  --bs-btn-border-color: var(--ui-line-input);
+  --bs-btn-hover-color: var(--ui-info);
+  --bs-btn-hover-bg: var(--ui-info-bg);
+  --bs-btn-hover-border-color: var(--ui-info-border);
+  --bs-btn-active-color: var(--ui-info);
+  --bs-btn-active-bg: var(--ui-info-bg);
+  --bs-btn-active-border-color: var(--ui-info-border);
+}
 .ui-body .btn-subtle,
 .ui-body .btn-link {
   --bs-btn-hover-bg: var(--ui-surface-muted);
@@ -334,6 +369,10 @@
   --bs-nav-link-color: var(--ui-text-muted);
   --bs-nav-link-hover-color: var(--ui-text);
 }
+.ui-body .nav .nav-link.active {
+  color: var(--ui-brand-text);
+  font-weight: 600;
+}
 .ui-body .nav-tabs {
   --bs-nav-tabs-border-color: var(--ui-line);
   --bs-nav-tabs-link-hover-border-color: var(--ui-line);
@@ -359,5 +398,31 @@
 /* pomocnicze klasy kolorów, które w ciemnym motywie zostałyby jasne */
 .ui-body .text-muted, .ui-body .text-body-secondary { color: var(--ui-text-muted) !important; }
 .ui-body .text-dark, .ui-body .text-body { color: var(--ui-text) !important; }
+.ui-body .text-primary { color: var(--ui-brand-text) !important; }
+.ui-body .text-success { color: var(--ui-success) !important; }
+.ui-body .text-warning { color: var(--ui-warning) !important; }
+.ui-body .text-danger { color: var(--ui-danger) !important; }
+.ui-body .text-info { color: var(--ui-info) !important; }
 .ui-body .bg-white, .ui-body .bg-body { background-color: var(--ui-surface) !important; }
 .ui-body .bg-light, .ui-body .bg-body-tertiary { background-color: var(--ui-surface-muted) !important; }
+
+/* cele dotykowe ≥ 44 px dla komponentów Bootstrapa */
+@media (any-pointer: coarse) {
+  .ui-body .btn:not(.btn-close),
+  .ui-body .form-control,
+  .ui-body .form-select,
+  .ui-body .page-link,
+  .ui-body .nav-link,
+  .ui-body .dropdown-item,
+  .ui-body .list-group-item-action {
+    min-height: 44px;
+  }
+  .ui-body .btn:not(.btn-close),
+  .ui-body .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ui-body .page-link { min-width: 44px; }
+  .ui-body .btn-close { min-width: 44px; min-height: 44px; padding: 12px; box-sizing: border-box; }
+}

@@ -1,13 +1,13 @@
 {
-  "version": "0.11.4",
+  "version": "0.12.0",
   "files": {
     "public/wspolny_ui/aplikacje.json": "899bf7c7172e7c64c450a33a7c8b9dd7068a1f4a1863a379433ef21c38ce1b52",
     "public/wspolny_ui/herb_wyszkowa.png": "6b68586a8edba07c843ece628bd469165597c664dfc18b14946ab4c55be8b798",
-    "public/wspolny_ui/ui-bootstrap.css": "f815e192f1280304123fbffd159599e6b112a6e26f5929f0100f978144fe1697",
-    "public/wspolny_ui/ui.css": "67427dabe2092493b76c1452bbee4f3f4d805ce2d3fcabb9b92f9fe292d03f82",
-    "public/wspolny_ui/ui.js": "c62b2fc053d5ed713633ae3e5c2178d7a3f6975ba3c5206fc439dba9f16ca6c8",
-    "public/wspolny_ui/VERSION": "a71756fe3302627972537ffafb2fc1391c9382715ecbdfedbf3712296e96b72d",
+    "public/wspolny_ui/ui-bootstrap.css": "82436bc6fde4c3134197062592298825eef5e83695c88ac04d2724b24b8959fe",
+    "public/wspolny_ui/ui.css": "8a480cea33658c556dd6e7bda9f5e0f28bd4e54f174e842dd969a902e865a9ae",
+    "public/wspolny_ui/ui.js": "2fb83ab845e54f51bccf9480d3f5d09e6f952b941b09195babcb80ca4218cff7",
+    "public/wspolny_ui/VERSION": "8a932413d42f95082f8323447652379a4885e328329efca3a67ec9c793c09940",
     "src/components/UiHelpInit.tsx": "9306628fd262d3112a51edfe650de8f1a7a7439baf7e2cc3d8150b876ddcb87a",
-    "src/components/WspolnyUi.tsx": "f20bc47a6b2ea7a9c946d070a3e265639e068904ce22efd397588325ab2c1cac"
+    "src/components/WspolnyUi.tsx": "3e88f5bc766a8ba0b8ba30f09b8b78626c4dc03d9033e15bdc692bd45c5b38bb"
   }
 }

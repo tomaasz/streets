@@ -93,7 +93,7 @@ export function UiAppBar({
             <nav className="ui-dropdown-menu" aria-label="Aplikacje organizacji">
               {apps.map((a) => (
                 <a key={a.url} href={a.url} aria-current={a.name === appName ? 'page' : undefined}>
-                  <span className="ui-launcher-icon">{a.short}</span>{a.name}
+                  <span className="ui-launcher-icon" aria-hidden>{a.short}</span>{a.name}
                   {a.admin && <span className="ui-menu-admin">admin</span>}
                 </a>
               ))}
@@ -191,15 +191,17 @@ export function UiWorkspace({ id, children, ...sidenav }: UiSidenavProps & { id?
 
 export type UiKpiItem = {
   label: string; value: string | number; unit?: string; kind?: 'success' | 'warning' | 'info' | 'neutral';
-  url?: string; meta?: string; delta?: string | number; direction?: 'up' | 'down';
+  hero?: boolean; url?: string; meta?: string; delta?: string | number; direction?: 'up' | 'down';
+  evaluation?: 'good' | 'bad' | 'neutral';
 };
 export function UiKpi({ item }: { item: UiKpiItem }) {
-  const className = `ui-kpi${item.kind ? ` ui-kpi-${item.kind}` : ''}`;
+  const className = `ui-kpi${item.hero ? ' ui-kpi-hero' : ''}${item.kind ? ` ui-kpi-${item.kind}` : ''}`;
+  const deltaClass = `ui-delta${item.direction ? ` ui-delta-${item.direction}` : ''}${item.evaluation ? ` ui-delta-${item.evaluation}` : ''}`;
   const content = <>
     <span className="ui-kpi-label">{item.label}</span>
-    <span className="ui-kpi-value">{item.value}{item.unit && <span className="ui-kpi-unit">{item.unit}</span>}</span>
+    <span className="ui-kpi-value">{item.value}{item.unit && <>&nbsp;<span className="ui-kpi-unit">{item.unit}</span></>}</span>
     {(item.meta || item.delta != null) && <span className="ui-kpi-meta">
-      {item.delta != null && <><span className={`ui-delta${item.direction ? ` ui-delta-${item.direction}` : ''}`}>
+      {item.delta != null && <><span className={deltaClass}>
         {item.direction && <span className="ui-visually-hidden">{item.direction === 'up' ? 'wzrost ' : 'spadek '}</span>}{item.delta}
       </span>{' '}</>}{item.meta}
     </span>}

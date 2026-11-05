@@ -19,7 +19,12 @@
  *   <button data-ui-sidenav-toggle>        zwija .ui-sidenav do szyny ikon (stan zapamiętany)
  *   [data-ui-tooltip="Tekst"]           podpowiedź na hover/fokus; -ref="ID" wskazuje opis
  *   [data-ui-tooltip-trigger]             przycisk informacji: otwarcie/zamknięcie dotykiem
+ *   [data-ui-table]                       interaktywna tabela: sortowanie .ui-sort (aria-sort),
+ *                                          wyszukiwanie [data-ui-table-search], filtry
+ *                                          [data-ui-table-filter] / [data-ui-table-select],
+ *                                          czyszczenie [data-ui-table-reset], licznik [data-ui-table-count]
  *   .ui-error-summary                      podsumowanie błędów formularza dostaje fokus
+ *                                          (chyba że ustawiono data-ui-autofocus="false")
  *
  * API: window.ui.toast(tekst, {kind: 'success'|'warning'|'danger'|'info', action: {label, run}})
  *      window.ui.confirm(tekst, {title, label, danger}) → Promise<boolean>
@@ -540,10 +545,382 @@
     });
   }
 
+  // ── Interaktywne tabele ([data-ui-table]) ──────────────────────────
+  var plCollator = typeof Intl !== 'undefined' && Intl.Collator
+    ? new Intl.Collator('pl', {numeric: true, sensitivity: 'base'})
+    : null;
+  var plIntFormat = typeof Intl !== 'undefined' && Intl.NumberFormat
+    ? new Intl.NumberFormat('pl-PL', {maximumFractionDigits: 0})
+    : null;
+
+  function fmtIntPl(n) {
+    return plIntFormat ? plIntFormat.format(n).replace(/\u00a0/g, '\u00a0') : String(n);
+  }
+  function fmtDecPl(n, decimals) {
+    if (typeof Intl !== 'undefined' && Intl.NumberFormat) {
+      return new Intl.NumberFormat('pl-PL', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(n);
+    }
+    return n.toFixed(decimals).replace('.', ',');
+  }
+  function normalizeTableText(text) {
+    return String(text || '').toLocaleLowerCase('pl').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
+  }
+  function isEmptyCellValue(raw) {
+    var s = String(raw || '').trim();
+    return !s || s === '—' || s === '–' || s === '-' || s.toLowerCase() === 'brak';
+  }
+  function parseTableDate(raw) {
+    var s = String(raw || '').trim();
+    var pl = s.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (pl) {
+      return Date.UTC(+pl[3], +pl[2] - 1, +pl[1], +(pl[4] || 0), +(pl[5] || 0), +(pl[6] || 0));
+    }
+    var iso = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if (iso) {
+      return Date.UTC(+iso[1], +iso[2] - 1, +iso[3], +(iso[4] || 0), +(iso[5] || 0), +(iso[6] || 0));
+    }
+    return NaN;
+  }
+  function parseTableNum(raw) {
+    var s = String(raw || '').trim()
+      .replace(/^[\u2212\u2013]/, '-')
+      .replace(/(?:\s*(?:zł|PLN|%|p\.p\.|km|m|GB|MB|KB|B|dni|dnia|dzień|szt\.?|godz\.?|min|s))$/i, '')
+      .replace(/[\s\u00a0\u202f]/g, '')
+      .replace(',', '.');
+    return /^[+-]?\d+(?:\.\d+)?$/.test(s) ? parseFloat(s) : NaN;
+  }
+
+  function initTables() {
+    document.querySelectorAll('[data-ui-table]:not([data-ui-table-ready])').forEach(function (container) {
+      var table = container.tagName === 'TABLE' ? container : container.querySelector('table');
+      var tbody = table && table.tBodies && table.tBodies[0];
+      if (!table || !tbody) return;
+
+      var entries = Array.from(tbody.rows)
+        .filter(function (row) { return !row.hasAttribute('data-ui-table-empty-row'); })
+        .map(function (row, index) {
+          return {
+            row: row,
+            index: index,
+            searchText: normalizeTableText(row.textContent)
+          };
+        });
+
+      var headerRow = table.tHead && table.tHead.rows.length ? table.tHead.rows[0] : null;
+      var headers = headerRow ? Array.from(headerRow.cells) : [];
+      var colCount = Math.max(1, headers.length || (entries[0] ? entries[0].row.cells.length : 1));
+
+      function rawCell(row, colIdx) {
+        var cell = row.cells[colIdx];
+        if (!cell) return '';
+        var explicit = cell.getAttribute('data-sort-value');
+        if (explicit === null) explicit = cell.getAttribute('data-value');
+        return explicit !== null ? explicit : cell.textContent.trim();
+      }
+
+      function detectType(th, btn, colIdx) {
+        var explicit = (btn && btn.getAttribute('data-ui-sort-type')) || th.getAttribute('data-ui-sort-type');
+        if (explicit) return explicit;
+        if (th.classList.contains('ui-num') || th.classList.contains('num') || th.classList.contains('text-end')) {
+          var sampleDates = entries.map(function (e) { return rawCell(e.row, colIdx); }).filter(function (v) { return !isEmptyCellValue(v); });
+          if (sampleDates.length && sampleDates.every(function (v) { return !isNaN(parseTableDate(v)); })) return 'date';
+          return 'num';
+        }
+        var nonEmpty = entries.map(function (e) { return rawCell(e.row, colIdx); }).filter(function (v) { return !isEmptyCellValue(v); });
+        if (nonEmpty.length && nonEmpty.every(function (v) { return !isNaN(parseTableDate(v)); })) return 'date';
+        if (nonEmpty.length && nonEmpty.every(function (v) { return !isNaN(parseTableNum(v)); })) return 'num';
+        return 'text';
+      }
+
+      var sortMeta = [];
+      headers.forEach(function (th, colIdx) {
+        var btn = th.querySelector('.ui-sort, [data-ui-sort]');
+        if (!btn) return;
+        if (!th.hasAttribute('aria-sort')) th.setAttribute('aria-sort', 'none');
+        var type = detectType(th, btn, colIdx);
+        sortMeta.push({th: th, btn: btn, colIdx: colIdx, type: type});
+      });
+
+      var searchInput = container.querySelector('[data-ui-table-search]');
+      var selects = Array.from(container.querySelectorAll('select[data-ui-table-select]'));
+      var filterBtns = Array.from(container.querySelectorAll('[data-ui-table-filter]'));
+      var countEl = container.querySelector('[data-ui-table-count]');
+      var customEmpty = container.querySelector('[data-ui-table-empty]');
+      var autoEmptyRow = tbody.querySelector('[data-ui-table-empty-row]');
+
+      if (countEl) {
+        if (!countEl.hasAttribute('role')) countEl.setAttribute('role', 'status');
+        if (!countEl.hasAttribute('aria-live')) countEl.setAttribute('aria-live', 'polite');
+      }
+
+      function applySortToDom() {
+        var active = null;
+        for (var i = 0; i < sortMeta.length; i++) {
+          var dir = sortMeta[i].th.getAttribute('aria-sort');
+          if (dir === 'ascending' || dir === 'descending') {
+            active = {meta: sortMeta[i], dir: dir};
+            break;
+          }
+        }
+        var ordered = entries.slice().sort(function (a, b) {
+          if (!active) return a.index - b.index;
+          var colIdx = active.meta.colIdx;
+          var type = active.meta.type;
+          var rawA = rawCell(a.row, colIdx);
+          var rawB = rawCell(b.row, colIdx);
+          var emptyA = isEmptyCellValue(rawA);
+          var emptyB = isEmptyCellValue(rawB);
+          if (emptyA && emptyB) return a.index - b.index;
+          if (emptyA) return 1;
+          if (emptyB) return -1;
+          var cmp = 0;
+          if (type === 'date' || type === 'num') {
+            var numA = type === 'date' ? parseTableDate(rawA) : parseTableNum(rawA);
+            var numB = type === 'date' ? parseTableDate(rawB) : parseTableNum(rawB);
+            if (isNaN(numA) && type === 'date') numA = parseTableNum(rawA);
+            if (isNaN(numB) && type === 'date') numB = parseTableNum(rawB);
+            if (!isNaN(numA) && !isNaN(numB) && numA !== numB) cmp = numA < numB ? -1 : 1;
+            else cmp = plCollator ? plCollator.compare(rawA, rawB) : rawA.localeCompare(rawB, 'pl');
+          } else {
+            cmp = plCollator ? plCollator.compare(rawA, rawB) : rawA.localeCompare(rawB, 'pl');
+          }
+          if (active.dir === 'descending') cmp = -cmp;
+          return cmp || (a.index - b.index);
+        });
+        var frag = document.createDocumentFragment();
+        ordered.forEach(function (entry) { frag.appendChild(entry.row); });
+        if (autoEmptyRow) frag.appendChild(autoEmptyRow);
+        tbody.appendChild(frag);
+      }
+
+      function activeButtonFilters() {
+        var active = [];
+        filterBtns.forEach(function (btn) {
+          if (btn.getAttribute('aria-pressed') !== 'true') return;
+          var val = btn.getAttribute('data-ui-table-filter') || '';
+          if (!val || val === 'all') return;
+          active.push({
+            val: val,
+            norm: normalizeTableText(val),
+            col: btn.hasAttribute('data-ui-table-col') ? parseInt(btn.getAttribute('data-ui-table-col'), 10) : null,
+            field: btn.getAttribute('data-ui-table-field') || null,
+            exact: btn.hasAttribute('data-ui-table-exact')
+          });
+        });
+        return active;
+      }
+
+      function updateFilterState() {
+        var words = searchInput ? normalizeTableText(searchInput.value).trim().split(/\s+/).filter(Boolean) : [];
+        var btnFilters = activeButtonFilters();
+        var activeSelects = selects.filter(function (s) { return s.value !== '' && s.value !== 'all'; });
+        var isFiltered = words.length > 0 || btnFilters.length > 0 || activeSelects.length > 0;
+
+        var visibleCount = 0;
+        var visibleEntries = [];
+        entries.forEach(function (entry) {
+          var ok = true;
+          if (words.length) {
+            ok = words.every(function (w) { return entry.searchText.indexOf(w) !== -1; });
+          }
+          if (ok && btnFilters.length) {
+            ok = btnFilters.every(function (f) {
+              if (f.col !== null && !isNaN(f.col)) {
+                var cellTxt = normalizeTableText(entry.row.cells[f.col] ? entry.row.cells[f.col].textContent.trim() : '');
+                return f.exact ? cellTxt === f.norm : cellTxt.indexOf(f.norm) !== -1;
+              }
+              if (f.field) {
+                var attrVal = normalizeTableText(entry.row.getAttribute('data-' + f.field) || '');
+                var tokens = attrVal.split(/[\s,]+/).filter(Boolean);
+                return f.exact ? attrVal === f.norm : (tokens.indexOf(f.norm) !== -1 || attrVal.indexOf(f.norm) !== -1);
+              }
+              var rowTokens = normalizeTableText(entry.row.getAttribute('data-filter') || '').split(/[\s,]+/).filter(Boolean);
+              if (rowTokens.length) return rowTokens.indexOf(f.norm) !== -1;
+              return entry.searchText.indexOf(f.norm) !== -1;
+            });
+          }
+          if (ok && activeSelects.length) {
+            ok = activeSelects.every(function (sel) {
+              var target = normalizeTableText(sel.value.trim());
+              if (sel.hasAttribute('data-ui-table-col')) {
+                var cIdx = parseInt(sel.getAttribute('data-ui-table-col'), 10);
+                var cTxt = normalizeTableText(entry.row.cells[cIdx] ? entry.row.cells[cIdx].textContent.trim() : '');
+                return sel.hasAttribute('data-ui-table-exact') ? cTxt === target : cTxt.indexOf(target) !== -1;
+              }
+              var field = sel.getAttribute('data-ui-table-field');
+              if (field) {
+                var fVal = normalizeTableText(entry.row.getAttribute('data-' + field) || '');
+                return fVal === target || fVal.indexOf(target) !== -1;
+              }
+              return entry.searchText.indexOf(target) !== -1;
+            });
+          }
+          entry.row.hidden = !ok;
+          if (ok) {
+            visibleCount++;
+            visibleEntries.push(entry);
+          }
+        });
+
+        // Przyciski czyszczenia filtrów
+        container.querySelectorAll('[data-ui-table-reset]').forEach(function (btn) {
+          if (btn.closest('[data-ui-table-empty-row]') || btn.closest('[data-ui-table-empty]')) return;
+          if (btn.hasAttribute('data-ui-table-reset-auto')) btn.hidden = !isFiltered;
+          if (btn.hasAttribute('data-ui-table-reset-disable')) btn.disabled = !isFiltered;
+        });
+
+        // Żywy licznik wyników
+        if (countEl) {
+          var totalAttr = parseInt(container.getAttribute('data-ui-table-total') || '', 10);
+          var fullTotal = !isNaN(totalAttr) && totalAttr > entries.length ? totalAttr : entries.length;
+          if (entries.length === 0) {
+            countEl.textContent = 'Wyniki: 0';
+          } else if (isFiltered) {
+            var suffix = fullTotal > entries.length
+              ? ' (filtr aktywny · w całym rejestrze: ' + fmtIntPl(fullTotal) + ')'
+              : ' (filtr aktywny)';
+            countEl.textContent = 'Wyniki: ' + fmtIntPl(visibleCount) + ' z ' + fmtIntPl(entries.length) + suffix;
+          } else if (fullTotal > entries.length) {
+            countEl.textContent = 'Wyniki 1–' + fmtIntPl(visibleCount) + ' z ' + fmtIntPl(fullTotal);
+          } else {
+            countEl.textContent = 'Wyniki 1–' + fmtIntPl(visibleCount) + ' z ' + fmtIntPl(entries.length);
+          }
+        }
+
+        // Stopka z podsumowaniem (tfoot)
+        if (table.tFoot) {
+          table.tFoot.hidden = entries.length > 0 && visibleCount === 0;
+          table.tFoot.querySelectorAll('[data-ui-table-visible-count]').forEach(function (el) {
+            el.textContent = fmtIntPl(visibleCount);
+          });
+          table.tFoot.querySelectorAll('[data-ui-table-sum]').forEach(function (el) {
+            var sumCol = parseInt(el.getAttribute('data-ui-table-sum'), 10);
+            var decimals = parseInt(el.getAttribute('data-ui-table-decimals') || '2', 10);
+            var unit = el.getAttribute('data-ui-table-unit') || '';
+            var sum = 0;
+            visibleEntries.forEach(function (e) {
+              var v = parseTableNum(rawCell(e.row, sumCol));
+              if (!isNaN(v)) sum += v;
+            });
+            el.textContent = fmtDecPl(sum, decimals) + unit;
+          });
+        }
+
+        // Stan pusty (gdy filtry odsiały wszystkie wiersze)
+        var showEmpty = entries.length > 0 && visibleCount === 0;
+        if (customEmpty) {
+          customEmpty.hidden = !showEmpty;
+        } else {
+          if (showEmpty && !autoEmptyRow) {
+            autoEmptyRow = document.createElement('tr');
+            autoEmptyRow.setAttribute('data-ui-table-empty-row', '');
+            var td = document.createElement('td');
+            td.colSpan = colCount;
+            var box = document.createElement('div');
+            box.className = 'ui-empty';
+            var strong = document.createElement('strong');
+            strong.textContent = 'Brak wyników';
+            var p = document.createElement('p');
+            p.textContent = 'Żaden wiersz nie pasuje do wybranych kryteriów filtrowania.';
+            var actions = document.createElement('div');
+            actions.className = 'ui-actions';
+            var resetBtn = document.createElement('button');
+            resetBtn.type = 'button';
+            resetBtn.className = 'ui-button';
+            resetBtn.setAttribute('data-ui-table-reset', '');
+            resetBtn.textContent = 'Wyczyść filtry';
+            resetBtn.addEventListener('click', resetFilters);
+            actions.appendChild(resetBtn);
+            box.appendChild(strong);
+            box.appendChild(p);
+            box.appendChild(actions);
+            td.appendChild(box);
+            autoEmptyRow.appendChild(td);
+            tbody.appendChild(autoEmptyRow);
+          }
+          if (autoEmptyRow) autoEmptyRow.hidden = !showEmpty;
+        }
+      }
+
+      function resetFilters() {
+        if (searchInput) searchInput.value = '';
+        selects.forEach(function (sel) { sel.value = ''; });
+        var groupsReset = {};
+        filterBtns.forEach(function (btn) {
+          var group = btn.getAttribute('data-ui-table-group') || 'default';
+          var val = btn.getAttribute('data-ui-table-filter') || '';
+          var isAll = !val || val === 'all';
+          if (isAll && !groupsReset[group]) {
+            btn.setAttribute('aria-pressed', 'true');
+            groupsReset[group] = true;
+          } else {
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+        updateFilterState();
+        if (searchInput) searchInput.focus();
+      }
+
+      sortMeta.forEach(function (meta) {
+        meta.btn.addEventListener('click', function () {
+          var current = meta.th.getAttribute('aria-sort');
+          var next = current === 'ascending' ? 'descending'
+            : current === 'descending' ? 'ascending'
+            : (meta.btn.getAttribute('data-ui-sort-default') || 'ascending');
+          sortMeta.forEach(function (other) {
+            other.th.setAttribute('aria-sort', other === meta ? next : 'none');
+          });
+          applySortToDom();
+          updateFilterState();
+        });
+      });
+
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var group = btn.getAttribute('data-ui-table-group') || 'default';
+          filterBtns.forEach(function (other) {
+            if ((other.getAttribute('data-ui-table-group') || 'default') === group) {
+              other.setAttribute('aria-pressed', other === btn ? 'true' : 'false');
+            }
+          });
+          updateFilterState();
+        });
+      });
+
+      selects.forEach(function (sel) {
+        sel.addEventListener('change', updateFilterState);
+      });
+
+      if (searchInput) {
+        searchInput.addEventListener('input', updateFilterState);
+        searchInput.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && searchInput.value) {
+            searchInput.value = '';
+            updateFilterState();
+          }
+        });
+      }
+
+      container.querySelectorAll('[data-ui-table-reset]').forEach(function (btn) {
+        btn.addEventListener('click', resetFilters);
+      });
+
+      container.setAttribute('data-ui-table-ready', '');
+      applySortToDom();
+      updateFilterState();
+    });
+  }
+
   function init() {
     initHelp();
+    initTables();
     document.addEventListener('htmx:afterSwap', initHelp);
+    document.addEventListener('htmx:afterSwap', initTables);
     document.addEventListener('ui:help-init', initHelp);
+    document.addEventListener('ui:table-init', initTables);
     document.addEventListener('ui:help-dispose', function (event) {
       var roots = event.detail && event.detail.root ? [event.detail.root] : document.querySelectorAll('[data-ui-help]');
       roots.forEach(function (root) {
@@ -558,7 +935,7 @@
     for (var w = 0; w < workspaces.length; w++) {
       setCollapsed(workspaces[w], read(sidenavKey(workspaces[w])) === '1');
     }
-    var summary = document.querySelector('.ui-error-summary');
+    var summary = document.querySelector('.ui-error-summary:not([data-ui-autofocus="false"])');
     if (summary) {
       if (!summary.hasAttribute('tabindex')) summary.setAttribute('tabindex', '-1');
       summary.focus();
@@ -687,7 +1064,7 @@
     var lines = stack.split('\n');
     var frames = [];
     for (var i = 0; i < lines.length; i++) {
-      var m = lines[i].match(/(?:at\s+(?:([^\s(]+)\s+\()?|@)(https?:\/\/[^:\s)]+):(\d+):(\d+)/);
+      var m = lines[i].match(/(?:at\s+(?:([^\s(]+)\s+\()?|@)(https?:\/\/[^\s)]+):(\d+):(\d+)/);
       if (m) {
         frames.unshift({
           function: m[1] || '<anonymous>',
